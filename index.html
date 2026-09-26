@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="나이, 소득, 결혼 나이, 자녀 계획, 맞벌이, 서울·수도권·지방 아파트 월세·전세·매매를 넣으면 65세까지 가구 순자산과 결과를 가장 크게 바꾸는 선택을 공공통계(KOSIS·한국부동산원)로 계산합니다.">
+<link rel="canonical" href="https://quanter02.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="아이·맞벌이 자산 계산기">
+<meta property="og:description" content="나이, 소득, 결혼 나이, 자녀 계획, 맞벌이, 서울·수도권·지방 아파트 월세·전세·매매를 넣으면 65세까지 가구 순자산과 결과를 가장 크게 바꾸는 선택을 공공통계(KOSIS·한국부동산원)로 계산합니다.">
+<meta property="og:url" content="https://quanter02.github.io/">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<!-- 검색 등록 후 발급받은 확인 코드를 여기에 넣으세요 -->
+<!-- <meta name="google-site-verification" content=""> -->
+<!-- <meta name="naver-site-verification" content=""> -->
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>아이·맞벌이 자산 계산기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #f4f6f3;
+  --panel: #ffffff;
+  --ink: #17211c;
+  --ink-2: #4c5852;
+  --ink-3: #7b8680;
+  --line: #dde3de;
+  --accent: #0e6b58;
+  --accent-soft: #e2f0eb;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --bar: #2a78d6;
+  --bar-neg: #eb6834;
+  --grid: #e6ebe7;
+  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111714; --panel: #19211d; --ink: #eef3ef; --ink-2: #b9c4be; --ink-3: #87938c;
+    --line: #2b3631; --accent: #4fc0a3; --accent-soft: #1d3a31;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --bar: #3987e5; --bar-neg: #d95926; --grid: #25302b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111714; --panel: #19211d; --ink: #eef3ef; --ink-2: #b9c4be; --ink-3: #87938c;
+  --line: #2b3631; --accent: #4fc0a3; --accent-soft: #1d3a31;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --bar: #3987e5; --bar-neg: #d95926; --grid: #25302b;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+header { display: grid; gap: 6px; margin-bottom: 22px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--accent); font-weight: 600; }
+h1 { font-size: clamp(24px, 4vw, 32px); line-height: 1.25; margin: 0; text-wrap: balance; }
+.lede { color: var(--ink-2); margin: 0; max-width: 62ch; }
+.layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+form { display: grid; gap: 16px; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 12px; }
+legend { font-weight: 600; font-size: 13px; color: var(--ink-2); margin-bottom: 4px; padding: 0; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 13px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+.field label output { font-family: var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.field input[type=number], .field select {
+  font: inherit; font-family: var(--mono); font-variant-numeric: tabular-nums;
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); width: 100%;
+}
+.field input[type=range] { width: 100%; accent-color: var(--accent); }
+.hint { font-size: 12px; color: var(--ink-3); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg.seg3 { grid-template-columns: repeat(3, 1fr); }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { display: block; text-align: center; padding: 7px 0; font-family: var(--mono); cursor: pointer; color: var(--ink-2); border-left: 1px solid var(--line); }
+.seg label:first-of-type { border-left: 0; }
+.seg input:checked + label { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.seg input:focus-visible + label, input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.privacy { font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 12px; }
+.results { display: grid; gap: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 12px; }
+@media (max-width: 480px) { .tiles { grid-template-columns: 1fr; } }
+.tile { display: grid; gap: 2px; }
+.tile .k { font-size: 12px; color: var(--ink-2); }
+.tile .v { font-family: var(--mono); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 12px; color: var(--ink-3); }
+.tile.main .v { color: var(--accent); }
+h2 { font-size: 16px; margin: 0 0 4px; }
+.sub { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--ink-3); font-family: var(--mono); font-size: 11px; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / .12); min-width: 160px; }
+.tip b { display: block; margin-bottom: 4px; }
+.tip div { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.tip div span:first-child { font-family: var(--font); color: var(--ink-2); }
+.drivers { display: grid; gap: 8px; }
+.drv { display: grid; grid-template-columns: minmax(120px, 170px) 1fr 76px; gap: 10px; align-items: center; font-size: 13px; }
+.drv .name { color: var(--ink-2); }
+.drv .track { position: relative; height: 14px; }
+.drv .axis { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line); }
+.drv .fill { position: absolute; top: 0; height: 14px; border-radius: 3px; }
+.drv .num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .drv { grid-template-columns: 1fr 70px; } .drv .track { grid-column: 1 / -1; grid-row: 2; } }
+.loan { margin-top: 2px; }
+.loan .row2 { margin-top: 10px; }
+details { font-size: 13px; color: var(--ink-2); }
+details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.table-wrap { overflow-x: auto; margin-top: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 12px; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-family: var(--font); font-weight: 500; }
+.notes { font-size: 12px; color: var(--ink-3); display: grid; gap: 4px; margin-top: 8px; }
+.notes p { margin: 0; }
+.badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; margin-left: 6px; vertical-align: 1px; }
+@media (prefers-reduced-motion: no-preference) { .drv .fill { transition: width .25s, left .25s; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">공공통계 기반 · 프로토타입</div>
+    <h1>아이, 맞벌이, 집이 65세 자산을 얼마나 바꿀까</h1>
+    <p class="lede">조건을 넣으면 지금부터 65세까지 우리 집 자산 흐름을 계산하고, 결과를 가장 크게 바꾸는 선택이 무엇인지 보여줍니다. 임금·취업률은 KOSIS, 양육비는 보건사회연구원, 아파트 가격은 한국부동산원 실거래 통계를 씁니다.</p>
+  </header>
+
+  <div class="layout">
+    <form class="panel" id="f" autocomplete="off">
+      <fieldset>
+        <legend>나</legend>
+        <div class="row2">
+          <div class="field"><label for="now">현재 나이</label><input id="now" type="number" min="20" max="45" value="24"></div>
+          <div class="field"><label for="gender">성별</label>
+            <select id="gender"><option value="m">남</option><option value="f">여</option></select></div>
+        </div>
+        <div class="field"><label for="myInc">현재 연소득 <span class="hint">만원, 세전</span></label><input id="myInc" type="number" min="0" step="100" value="3300"></div>
+        <div class="field"><label for="assets">현재 자산 <span class="hint">만원</span></label><input id="assets" type="number" step="100" value="0"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>결혼과 배우자</legend>
+        <div class="field"><label for="marry">결혼 나이 <output id="marryOut"></output></label><input id="marry" type="range" min="24" max="45" value="31"></div>
+        <div class="field"><label for="gap">배우자 나이 차 <output id="gapOut"></output></label><input id="gap" type="range" min="-8" max="8" value="0">
+          <span class="hint">배우자 나이 − 내 나이</span></div>
+        <div class="field"><label for="spInc">배우자 현재 연소득 <span class="hint">만원, 비우면 통계 평균</span></label><input id="spInc" type="number" min="0" step="100" placeholder="통계 평균"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>아이와 일</legend>
+        <div class="field"><span class="hint" id="kidsLabel">자녀 수</span>
+          <div class="seg" role="radiogroup" aria-labelledby="kidsLabel">
+            <input type="radio" name="kids" id="k0" value="0"><label for="k0">0</label>
+            <input type="radio" name="kids" id="k1" value="1" checked><label for="k1">1</label>
+            <input type="radio" name="kids" id="k2" value="2"><label for="k2">2</label>
+            <input type="radio" name="kids" id="k3" value="3"><label for="k3">3</label>
+          </div></div>
+        <div class="field"><label for="keep">주 양육자 경력 유지 <output id="keepOut"></output></label><input id="keep" type="range" min="0" max="100" step="5" value="0">
+          <span class="hint">0% = 통계 그대로(결혼 후 기혼여성 취업률 약 60%), 100% = 결혼·출산 후에도 계속 일함</span></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>집</legend>
+        <div class="field"><span class="hint" id="tenureLabel">결혼 후 주거 방식</span>
+          <div class="seg seg3" role="radiogroup" aria-labelledby="tenureLabel">
+            <input type="radio" name="tenure" id="tn1" value="rent"><label for="tn1">월세</label>
+            <input type="radio" name="tenure" id="tn2" value="jeonse"><label for="tn2">전세</label>
+            <input type="radio" name="tenure" id="tn3" value="buy" checked><label for="tn3">매매</label>
+          </div></div>
+        <div class="row2">
+          <div class="field"><label for="region">지역</label>
+            <select id="region"><option value="서울">서울</option><option value="수도권">수도권</option><option value="지방">지방</option></select></div>
+          <div class="field"><label for="size">전용면적</label>
+            <select id="size"><option value="59">59㎡</option><option value="84" selected>84㎡</option><option value="110">110㎡</option></select></div>
+        </div>
+        <p class="hint" id="priceHint"></p>
+        <div class="field"><label for="hg">집값 실질 상승률 <output id="hgOut"></output></label><input id="hg" type="range" min="-1" max="4" step="0.25" value="1.5">
+          <span class="hint" id="hgHint"></span></div>
+        <div class="row2">
+          <div class="field"><label for="single">결혼 전 주거비 <span class="hint">만원/월</span></label><input id="single" type="number" min="0" step="10" value="70"></div>
+          <div class="field"><label for="rentIn">결혼 후 월세 <span class="hint">만원/월</span></label><input id="rentIn" type="number" min="0" step="10" placeholder="자동"></div>
+        </div>
+        <details class="loan">
+          <summary>대출 조건</summary>
+          <div class="row2">
+            <div class="field"><label for="rate">금리 <span class="hint">연 %, 명목</span></label><input id="rate" type="number" min="0" max="15" step="0.1" value="4.0"></div>
+            <div class="field"><label for="ltv">LTV <span class="hint">%</span></label><input id="ltv" type="number" min="0" max="90" step="5" value="70"></div>
+            <div class="field"><label for="cap">대출 한도 <span class="hint">억원</span></label><input id="cap" type="number" min="0" step="0.5" value="6"></div>
+            <div class="field"><label for="dsr">DSR <span class="hint">%</span></label><input id="dsr" type="number" min="10" max="70" step="5" value="40"></div>
+          </div>
+          <p class="hint">주담대 30년 원리금균등. 대출 규제는 자주 바뀌니 실제 조건을 확인하세요. 전세대출은 보증금의 80%까지 같은 금리로 계산합니다.</p>
+        </details>
+      </fieldset>
+
+      <fieldset>
+        <legend>생활</legend>
+        <div class="field"><label for="live">생활비·세금 <span class="hint">소득 대비</span> <output id="liveOut"></output></label><input id="live" type="range" min="30" max="80" step="5" value="50"></div>
+      </fieldset>
+
+      <p class="privacy">입력값은 이 브라우저 안에서만 계산되고 어디에도 전송되지 않습니다.</p>
+    </form>
+
+    <section class="results" aria-live="polite">
+      <div class="panel tiles">
+        <div class="tile main"><span class="k">65세 가구 순자산</span><span class="v" id="tEnd">–</span><span class="s" id="tEndS"></span></div>
+        <div class="tile"><span class="k">자녀 양육비 순부담 합계</span><span class="v" id="tKids">–</span><span class="s" id="tKidsS"></span></div>
+        <div class="tile"><span class="k">주 양육자가 계속 일하면</span><span class="v" id="tKeep">–</span><span class="s">경력 유지 100%일 때 65세 자산 차이</span></div>
+        <div class="tile"><span class="k" id="tHomeK">내 집 마련</span><span class="v" id="tHome">–</span><span class="s" id="tHomeS"></span></div>
+      </div>
+
+      <div class="panel">
+        <h2>나이별 가구 순자산</h2>
+        <p class="sub">같은 조건에서 자녀 계획과 경력 유지만 바꿨을 때 비교 (단위: 억 원, 오늘 가격)</p>
+        <div class="legend" id="legend"></div>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="panel">
+        <h2>무엇이 가장 크게 바꾸나</h2>
+        <p class="sub">지금 계획에서 하나씩만 바꿨을 때 65세 가구 순자산의 변화</p>
+        <div class="drivers" id="drivers"></div>
+      </div>
+
+      <div class="panel">
+        <details>
+          <summary>계산 방법과 출처</summary>
+          <div class="notes">
+            <p>매년 두 사람의 소득에서 생활비·세금(소득 대비 비율), 주거비, 자녀 순양육비를 빼고 남은 돈을 연 3%(물가 제외 실질)로 굴립니다. 금액은 모두 오늘 가격입니다.</p>
+            <p>소득은 성·연령별 평균 임금 곡선(고용노동부 고용형태별근로실태조사, KOSIS DT_118N_PAY0004, 2025)을 따라 변하고 매년 실질 1%씩 오릅니다. 60세에 근로소득이 끝나며 연금은 넣지 않았습니다.</p>
+            <p>주 양육자(여성 배우자, 본인이 여성이면 본인)는 결혼 후 나이별 기혼여성 취업률(2020 인구총조사, DT_1PF2015)만큼 일한다고 봅니다. 경력 유지 슬라이더는 일하지 않는 비율을 그만큼 줄입니다.</p>
+            <p>자녀 1명당 양육비 연 1,039만원(보건사회연구원 2021 가족과 출산조사 × 소비자물가), 지원금 연 158만원(부모급여·아동수당·첫만남이용권 평균)을 0~18세 19년 동안 반영합니다. 첫 아이는 결혼 2년 뒤, 이후 2년 간격입니다.</p>
+            <p>결혼 전에는 입력한 1인 주거비를 내고, 결혼하는 해에 결혼 비용 3,000만원이 나갑니다. 결혼 후 월세는 비워 두면 전세가 × 아파트 전월세전환율(한국부동산원 DT_30404_N0010, 서울 4.71%, 수도권 5.13%, 지방 5.64%)로 계산하고, 집값 상승률만큼 오릅니다.</p>
+            <p><b>집값</b>: 한국부동산원 아파트 규모별 매매·전세 실거래 평균가격(KOSIS DT_KAB_11672_S19, S31, 2025.07~2026.06 평균, ㎡당 가격 × 전용면적). 수도권은 서울을 포함한 평균입니다. 과거 상승률은 아파트 매매 실거래가격지수(DT_KAB_11672_S1, 2006.12~2026.06)에서 소비자물가를 뺀 실질 연평균입니다. 과거 상승률이 앞으로도 이어진다는 보장은 없어서 기본값은 과거의 절반입니다.</p>
+            <p><b>매매</b>: 결혼 후 매년 "모은 돈 ≥ 집값 − 대출 + 취득 비용(1.5%)"이 되는 첫해에 삽니다. 대출은 LTV, 한도, DSR(연 원리금 ≤ 가구 소득 × DSR) 중 가장 작은 금액이고, 30년 원리금균등으로 갚습니다. 물가 2%를 가정해 명목 상환액의 실질 부담은 해마다 줄어듭니다. 보유세·관리 비용은 집값의 연 0.3%입니다. 살 수 있을 때까지는 월세를 냅니다.</p>
+            <p><b>전세</b>: 보증금은 집값 상승률만큼 오르고, 보증금에 묶인 돈은 수익이 없습니다. 부족분은 전세대출(보증금의 80%까지)로 메우고 이자를 냅니다. 보증금을 못 마련하면 월세를 냅니다.</p>
+            <p>생활비 비율, 결혼 전 주거비, 결혼 비용, 수익률, 취득 비용, 보유 비용은 가정값입니다. 이혼 위험과 소득 변동은 넣지 않았습니다(확률 버전은 별도 모델).</p>
+          </div>
+          <div class="table-wrap"><table id="tbl"></table></div>
+        </details>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+<footer class="site-foot">
+  <div class="wrap-foot">
+    <p>데이터: KOSIS 국가통계포털(고용노동부, 통계청), 한국보건사회연구원, 한국부동산원. 계산 결과는 평균 통계에 기반한 참고용이며 개인의 미래를 예측하지 않습니다.</p>
+    <p>개인정보: 입력값은 브라우저 안에서만 계산되며 서버로 전송하거나 저장하지 않습니다. 쿠키와 방문 분석 도구를 쓰지 않습니다.</p>
+  </div>
+</footer>
+<style>.site-foot{padding-inline:16px;padding-block:0 40px}.wrap-foot{max-width:1120px;margin:0 auto;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:16px;display:grid;gap:4px}.wrap-foot p{margin:0}</style>
+
+<script>
+// ── KOSIS 실제 통계 (data/age_profiles.json에서 가져온 값) ──
+const WAGE = { // 5세 구간 하한 → 만원/년 (월임금총액 × 12)
+  m: {19: 2432.4, 20: 3292.8, 25: 4316.4, 30: 5184.0, 35: 6226.8, 40: 7029.6, 45: 7501.2, 50: 7622.4, 55: 7292.4, 60: 4926.0},
+  f: {19: 1592.4, 20: 3080.4, 25: 4004.4, 30: 4606.8, 35: 5088.0, 40: 5071.2, 45: 4838.4, 50: 4274.4, 55: 3669.6, 60: 2695.2},
+};
+const EMP = {15: .173, 20: .371, 25: .583, 30: .606, 35: .598, 40: .639, 45: .673, 50: .660, 55: .582, 60: .438};
+const CHILD_COST = 1039, CHILD_SUB = 158, CHILD_YEARS = 19;
+const END = 65, RETIRE = 60, RET = 0.03, WAGE_G = 0.01, WEDDING = 3000;
+
+// 한국부동산원 아파트 실거래 평균가격 (만원/㎡, 2025.07~2026.06 평균). 59㎡=소형, 84㎡=중소형, 110㎡=중대형 구간
+const SALE = {서울: {59: 1666, 84: 1534, 110: 1531}, 수도권: {59: 1030, 84: 939, 110: 980}, 지방: {59: 319, 84: 435, 110: 474}};
+const JEONSE = {서울: {59: 870, 84: 842, 110: 833}, 수도권: {59: 638, 84: 606, 110: 619}, 지방: {59: 283, 84: 329, 110: 340}};
+// 아파트 매매 실거래가격지수 2006.12~2026.06 실질 연평균 (소비자물가 연 2.27% 차감)
+const HIST_G = {서울: 0.0311, 수도권: 0.0149, 지방: 0.0066};
+// 아파트 전월세전환율 (한국부동산원 DT_30404_N0010, 2025.07~2026.06 평균)
+const CONV = {서울: 0.0471, 수도권: 0.0513, 지방: 0.0564};
+const INFL = 0.02, BUY_FEE = 0.015, HOLD = 0.003, LOAN_YEARS = 30, JEONSE_LTV = 0.8;
+
+function rentMonthly(p) {  // 비우면 전세가 × 전월세전환율로 계산한 월세
+  return p.rentIn > 0 ? p.rentIn : JEONSE[p.region][p.size] * p.size * CONV[p.region] / 12;
+}
+function annuity(loan, r, n) { return r === 0 ? loan / n : loan * r / (1 - Math.pow(1 + r, -n)); }
+function maxLoanByPayment(pay, r, n) { return r === 0 ? pay * n : pay * (1 - Math.pow(1 + r, -n)) / r; }
+
+function band(table, age) {
+  const ks = Object.keys(table).map(Number).sort((a, b) => a - b);
+  let k = ks[0];
+  for (const x of ks) if (age >= x) k = x;
+  return table[k];
+}
+
+function simulate(p) {
+  const out = [];
+  const spNow = p.now + p.gap;
+  const mySex = p.gender, spSex = p.gender === "m" ? "f" : "m";
+  const spInc = p.spInc > 0 ? p.spInc : band(WAGE[spSex], spNow);
+  const firstBirth = p.marry + 2;  // 첫 아이는 결혼 2년 뒤
+  const births = Array.from({length: p.kids}, (_, i) => firstBirth + 2 * i);  // 나의 나이 기준
+  let a0 = p.assets, childTotal = 0;
+  const price0 = SALE[p.region][p.size] * p.size, dep0 = JEONSE[p.region][p.size] * p.size;
+  const rate = p.rate / 100;
+  // 집 상태: 매매(own) 또는 전세(jeonse)
+  let own = null, jeonse = null, boughtAt = null, boughtPrice = null;
+  const netWorth = () => a0 + (own ? own.value - own.bal / Math.pow(1 + INFL, own.k) : 0)
+                             + (jeonse ? jeonse.deposit - jeonse.loan / Math.pow(1 + INFL, jeonse.k) : 0);
+  out.push({age: p.now, assets: a0});
+  for (let age = p.now; age < END; age++) {
+    const g = Math.pow(1 + WAGE_G, age - p.now);
+    let my = age < RETIRE ? p.myInc * band(WAGE[mySex], age) / band(WAGE[mySex], p.now) * g : 0;
+    let income, cost;
+    if (age < p.marry) {
+      income = my;
+      cost = p.live * my + p.single * 12;
+    } else {
+      const sa = age + p.gap;
+      let sp = sa < RETIRE ? spInc * band(WAGE[spSex], sa) / band(WAGE[spSex], spNow) * g : 0;
+      {  // 결혼 후 주 양육자는 나이별 기혼여성 취업률만큼 일한다 (자녀 유무와 무관, 통계에 둘 다 포함)
+        const carerAge = mySex === "f" ? age : sa;
+        const r = band(EMP, carerAge);
+        const e = r + p.keep * (1 - r);
+        if (mySex === "f") my *= e; else sp *= e;
+      }
+      const dep = births.filter(b => age >= b && age < b + CHILD_YEARS).length;
+      const kidsNet = dep * (CHILD_COST - CHILD_SUB);
+      childTotal += kidsNet;
+      income = my + sp;
+      const t = age - p.now, gH = Math.pow(1 + p.hg, t);
+      let housing = rentMonthly(p) * 12 * gH;  // 월세도 집값(전세가) 상승률만큼 오른다
+      if (p.tenure === "buy" && !own) {
+        // 살 수 있는지: 모은 돈 ≥ 집값 − 대출 + 취득 비용
+        const price = price0 * gH;
+        const capReal = p.cap * 10000 / Math.pow(1 + INFL, t);          // 한도는 명목 금액이라 실질로는 줄어든다
+        const loan = Math.max(0, Math.min(p.ltv * price, capReal, maxLoanByPayment(p.dsr * income, rate, LOAN_YEARS)));
+        const need = price - loan + BUY_FEE * price;
+        if (a0 >= need && income > 0) {
+          a0 -= need;
+          own = {value: price, bal: loan, pay: annuity(loan, rate, LOAN_YEARS), k: 0};
+          boughtAt = age; boughtPrice = price;
+        }
+      }
+      if (p.tenure === "jeonse" && !jeonse) {
+        const deposit = dep0 * gH, loan = JEONSE_LTV * deposit;
+        if (a0 >= deposit - loan) { a0 -= deposit - loan; jeonse = {deposit, loan, k: 0}; }
+      }
+      if (own) {
+        const payReal = own.k < LOAN_YEARS ? own.pay / Math.pow(1 + INFL, own.k) : 0;
+        housing = payReal + HOLD * own.value;
+      } else if (jeonse) {
+        // 이자 + 오른 보증금 추가분(묶인 돈은 수익 없음)
+        const interest = jeonse.loan * rate / Math.pow(1 + INFL, jeonse.k);
+        const newDep = dep0 * Math.pow(1 + p.hg, t + 1);
+        housing = interest + (newDep - jeonse.deposit);
+      }
+      cost = p.live * income + housing + kidsNet + (age === p.marry ? WEDDING : 0);
+    }
+    a0 = a0 * (1 + RET) + income - cost;
+    if (own) {
+      if (own.k < LOAN_YEARS) own.bal = own.bal * (1 + rate) - own.pay;
+      own.bal = Math.max(0, own.bal); own.k += 1; own.value *= 1 + p.hg;
+    }
+    if (jeonse) { jeonse.deposit = dep0 * Math.pow(1 + p.hg, age - p.now + 1); jeonse.k += 1; }
+    out.push({age: age + 1, assets: netWorth()});
+  }
+  const homeEquity = own ? own.value - own.bal / Math.pow(1 + INFL, own.k) : 0;
+  return {path: out, end: netWorth(), childTotal, boughtAt, boughtPrice, price0, dep0, homeEquity,
+          atMarry: (out.find(r => r.age === p.marry) || out[0]).assets};
+}
+
+// ── 입력 ──
+const $ = id => document.getElementById(id);
+const FIELDS = ["now", "gender", "myInc", "assets", "marry", "gap", "spInc", "keep", "single", "rentIn", "live",
+                "region", "size", "hg", "rate", "ltv", "cap", "dsr"];
+function readParams() {
+  const kids = Number(document.querySelector("input[name=kids]:checked").value);
+  const now = Number($("now").value) || 24;
+  return {
+    now, gender: $("gender").value,
+    myInc: Math.max(0, Number($("myInc").value) || 0),
+    assets: Number($("assets").value) || 0,
+    marry: Math.max(now, Number($("marry").value)),
+    gap: Number($("gap").value),
+    spInc: Number($("spInc").value) || 0,
+    kids, keep: Number($("keep").value) / 100,
+    single: Math.max(0, Number($("single").value) || 0),
+    rentIn: Math.max(0, Number($("rentIn").value) || 0),
+    live: Number($("live").value) / 100,
+    tenure: document.querySelector("input[name=tenure]:checked").value,
+    region: $("region").value, size: Number($("size").value),
+    hg: Number($("hg").value) / 100,
+    rate: Number($("rate").value) || 0, ltv: (Number($("ltv").value) || 0) / 100,
+    cap: Number($("cap").value) || 0, dsr: (Number($("dsr").value) || 40) / 100,
+  };
+}
+function save() {
+  try {
+    const o = Object.fromEntries(FIELDS.map(k => [k, $(k).value]));
+    o.kids = document.querySelector("input[name=kids]:checked").value;
+    o.tenure = document.querySelector("input[name=tenure]:checked").value;
+    localStorage.setItem("calc-v2", JSON.stringify(o));
+  } catch (e) {}
+}
+function restore() {
+  try {
+    const o = JSON.parse(localStorage.getItem("calc-v2") || "null");
+    if (!o) return;
+    FIELDS.forEach(k => { if (o[k] !== undefined) $(k).value = o[k]; });
+    const r = document.querySelector(`input[name=kids][value="${o.kids}"]`);
+    if (r) r.checked = true;
+    const tn = document.querySelector(`input[name=tenure][value="${o.tenure}"]`);
+    if (tn) tn.checked = true;
+  } catch (e) {}
+}
+
+const eok = v => (v / 10000).toFixed(2) + "억";
+const signed = v => (v >= 0 ? "+" : "−") + (Math.abs(v) / 10000).toFixed(2) + "억";
+
+// ── 차트 ──
+function drawChart(series) {
+  const W = 640, H = 300, m = {l: 44, r: 16, t: 12, b: 28};
+  const all = series.flatMap(s => s.path.map(r => r.assets));
+  let lo = Math.min(0, ...all), hi = Math.max(...all);
+  const stepRaw = (hi - lo) / 5 / 10000;
+  const step = [0.5, 1, 2, 5, 10, 20].find(s => s >= stepRaw) || 50;
+  lo = Math.floor(lo / 10000 / step) * step; hi = Math.ceil(hi / 10000 / step) * step;
+  if (hi === lo) hi = lo + step;
+  const ages = series[0].path.map(r => r.age);
+  const x = a => m.l + (a - ages[0]) / (ages.at(-1) - ages[0]) * (W - m.l - m.r);
+  const y = v => m.t + (1 - (v / 10000 - lo) / (hi - lo)) * (H - m.t - m.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="나이별 가구 순자산 선그래프">`;
+  for (let v = lo; v <= hi + 1e-9; v += step) {
+    svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v * 10000)}" y2="${y(v * 10000)}" stroke="var(--grid)" stroke-width="1"/>`;
+    svg += `<text x="${m.l - 6}" y="${y(v * 10000) + 4}" text-anchor="end">${+v.toFixed(1)}</text>`;
+  }
+  const tickStep = ages.length > 30 ? 10 : 5;
+  for (let a = Math.ceil(ages[0] / tickStep) * tickStep; a <= ages.at(-1); a += tickStep) {
+    svg += `<text x="${x(a)}" y="${H - 8}" text-anchor="middle">${a}세</text>`;
+  }
+  series.forEach(s => {
+    const d = s.path.map((r, i) => `${i ? "L" : "M"}${x(r.age).toFixed(1)},${y(r.assets).toFixed(1)}`).join("");
+    svg += `<path d="${d}" fill="none" stroke="var(${s.color})" stroke-width="2" stroke-linejoin="round"/>`;
+  });
+  series.forEach(s => {
+    const last = s.path.at(-1);
+    svg += `<circle cx="${x(last.age)}" cy="${y(last.assets)}" r="4" fill="var(${s.color})" stroke="var(--panel)" stroke-width="2"/>`;
+  });
+  svg += `<line id="xh" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>`;
+  svg += `<rect id="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
+  svg += `</svg><div class="tip" id="tip" hidden></div>`;
+  const box = $("chart");
+  box.innerHTML = svg;
+  const svgEl = box.querySelector("svg"), tip = $("tip"), xh = $("xh");
+  function move(ev) {
+    const r = svgEl.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * W;
+    const a = Math.round(ages[0] + (px - m.l) / (W - m.l - m.r) * (ages.at(-1) - ages[0]));
+    const age = Math.min(ages.at(-1), Math.max(ages[0], a));
+    xh.setAttribute("x1", x(age)); xh.setAttribute("x2", x(age)); xh.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>${age}세</b>` + series.map(s =>
+      `<div><span>${s.name}</span><span>${eok(s.path.find(p => p.age === age).assets)}</span></div>`).join("");
+    tip.hidden = false;
+    const left = x(age) / W * r.width;
+    tip.style.left = Math.min(r.width - tip.offsetWidth, Math.max(0, left + 12)) + "px";
+    tip.style.top = "8px";
+  }
+  $("hit").addEventListener("pointermove", move);
+  $("hit").addEventListener("pointerleave", () => { tip.hidden = true; xh.setAttribute("visibility", "hidden"); });
+}
+
+// ── 영향 요인 ──
+function drivers(p, base) {
+  const list = [];
+  const tryAlt = (name, alt) => list.push({name, d: simulate({...p, ...alt}).end - base});
+  if (p.kids < 3) tryAlt("자녀 1명 더", {kids: p.kids + 1});
+  if (p.kids > 0) tryAlt("자녀 1명 덜", {kids: p.kids - 1});
+  if (p.keep < 1) tryAlt("경력 유지 +25%p", {keep: Math.min(1, p.keep + .25)});
+  if (p.marry + 2 <= 45) tryAlt("결혼 2년 늦게", {marry: p.marry + 2});
+  if (p.marry - 2 >= p.now) tryAlt("결혼 2년 일찍", {marry: p.marry - 2});
+  tryAlt("생활비·세금 −5%p", {live: Math.max(0, p.live - .05)});
+  tryAlt("내 소득 +10%", {myInc: p.myInc * 1.1});
+  if (p.tenure !== "rent") tryAlt("월세로 살면", {tenure: "rent"});
+  if (p.tenure !== "jeonse") tryAlt("전세로 살면", {tenure: "jeonse"});
+  if (p.tenure !== "buy") tryAlt("집을 사면", {tenure: "buy"});
+  if (p.tenure !== "rent") tryAlt("집값 상승률 −1%p", {hg: p.hg - 0.01});
+  if (p.tenure === "buy") tryAlt("대출 금리 +1%p", {rate: p.rate + 1});
+  if (p.size > 59) tryAlt("한 단계 작은 집", {size: p.size === 110 ? 84 : 59});
+  if (p.region === "서울") tryAlt("서울 대신 수도권 평균", {region: "수도권"});
+  if (p.gap + 3 <= 8) tryAlt("배우자 3살 연상", {gap: p.gap + 3});
+  if (p.gap - 3 >= -8) tryAlt("배우자 3살 연하", {gap: p.gap - 3});
+  list.sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  const max = Math.max(...list.map(r => Math.abs(r.d)), 1);
+  $("drivers").innerHTML = list.map(r => {
+    const w = Math.abs(r.d) / max * 50;
+    const left = r.d >= 0 ? 50 : 50 - w;
+    return `<div class="drv"><span class="name">${r.name}</span>
+      <span class="track"><span class="axis"></span><span class="fill" style="left:${left}%;width:${w}%;background:var(${r.d >= 0 ? "--bar" : "--bar-neg"})"></span></span>
+      <span class="num">${signed(r.d)}</span></div>`;
+  }).join("");
+}
+
+function render() {
+  const p = readParams();
+  $("marry").min = p.now;
+  $("marryOut").textContent = p.marry + "세";
+  $("gapOut").textContent = p.gap === 0 ? "동갑" : (p.gap > 0 ? p.gap + "살 연상" : -p.gap + "살 연하");
+  $("keepOut").textContent = Math.round(p.keep * 100) + "%";
+  $("liveOut").textContent = Math.round(p.live * 100) + "%";
+  $("hgOut").textContent = (p.hg * 100).toFixed(2).replace(/\.?0+$/, "") + "%";
+  $("hgHint").textContent = `과거 20년 ${p.region} 실질 ${(HIST_G[p.region] * 100).toFixed(1)}%. 기본값은 그 절반`;
+  $("priceHint").textContent = `오늘 ${p.region === "수도권" ? "수도권(서울 포함)" : p.region} ${p.size}㎡ 아파트 평균: 매매 ${eok(SALE[p.region][p.size] * p.size)}, 전세 ${eok(JEONSE[p.region][p.size] * p.size)}, 월세 환산 월 ${Math.round(rentMonthly({...p, rentIn: 0}))}만원`;
+  $("rentIn").placeholder = `자동 ${Math.round(rentMonthly({...p, rentIn: 0}))}`;
+
+  const base = simulate(p);
+  const noKids = simulate({...p, kids: 0});
+  const keepAll = simulate({...p, keep: 1});
+  $("tEnd").textContent = eok(base.end);
+  $("tEndS").textContent = `결혼 시점 ${eok(base.atMarry)}`;
+  $("tKids").textContent = eok(base.childTotal);
+  $("tKidsS").textContent = p.kids ? `자녀 ${p.kids}명 × 19년, 지원금 반영` : "자녀 없음";
+  $("tKeep").textContent = p.keep < 1 ? signed(keepAll.end - base.end) : "이미 100%";
+  if (p.tenure === "buy") {
+    $("tHomeK").textContent = "내 집 마련";
+    $("tHome").textContent = base.boughtAt !== null ? base.boughtAt + "세" : "65세까지 어려움";
+    $("tHomeS").textContent = base.boughtAt !== null
+      ? `그때 집값 ${eok(base.boughtPrice)}, 65세 집 순가치 ${eok(base.homeEquity)}`
+      : `오늘 집값 ${eok(base.price0)}. 대출 한도·DSR 안에서 모은 돈이 부족`;
+  } else {
+    $("tHomeK").textContent = p.tenure === "jeonse" ? "전세 보증금 (오늘)" : "주거";
+    $("tHome").textContent = p.tenure === "jeonse" ? eok(base.dep0) : "월세";
+    $("tHomeS").textContent = p.tenure === "jeonse" ? "80%까지 전세대출, 보증금은 집값만큼 오름" : `월 ${Math.round(rentMonthly(p))}만원, 집값만큼 오름`;
+  }
+
+  const series = [{name: "내 계획", path: base.path, color: "--s1"}];
+  if (p.kids > 0) series.push({name: "자녀 없이", path: noKids.path, color: "--s2"});
+  if (p.keep < 1) series.push({name: "경력 100% 유지", path: keepAll.path, color: "--s3"});
+  $("legend").innerHTML = series.length > 1
+    ? series.map(s => `<span><i style="background:var(${s.color})"></i>${s.name}</span>`).join("") : "";
+  drawChart(series);
+  drivers(p, base.end);
+
+  const rows = base.path.filter(r => r.age % 5 === 0 || r.age === p.now || r.age === END);
+  $("tbl").innerHTML = `<tr><th>나이</th>${series.map(s => `<th>${s.name}</th>`).join("")}</tr>` +
+    rows.map(r => `<tr><td>${r.age}세</td>${series.map(s => `<td>${eok(s.path.find(q => q.age === r.age).assets)}</td>`).join("")}</tr>`).join("");
+  save();
+}
+
+restore();
+$("region").addEventListener("change", () => {
+  $("hg").value = (Math.round(HIST_G[$("region").value] * 100 / 2 / 0.25) * 0.25).toFixed(2);
+  render();
+});
+document.getElementById("f").addEventListener("input", render);
+document.getElementById("f").addEventListener("submit", e => e.preventDefault());
+render();
+</script>
+
+</body>
+</html>
