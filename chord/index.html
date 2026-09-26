@@ -85,10 +85,11 @@ code { font-family: var(--mono); font-size: 13px; }
     <div class="row">
       <label>라벨 <input type="text" id="label" value="A" aria-label="라벨"></label>
       <label class="filebtn primary">사진 선택 (여러 장, zip 가능)<input type="file" id="files" accept="image/*,.zip" multiple></label>
+      <button id="mpnone">MediaPipe 샘플을 none으로 추가</button>
       <button id="clear">전체 지우기</button>
       <span id="status">모델 불러오는 중…</span>
     </div>
-    <p class="hint" style="margin-top:8px">코드 사진은 라벨을 <code>A</code>로, 코드가 아닌 손(넥만 잡은 손, 다른 코드, 편 손)은 라벨을 <code>none</code>으로 바꾼 뒤 올리세요. 뼈대가 꼬이게 잡힌 사진은 <b>빼기</b>를 누르세요.</p>
+    <p class="hint" style="margin-top:8px">코드 사진은 라벨을 <code>A</code>로, 코드가 아닌 손(넥만 잡은 손, 다른 코드, 편 손)은 라벨을 <code>none</code>으로 바꾼 뒤 올리세요. 뼈대가 꼬이게 잡힌 사진은 <b>빼기</b>를 누르세요.<br><b>MediaPipe 샘플</b> 버튼은 구글이 공개한 손 모양 사진(가위·바위·보·기타)을 12MB 받아 종류별 20장씩 <code>none</code>으로 넣습니다. 편 손·주먹 같은 확연히 다른 손을 걸러 주지만, 다른 코드나 넥만 잡은 손은 직접 찍어 넣어야 합니다.</p>
     <div class="grid" id="grid"></div>
   </section>
 
@@ -129,9 +130,11 @@ const CFG = window.CHORD_CFG || {
   wasm: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/wasm`,
   model: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
   zip: 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js',
+  mpSamples: 'https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/rps_data_sample.zip',
 };
 const MAX_SIDE = 1200;   // 사진을 이 크기로 줄여서 인식 (이전 테스트와 동일)
 const K = 3;             // 가까운 사진 몇 장의 평균 거리로 판정할지
+const MP_PER = 20;       // MediaPipe 샘플에서 손 모양 종류별로 가져올 장수
 const MIN_THR = 0.10;    // 같은 손 모양을 웹캠(저해상도)으로 보면 0.07 정도, 다른 손 모양은 0.26 이상 떨어짐
 const $ = (id) => document.getElementById(id);
 
@@ -245,29 +248,36 @@ function drawSkeleton(ctx, lm, w, h, color) {
   for (const p of lm) { ctx.beginPath(); ctx.arc(p.x*w, p.y*h, r, 0, 7); ctx.fill(); }
 }
 
+async function unzipImages(bytes) {
+  const { unzipSync } = await import(CFG.zip);
+  const out = [];
+  for (const [name, data] of Object.entries(unzipSync(bytes))) {
+    if (/(^|\/)(__MACOSX|\.)/.test(name) || !/\.(jpe?g|png|webp|bmp)$/i.test(name)) continue;
+    out.push({ name: name.split('/').pop(), blob: new Blob([data]), folder: name.includes('/') ? name.split('/').slice(-2, -1)[0] : null });
+  }
+  return out;
+}
+
 async function expandFiles(fileList) {
   const out = [];
   for (const f of fileList) {
-    if (/\.zip$/i.test(f.name)) {
-      const { unzipSync } = await import(CFG.zip);
-      const ents = unzipSync(new Uint8Array(await f.arrayBuffer()));
-      for (const [name, data] of Object.entries(ents)) {
-        if (/(^|\/)(__MACOSX|\.)/.test(name) || !/\.(jpe?g|png|webp|bmp)$/i.test(name)) continue;
-        out.push({ name: name.split('/').pop(), blob: new Blob([data]), folder: name.includes('/') ? name.split('/').slice(-2, -1)[0] : null });
-      }
-    } else out.push({ name: f.name, blob: f, folder: null });
+    if (/\.zip$/i.test(f.name)) out.push(...await unzipImages(new Uint8Array(await f.arrayBuffer())));
+    else out.push({ name: f.name, blob: f, folder: null });
   }
   return out;
 }
 
 async function addFiles(fileList) {
+  await addEntries(await expandFiles(fileList));
+}
+
+// forceLabel이 없으면 zip 안의 폴더 이름(A/none)을 라벨로, 그것도 없으면 입력칸의 라벨을 쓴다
+async function addEntries(files, forceLabel) {
   const label = $('label').value.trim() || 'A';
-  const files = await expandFiles(fileList);
   let i = 0;
   for (const f of files) {
     setStatus(`손 인식 중 ${++i}/${files.length}`);
-    // zip 안의 폴더 이름이 A/none 이면 그걸 라벨로 사용
-    const lab = f.folder && /^(none|[A-Za-z][A-Za-z0-9#]*)$/.test(f.folder) ? f.folder : label;
+    const lab = forceLabel || (f.folder && /^(none|[A-Za-z][A-Za-z0-9#]*)$/.test(f.folder) ? f.folder : label);
     try {
       const canvas = await toBitmap(f.blob);
       const r = imgLm.detect(canvas);
@@ -286,6 +296,44 @@ async function addFiles(fileList) {
   const found = samples.filter(s => s.feat).length;
   setStatus(`${samples.length}장 중 ${found}장에서 손 검출`);
   $('train').disabled = samples.filter(s => s.on && s.feat).length < 2;
+}
+
+// MediaPipe 공개 손 모양 샘플(가위·바위·보·none 각 125장)에서 종류별로 고르게 뽑아 none으로 추가
+async function addMediaPipeSamples() {
+  const btn = $('mpnone');
+  btn.disabled = true;
+  try {
+    setStatus('MediaPipe 샘플 받는 중…');
+    const res = await fetch(CFG.mpSamples);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const total = +res.headers.get('content-length') || 0;
+    const reader = res.body.getReader(), chunks = [];
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value); got += value.length;
+      setStatus(`MediaPipe 샘플 받는 중 ${total ? Math.round(got / total * 100) + '%' : (got / 1e6).toFixed(1) + 'MB'}`);
+    }
+    const bytes = new Uint8Array(got);
+    let off = 0; for (const c of chunks) { bytes.set(c, off); off += c.length; }
+    const byClass = {};
+    for (const e of await unzipImages(bytes)) (byClass[e.folder] ||= []).push(e);
+    const picked = [];
+    for (const [cls, list] of Object.entries(byClass)) {
+      list.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      const step = list.length / Math.min(MP_PER, list.length);
+      for (let i = 0; i < Math.min(MP_PER, list.length); i++) {
+        const e = list[Math.floor(i * step)];
+        picked.push({ ...e, name: `mp_${cls}_${e.name}` });
+      }
+    }
+    await addEntries(picked, 'none');
+    btn.textContent = 'MediaPipe 샘플 추가됨';
+  } catch (e) {
+    setStatus('MediaPipe 샘플을 받지 못했습니다: ' + e.message);
+    btn.disabled = false;
+  }
 }
 
 function renderCard(s) {
@@ -394,7 +442,8 @@ function loop() {
 
 // ---------- 이벤트 ----------
 $('files').onchange = async (e) => { const fl = [...e.target.files]; e.target.value = ''; if (imgLm) await addFiles(fl); };
-$('clear').onclick = () => { samples = []; $('grid').innerHTML = ''; $('train').disabled = true; setStatus('준비됨'); };
+$('mpnone').onclick = () => { if (imgLm) addMediaPipeSamples(); };
+$('clear').onclick = () => { $('mpnone').disabled = false; $('mpnone').textContent = 'MediaPipe 샘플을 none으로 추가'; samples = []; $('grid').innerHTML = ''; $('train').disabled = true; setStatus('준비됨'); };
 $('train').onclick = train;
 $('mirror').onchange = (e) => $('stage').classList.toggle('mirror', e.target.checked);
 $('cam').onclick = toggleCam;
