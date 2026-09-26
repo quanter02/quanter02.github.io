@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>기타 코드 손 모양 판정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #f4f6f3; --panel: #ffffff; --ink: #17211c; --ink-2: #4c5852; --ink-3: #7b8680;
+  --line: #dde3de; --accent: #0e6b58; --accent-soft: #e2f0eb;
+  --good: #1baf7a; --bad: #d95926; --warn: #c28a12;
+  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111714; --panel: #19211d; --ink: #eef3ef; --ink-2: #b9c4be; --ink-3: #87938c;
+    --line: #2b3631; --accent: #4fc0a3; --accent-soft: #1d3a31;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+[hidden] { display: none !important; }
+main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 64px; display: grid; gap: 18px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--accent); font-weight: 600; }
+h1 { font-size: clamp(24px, 4vw, 30px); line-height: 1.25; margin: 4px 0 8px; }
+h2 { font-size: 17px; margin: 0 0 10px; }
+.lede, .hint { color: var(--ink-2); margin: 0; }
+.hint { font-size: 13px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button, .filebtn, select {
+  font: inherit; font-size: 14px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); padding: 8px 14px; cursor: pointer;
+}
+button.primary, .filebtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.filebtn input { display: none; }
+input[type=text] { font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); width: 110px; }
+#status { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+.card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg); position: relative; }
+.card canvas { display: block; width: 100%; height: auto; }
+.card .meta { padding: 6px 8px; font-size: 12px; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+.card .meta b { font-family: var(--mono); }
+.card.off { opacity: .4; }
+.card.off canvas { filter: grayscale(1); }
+.card .x { padding: 2px 8px; font-size: 12px; }
+.tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.tag.none { background: #f6e3da; color: var(--bad); }
+.tag.fail { background: #f3ead1; color: var(--warn); }
+.ok { color: var(--good); } .ng { color: var(--bad); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 10px; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); }
+td.num { font-family: var(--mono); text-align: right; }
+.live { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 720px) { .live { grid-template-columns: 1fr; } }
+.stage { position: relative; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; }
+.stage video, .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.stage.mirror video, .stage.mirror canvas { transform: scaleX(-1); }
+.verdict { font-size: 44px; font-weight: 700; line-height: 1.1; }
+.meter { height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; margin: 8px 0 4px; position: relative; }
+.meter span { position: absolute; inset: 0 auto 0 0; background: var(--accent); width: 0; transition: width .1s; }
+.meter i { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 2px; background: var(--ink); }
+.big { font-family: var(--mono); font-size: 20px; }
+code { font-family: var(--mono); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">MediaPipe 손 인식 · 브라우저 안에서만 계산</div>
+    <h1>기타 코드 손 모양 판정</h1>
+    <p class="lede">코드를 잡은 사진을 올리면 손 관절 21개를 찾아 학습하고, 웹캠으로 지금 잡은 손이 그 코드인지 판정합니다. 사진은 서버로 보내지 않습니다.</p>
+  </header>
+
+  <section class="panel">
+    <h2>① 사진 올리기</h2>
+    <div class="row">
+      <label>라벨 <input type="text" id="label" value="A" aria-label="라벨"></label>
+      <label class="filebtn primary">사진 선택 (여러 장, zip 가능)<input type="file" id="files" accept="image/*,.zip" multiple></label>
+      <button id="mpnone">MediaPipe 샘플을 none으로 추가</button>
+      <button id="clear">전체 지우기</button>
+      <span id="status">모델 불러오는 중…</span>
+    </div>
+    <p class="hint" style="margin-top:8px">코드 사진은 라벨을 <code>A</code>로, 코드가 아닌 손(넥만 잡은 손, 다른 코드, 편 손)은 라벨을 <code>none</code>으로 바꾼 뒤 올리세요. 뼈대가 꼬이게 잡힌 사진은 <b>빼기</b>를 누르세요.<br><b>MediaPipe 샘플</b> 버튼은 구글이 공개한 손 모양 사진(가위·바위·보·기타)을 12MB 받아 종류별 20장씩 <code>none</code>으로 넣습니다. 편 손·주먹 같은 확연히 다른 손을 걸러 주지만, 다른 코드나 넥만 잡은 손은 직접 찍어 넣어야 합니다.</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="panel">
+    <h2>② 학습 · 검증</h2>
+    <div class="row">
+      <button class="primary" id="train" disabled>학습 + 한 장씩 빼고 검증</button>
+      <button id="export" disabled>모델 저장(JSON)</button>
+      <label class="filebtn">모델 불러오기<input type="file" id="import" accept=".json"></label>
+    </div>
+    <div id="report" class="hint" style="margin-top:10px">사진을 올린 뒤 학습을 누르세요.</div>
+  </section>
+
+  <section class="panel">
+    <h2>③ 웹캠 실시간 판정</h2>
+    <div class="row" style="margin-bottom:12px">
+      <button class="primary" id="cam" disabled>웹캠 켜기</button>
+      <label><input type="checkbox" id="mirror" checked> 거울 모드 화면</label>
+      <label>너그러움 <input type="range" id="sens" min="0.5" max="2" step="0.1" value="1"> <output id="sensv">×1.0</output></label>
+    </div>
+    <div class="live">
+      <div class="stage mirror" id="stage"><video id="video" playsinline muted></video><canvas id="overlay"></canvas></div>
+      <div>
+        <div class="hint">판정</div>
+        <div class="verdict" id="verdict">—</div>
+        <div class="meter"><span id="bar"></span><i title="합격선"></i></div>
+        <div class="hint">점수 <span class="big" id="score">—</span> / 100 · 50점이 합격선</div>
+        <p class="hint" id="liveinfo" style="margin-top:12px">손목까지 화면에 나오는 반신 구도가 가장 안정적입니다.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+const MP_VER = '0.10.14';
+const CFG = window.CHORD_CFG || {
+  bundle: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/vision_bundle.mjs`,
+  wasm: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/wasm`,
+  model: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+  zip: 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js',
+  mpSamples: 'https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/rps_data_sample.zip',
+};
+const MAX_SIDE = 1200;   // 사진을 이 크기로 줄여서 인식 (이전 테스트와 동일)
+const K = 3;             // 가까운 사진 몇 장의 평균 거리로 판정할지
+const MP_PER = 20;       // MediaPipe 샘플에서 손 모양 종류별로 가져올 장수
+const MIN_THR = 0.10;    // 같은 손 모양을 웹캠(저해상도)으로 보면 0.07 정도, 다른 손 모양은 0.26 이상 떨어짐
+const $ = (id) => document.getElementById(id);
+
+const EDGES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],
+  [9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+
+let vision, imgLm, vidLm;
+let samples = [];       // {id, name, label, feat|null, handed, on}
+let model = null;       // {mode, target, labels, items:[{label, feat}], thr}
+let nextId = 1;
+let sens = 1;           // 웹캠 화면의 합격선 배율 (클수록 너그럽게)
+
+// ---------- 특징: 손바닥 좌표계로 옮긴 21개 관절 (world 좌표, 크기 정규화) ----------
+function sub(a, b) { return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
+function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+function cross(a, b) { return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+function norm(a) { const n = Math.hypot(...a) || 1; return [a[0]/n, a[1]/n, a[2]/n]; }
+
+function features(world, handed) {
+  const P = world.map(p => [p.x, p.y, p.z]);
+  const o = P[0];
+  const up = sub(P[9], o);
+  const scale = Math.hypot(...up) || 1;
+  const y = norm(up);
+  let x = sub(P[17], P[5]);
+  x = norm(sub(x, y.map(v => v * dot(x, y))));
+  const z = cross(x, y);
+  // 왼손 라벨은 좌우를 뒤집어 한 좌표계로 맞춘다 (손 지정 any)
+  const flip = handed === 'Left' ? -1 : 1;
+  const f = [];
+  for (let i = 1; i < 21; i++) {
+    const d = sub(P[i], o);
+    f.push(flip * dot(d, x) / scale, dot(d, y) / scale, flip * dot(d, z) / scale);
+  }
+  return f;
+}
+function dist(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += (a[i]-b[i]) ** 2; return Math.sqrt(s / (a.length / 3)); }
+
+// 라벨별로 가장 가까운 K장 평균 거리
+function labelDists(feat, items) {
+  const by = {};
+  for (const it of items) (by[it.label] ||= []).push(dist(feat, it.feat));
+  const out = {};
+  for (const [l, ds] of Object.entries(by)) {
+    ds.sort((a, b) => a - b);
+    const k = Math.min(K, ds.length);
+    out[l] = ds.slice(0, k).reduce((s, v) => s + v, 0) / k;
+  }
+  return out;
+}
+
+// 판정: 목표 라벨과의 거리가 임계값 안이고, (none 데이터가 있으면) none보다 가까워야 통과
+function judge(feat, m) {
+  const d = labelDists(feat, m.items);
+  const dT = d[m.target];
+  const thr = m.thr * (m === model ? sens : 1);
+  let score = 100 * Math.pow(0.5, (dT / thr) ** 2);  // 임계값에서 50점
+  if (m.mode === 'knn') {
+    const others = Object.entries(d).filter(([l]) => l !== m.target).map(([, v]) => v);
+    const dO = Math.min(...others);
+    // 다른 라벨이 더 가까우면 점수를 50 아래로 누른다
+    const ratio = dO / (dT + dO);          // 0.5 = 경계
+    score = Math.min(score, 100 * ratio);
+  }
+  return { score, pass: score >= 50, d };
+}
+
+function buildModel(list) {
+  const labels = [...new Set(list.map(s => s.label))];
+  const target = labels.includes('A') ? 'A' : labels.find(l => l !== 'none') || labels[0];
+  const items = list.map(s => ({ label: s.label, feat: s.feat }));
+  // 임계값: 목표 라벨 사진끼리 한 장씩 뺐을 때의 거리 중 최댓값 × 1.25
+  const own = items.filter(i => i.label === target);
+  const loo = own.map((it, i) => labelDists(it.feat, own.filter((_, j) => j !== i))[target]).filter(v => v != null);
+  const thr = Math.max(MIN_THR, (loo.length ? Math.max(...loo) : 0.3) * 1.25);
+  return { mode: labels.length > 1 ? 'knn' : 'template', target, labels, items, thr, k: K, version: 1 };
+}
+
+// ---------- MediaPipe ----------
+async function init() {
+  try {
+    vision = await import(CFG.bundle);
+    const fs = await vision.FilesetResolver.forVisionTasks(CFG.wasm);
+    const opts = (mode) => ({ baseOptions: { modelAssetPath: CFG.model, delegate: 'CPU' }, runningMode: mode, numHands: 1,
+      minHandDetectionConfidence: 0.3, minHandPresenceConfidence: 0.3, minTrackingConfidence: 0.3 });
+    imgLm = await vision.HandLandmarker.createFromOptions(fs, opts('IMAGE'));
+    vidLm = await vision.HandLandmarker.createFromOptions(fs, opts('VIDEO'));
+    setStatus('준비됨');
+    try { const saved = localStorage.getItem('chord-model'); if (saved) setModel(JSON.parse(saved), '이전에 학습한 모델을 불러왔습니다.'); } catch {}
+  } catch (e) {
+    setStatus('모델 로드 실패: ' + e.message);
+    console.error(e);
+  }
+}
+function setStatus(t) { $('status').textContent = t; }
+
+async function toBitmap(blob) {
+  const bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+  const s = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  bmp.close?.();
+  return c;
+}
+
+function drawSkeleton(ctx, lm, w, h, color) {
+  ctx.lineWidth = Math.max(2, w / 250); ctx.strokeStyle = color; ctx.fillStyle = '#fff';
+  for (const [a, b] of EDGES) { ctx.beginPath(); ctx.moveTo(lm[a].x*w, lm[a].y*h); ctx.lineTo(lm[b].x*w, lm[b].y*h); ctx.stroke(); }
+  const r = Math.max(2.5, w / 200);
+  for (const p of lm) { ctx.beginPath(); ctx.arc(p.x*w, p.y*h, r, 0, 7); ctx.fill(); }
+}
+
+async function unzipImages(bytes) {
+  const { unzipSync } = await import(CFG.zip);
+  const out = [];
+  for (const [name, data] of Object.entries(unzipSync(bytes))) {
+    if (/(^|\/)(__MACOSX|\.)/.test(name) || !/\.(jpe?g|png|webp|bmp)$/i.test(name)) continue;
+    out.push({ name: name.split('/').pop(), blob: new Blob([data]), folder: name.includes('/') ? name.split('/').slice(-2, -1)[0] : null });
+  }
+  return out;
+}
+
+async function expandFiles(fileList) {
+  const out = [];
+  for (const f of fileList) {
+    if (/\.zip$/i.test(f.name)) out.push(...await unzipImages(new Uint8Array(await f.arrayBuffer())));
+    else out.push({ name: f.name, blob: f, folder: null });
+  }
+  return out;
+}
+
+async function addFiles(fileList) {
+  await addEntries(await expandFiles(fileList));
+}
+
+// forceLabel이 없으면 zip 안의 폴더 이름(A/none)을 라벨로, 그것도 없으면 입력칸의 라벨을 쓴다
+async function addEntries(files, forceLabel) {
+  const label = $('label').value.trim() || 'A';
+  let i = 0;
+  for (const f of files) {
+    setStatus(`손 인식 중 ${++i}/${files.length}`);
+    const lab = forceLabel || (f.folder && /^(none|[A-Za-z][A-Za-z0-9#]*)$/.test(f.folder) ? f.folder : label);
+    try {
+      const canvas = await toBitmap(f.blob);
+      const r = imgLm.detect(canvas);
+      const s = { id: nextId++, name: f.name, label: lab, on: true, feat: null, handed: null, conf: 0 };
+      if (r.landmarks.length) {
+        const cat = r.handedness[0][0];
+        s.handed = cat.categoryName; s.conf = cat.score;
+        s.feat = features(r.worldLandmarks[0], s.handed);
+        drawSkeleton(canvas.getContext('2d'), r.landmarks[0], canvas.width, canvas.height, '#1baf7a');
+      } else s.on = false;
+      s.thumb = canvas;
+      samples.push(s);
+      renderCard(s);
+    } catch (e) { console.error(f.name, e); }
+  }
+  const found = samples.filter(s => s.feat).length;
+  setStatus(`${samples.length}장 중 ${found}장에서 손 검출`);
+  $('train').disabled = samples.filter(s => s.on && s.feat).length < 2;
+}
+
+// MediaPipe 공개 손 모양 샘플(가위·바위·보·none 각 125장)에서 종류별로 고르게 뽑아 none으로 추가
+async function addMediaPipeSamples() {
+  const btn = $('mpnone');
+  btn.disabled = true;
+  try {
+    setStatus('MediaPipe 샘플 받는 중…');
+    const res = await fetch(CFG.mpSamples);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const total = +res.headers.get('content-length') || 0;
+    const reader = res.body.getReader(), chunks = [];
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value); got += value.length;
+      setStatus(`MediaPipe 샘플 받는 중 ${total ? Math.round(got / total * 100) + '%' : (got / 1e6).toFixed(1) + 'MB'}`);
+    }
+    const bytes = new Uint8Array(got);
+    let off = 0; for (const c of chunks) { bytes.set(c, off); off += c.length; }
+    const byClass = {};
+    for (const e of await unzipImages(bytes)) (byClass[e.folder] ||= []).push(e);
+    const picked = [];
+    for (const [cls, list] of Object.entries(byClass)) {
+      list.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      const step = list.length / Math.min(MP_PER, list.length);
+      for (let i = 0; i < Math.min(MP_PER, list.length); i++) {
+        const e = list[Math.floor(i * step)];
+        picked.push({ ...e, name: `mp_${cls}_${e.name}` });
+      }
+    }
+    await addEntries(picked, 'none');
+    btn.textContent = 'MediaPipe 샘플 추가됨';
+  } catch (e) {
+    setStatus('MediaPipe 샘플을 받지 못했습니다: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+function renderCard(s) {
+  let card = document.querySelector(`[data-id="${s.id}"]`);
+  if (!card) {
+    card = document.createElement('div'); card.className = 'card'; card.dataset.id = s.id;
+    const c = document.createElement('canvas');
+    c.width = 300; c.height = Math.round(300 * s.thumb.height / s.thumb.width);
+    c.getContext('2d').drawImage(s.thumb, 0, 0, c.width, c.height);
+    card.append(c);
+    const meta = document.createElement('div'); meta.className = 'meta'; card.append(meta);
+    $('grid').append(card);
+  }
+  card.classList.toggle('off', !s.on);
+  const meta = card.querySelector('.meta');
+  const tagCls = !s.feat ? 'fail' : s.label === 'none' ? 'none' : '';
+  meta.innerHTML = `<span><span class="tag ${tagCls}">${s.feat ? esc(s.label) : '손 없음'}</span> <b>${s.loo ?? ''}</b></span>`;
+  if (s.feat) {
+    const b = document.createElement('button'); b.className = 'x'; b.textContent = s.on ? '빼기' : '넣기';
+    b.onclick = () => { s.on = !s.on; renderCard(s); $('train').disabled = samples.filter(x => x.on && x.feat).length < 2; };
+    meta.append(b);
+  }
+  card.title = `${s.name}${s.handed ? ` · ${s.handed} ${(s.conf*100).toFixed(0)}%` : ''}`;
+}
+const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function train() {
+  const used = samples.filter(s => s.on && s.feat);
+  const m = buildModel(used);
+  // 한 장씩 빼고 나머지로 학습해서 판정
+  const rows = [];
+  for (const s of samples.filter(x => x.feat)) {
+    const rest = used.filter(x => x !== s);
+    if (!rest.some(x => x.label === m.target)) continue;
+    const mm = buildModel(rest);
+    const j = judge(s.feat, mm);
+    const truth = s.label === m.target;
+    const ok = s.on ? j.pass === truth : !j.pass;   // 뺀 사진은 '아님'으로 나와야 맞음
+    s.loo = Math.round(j.score);
+    rows.push({ s, j, truth, ok });
+    renderCard(s);
+  }
+  const counted = rows.filter(r => r.s.on);
+  const acc = counted.filter(r => r.ok).length;
+  const excluded = rows.filter(r => !r.s.on);
+  let html = `<p><b>${m.mode === 'template' ? `라벨이 <code>${esc(m.target)}</code> 하나뿐이라 “저장된 ${esc(m.target)} 모양과 얼마나 가까운가”로 판정합니다.` :
+    `라벨 ${m.labels.map(l => `<code>${esc(l)}</code>`).join(', ')} — 가장 가까운 사진들의 라벨로 판정합니다.`}</b></p>`;
+  html += `<p>학습에 쓴 ${counted.length}장을 한 장씩 빼고 나머지로 판정: <b class="${acc === counted.length ? 'ok' : 'ng'}">${acc}/${counted.length} 정답</b>`;
+  if (excluded.length) html += ` · 뺀 사진 ${excluded.length}장: ${excluded.map(r => `${esc(r.s.name)} ${Math.round(r.j.score)}점 ${r.ok ? '(A 아님으로 판정 ✓)' : '(A로 판정 ✗)'}`).join(', ')}`;
+  html += `</p>`;
+  if (m.mode === 'template') html += `<p class="ng">⚠ <code>none</code> 사진이 없어서 다른 손 모양을 ${esc(m.target)}로 잘못 판정하는지는 아직 확인할 수 없습니다. 라벨을 <code>none</code>으로 바꿔 10~20장 올려 주세요.</p>`;
+  html += `<table><thead><tr><th>사진</th><th>라벨</th><th>손</th><th class="num">점수</th><th>결과</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${esc(r.s.name)}${r.s.on ? '' : ' (뺌)'}</td><td>${esc(r.s.label)}</td><td>${r.s.handed}</td><td class="num">${Math.round(r.j.score)}</td><td class="${r.ok ? 'ok' : 'ng'}">${r.j.pass ? esc(m.target) : '아님'} ${r.ok ? '✓' : '✗'}</td></tr>`).join('') + `</tbody></table>`;
+  setModel(m, html);
+}
+
+function setModel(m, html) {
+  model = m;
+  $('report').innerHTML = html;
+  $('export').disabled = false;
+  $('cam').disabled = false;
+  try { localStorage.setItem('chord-model', JSON.stringify(m)); } catch {}
+}
+
+// ---------- 웹캠 ----------
+let stream = null, lastT = -1, hist = [];
+async function toggleCam() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; $('cam').textContent = '웹캠 켜기'; return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+  } catch (e) { $('liveinfo').textContent = '웹캠을 열 수 없습니다: ' + e.message; return; }
+  const v = $('video'); v.srcObject = stream; await v.play();
+  $('cam').textContent = '웹캠 끄기';
+  requestAnimationFrame(loop);
+}
+function loop() {
+  if (!stream) return;
+  const v = $('video'), c = $('overlay');
+  if (v.readyState >= 2 && v.currentTime !== lastT) {
+    lastT = v.currentTime;
+    if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
+    const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
+    const r = vidLm.detectForVideo(v, performance.now());
+    let score = null;
+    if (r.landmarks.length) {
+      const handed = r.handedness[0][0].categoryName;
+      const j = judge(features(r.worldLandmarks[0], handed), model);
+      score = j.score;
+      drawSkeleton(ctx, r.landmarks[0], c.width, c.height, j.pass ? '#1baf7a' : '#d95926');
+      $('liveinfo').textContent = `MediaPipe 표시: ${handed} · 가장 가까운 ${model.target} 거리 ${j.d[model.target].toFixed(3)} (합격선 ${(model.thr * sens).toFixed(3)})`;
+    }
+    hist.push(score); if (hist.length > 8) hist.shift();
+    const vals = hist.filter(x => x != null);
+    if (vals.length < hist.length / 2) { $('verdict').textContent = '손 없음'; $('verdict').className = 'verdict'; $('score').textContent = '—'; $('bar').style.width = '0'; }
+    else {
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const pass = avg >= 50;
+      $('verdict').textContent = pass ? `${model.target} ✓` : `${model.target} 아님`;
+      $('verdict').className = 'verdict ' + (pass ? 'ok' : 'ng');
+      $('score').textContent = Math.round(avg);
+      $('bar').style.width = avg + '%';
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+// ---------- 이벤트 ----------
+$('files').onchange = async (e) => { const fl = [...e.target.files]; e.target.value = ''; if (imgLm) await addFiles(fl); };
+$('mpnone').onclick = () => { if (imgLm) addMediaPipeSamples(); };
+$('clear').onclick = () => { $('mpnone').disabled = false; $('mpnone').textContent = 'MediaPipe 샘플을 none으로 추가'; samples = []; $('grid').innerHTML = ''; $('train').disabled = true; setStatus('준비됨'); };
+$('train').onclick = train;
+$('mirror').onchange = (e) => $('stage').classList.toggle('mirror', e.target.checked);
+$('cam').onclick = toggleCam;
+$('sens').oninput = (e) => { sens = +e.target.value; $('sensv').textContent = '×' + sens.toFixed(1); };
+$('export').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(model)], { type: 'application/json' }));
+  a.download = `chord-model-${model.target}.json`; a.click();
+};
+$('import').onchange = async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { setModel(JSON.parse(await f.text()), `모델을 불러왔습니다: ${esc(f.name)}`); } catch (err) { $('report').textContent = '모델 파일을 읽을 수 없습니다.'; }
+};
+window.__chord = { get samples() { return samples; }, get model() { return model; }, judge, features, train };
+init();
+</script>
+</body>
+</html>
