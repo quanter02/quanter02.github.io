@@ -104,7 +104,7 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 .stage .shutter { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.95); color: var(--blue); display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(255,255,255,.25); }
 .stage .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #c9d5ee; padding: 24px; font-size: 14px; }
 .stage .empty b { display: block; color: #fff; font-size: 16px; margin-bottom: 6px; }
-.stage .center-msg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(15,29,58,.8); color: #fff; font-size: 13px; padding: 8px 12px; border-radius: 10px; text-align: center; max-width: 80%; pointer-events: none; }
+.stage .center-msg { position: absolute; left: 50%; top: 56px; transform: translateX(-50%); background: rgba(15,29,58,.8); color: #fff; font-size: 13px; padding: 8px 12px; border-radius: 10px; text-align: center; max-width: 80%; pointer-events: none; }
 
 /* 코드 수업 */
 .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
@@ -440,6 +440,34 @@ function followNeck(hands, dt) {
   follow.lost = follow.lostFor > 1.5;
 }
 
+// ---------- 구도 안내 ----------
+// 공개 데이터 검사에서 손이 넥을 감싸거나 너무 가까우면 손 인식부터 실패했다(검출 27%, 원본 구도 53%).
+// 손이 안 보이거나, 너무 크거나(가까움), 너무 작게(멀리) 잡히면 고치는 방법을 알려 준다.
+const framing = { startedAt: 0, noHand: 0, close: 0, far: 0, msg: '' };
+function updateFraming(hands, idx, dt) {
+  framing.noHand = hands.length ? 0 : framing.noHand + dt;
+  // 화면 대비 손 크기. 줄 잡는 손을 잘못 고를 수 있으니 보이는 손 중 가장 큰 손으로 판단
+  const size = Math.max(0, ...hands.map((lm) => {
+    const xs = lm.map((p) => p.x), ys = lm.map((p) => p.y);
+    return Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  }));
+  framing.close = size > 0.6 ? framing.close + dt : 0;
+  framing.far = hands.length && size < 0.12 ? framing.far + dt : 0;
+  const first = performance.now() - framing.startedAt < 4000;
+  framing.msg =
+    framing.noHand > 2 ? '손이 안 보여요. 카메라를 정면에 두고, 줄 잡는 손의 손목까지 화면에 나오게 해 주세요'
+    : framing.close > 1 ? '너무 가까워요. 카메라를 조금 뒤로 해서 손 전체와 손목이 보이게 해 주세요'
+    : framing.far > 1.5 ? '손이 너무 작게 보여요. 카메라를 조금 더 가까이 두세요'
+    : first ? '정면에서 상반신이 나오게, 지판(너트~5프렛)과 손목까지 보이게 맞춰 주세요'
+    : '';
+}
+// 화면에 띄울 안내: 지판을 놓침 > 구도 문제
+function stageHint() {
+  if (S.calib) return '';
+  if (follow.lost) return '지판을 놓쳤어요. “위치 맞추기”로 가이드를 다시 맞춰 주세요';
+  return framing.msg;
+}
+
 // ---------- 스트럼(오른손) 감지 ----------
 // 줄 잡는 손이 아닌 다른 손이 6번줄→1번줄 방향으로 빠르게 움직이면 다운, 반대면 업 스트로크
 const strum = { p: null, v: 0, dir: 0, last: 0, strokes: [], seenAt: 0, flash: null };
@@ -559,7 +587,7 @@ async function startCamera() {
       loadMP(),
     ]);
     cam.stream = stream; video.srcObject = stream; await video.play();
-    cam.running = true;
+    cam.running = true; framing.startedAt = performance.now(); framing.noHand = framing.close = framing.far = 0;
     attachStage();
     requestAnimationFrame(loop);
   } catch (e) {
@@ -604,13 +632,14 @@ function loop(ts) {
     const idx = hands.length ? C.pickFrettingHand(S.neck, hands) : -1;
     const lm = idx >= 0 ? hands[idx] : null;
     updateStrum(hands, idx, dt);
+    updateFraming(hands, idx, dt);
     const key = S.tab === 'play' ? play.current() : S.chord;
     const ev = smooth(lm && key ? C.evaluateChord(S.neck, lm, C.CHORDS[key]) : null, key);
     if (S.tab === 'code') onCodeFrame(ev, dt, !!lm);
     if (S.tab === 'play') onPlayFrame(ev, dt, !!lm);
     if (lm || S.tab === 'play' && play.running) { day().sec += dt; dirty = true; }
     const st = stageEl();
-    if (st && !st.hidden) { draw($('canvas', st), hands, idx, ev); setStageMsg(st, follow.lost && !S.calib ? '지판을 놓쳤어요. “위치 맞추기”로 가이드를 다시 맞춰 주세요' : ''); }
+    if (st && !st.hidden) { draw($('canvas', st), hands, idx, ev); setStageMsg(st, stageHint()); }
   }
   requestAnimationFrame(loop);
 }
@@ -1001,14 +1030,15 @@ function renderPlay() {
   if (!bt.hidden) bt.innerHTML = play.beats.map((g, k) => `<i class="${g || (k === play.beat ? 'now' : '')}">↓</i>`).join('');
   $('#nextList').innerHTML = song.bars.slice(play.bar, play.bar + 5).map((k, i) => `<div class="${i ? '' : 'cur'}">${k}</div>`).join('');
   $('#playBtn').textContent = play.running ? '❚❚ 일시정지' : play.bar >= n ? '↺ 처음부터' : '▶ 계속';
-  if (follow.lost) $('#camStatus').textContent = '지판을 놓쳤어요 · 화면 보기에서 위치를 맞춰 주세요';
+  const hint = stageHint();
+  if (hint) $('#camStatus').textContent = hint;
   else if (cam.running) $('#camStatus').textContent = '카메라로 코드 인식 중…';
 }
 
 // ---------- 도움말 ----------
 $('#helpBtn').onclick = () => alert('사용법\n\n1. 코드 수업에서 카메라를 켜고 “지판 위치 맞추기”로 파란 가이드를 기타 지판(너트~5프렛)에 맞춥니다.\n2. 화면의 번호 동그라미(손가락 번호) 위에 손가락을 올리면 줄·프렛 단위로 판정합니다.\n3. 연주해보자에서 곡의 코드 진행을 따라 잡아 보세요.\n\n카메라 영상과 기록은 이 브라우저 밖으로 보내지 않습니다.');
 
-window.__app = { S, C, play, follow, strum, setCorners, video, SONGS, openPlayer, closePlayer, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
+window.__app = { S, C, play, follow, strum, framing, setCorners, video, SONGS, openPlayer, closePlayer, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
 setChord('A');
 renderSongs();
 renderHome();
