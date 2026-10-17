@@ -43,7 +43,7 @@ main > section { padding: 4px 16px 16px; display: grid; gap: 14px; }
 
 /* 공통 */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
-.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
+.pill { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
 .pill.green { background: var(--green-soft); color: var(--green); }
 .pill.red { background: var(--red-soft); color: var(--red); }
 .pill.orange { background: var(--orange-soft); color: var(--orange); }
@@ -162,6 +162,10 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 .stepper { display: flex; align-items: center; gap: 4px; }
 .stepper button { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); font-weight: 800; }
 .stepper output { min-width: 64px; text-align: center; font-weight: 700; font-size: 14px; }
+.beats { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; }
+.beats i { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 18px; color: #cbd5e1; background: rgba(15,29,58,.72); border: 1px solid rgba(255,255,255,.18); }
+.beats i.now { border-color: #fff; color: #fff; background: rgba(37,99,235,.85); }
+.beats i.hit { background: rgba(34,197,94,.85); color: #fff; } .beats i.near { background: rgba(245,158,11,.85); color: #fff; } .beats i.miss { background: rgba(239,68,68,.75); color: #fff; }
 .summary { text-align: center; display: grid; gap: 6px; }
 .summary .big { font-size: 40px; font-weight: 800; color: var(--blue); }
 
@@ -240,7 +244,7 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
         <div class="week" id="week"></div>
       </div>
 
-      <p class="tiny" style="text-align:center">기록은 이 브라우저에만 저장됩니다 · <a href="photo.html" style="color:inherit">사진으로 손 모양 학습(이전 실험)</a></p>
+      <p class="tiny" style="text-align:center">기록은 이 브라우저에만 저장됩니다</p>
     </section>
 
     <!-- ================= 코드 수업 ================= -->
@@ -263,8 +267,9 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
         <ol>
           <li>파란 가이드에 기타 지판을 맞춰 들거나, 모서리 동그라미 4개를 끌어 지판에 맞추세요.</li>
           <li><b>너트</b>(헤드 쪽 흰 막대)와 <b>5번 프렛</b>, <b>6번줄</b>(가장 굵은 줄)과 <b>1번줄</b> 위치를 맞추면 됩니다.</li>
-          <li>맞춘 뒤에는 기타와 카메라를 움직이지 마세요. 움직였다면 다시 맞추면 돼요.</li>
+          <li>맞춘 뒤 기타가 조금 움직이면 가이드가 자동으로 따라가요. 많이 기울이거나 멀어지면 다시 맞춰 주세요.</li>
         </ol>
+        <label class="row" style="font-weight:700"><input type="checkbox" id="followChk" checked> 기타가 움직이면 가이드 자동으로 따라가기</label>
         <div class="row"><button class="btn primary" id="calibDone" style="flex:1">완료</button><button class="btn line" id="calibReset">가이드 초기화</button></div>
       </div>
 
@@ -323,6 +328,7 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
           <div class="empty" data-empty><div><b>카메라를 켜 주세요</b><button class="btn primary" data-camon style="margin-top:8px">카메라 켜기</button></div></div>
           <div class="ov t"><span class="badge live" data-live hidden>실시간 지판 감지 중</span><button class="badge" data-calib hidden>⟷ 위치 맞추기</button></div>
           <div class="center-msg" data-msg hidden></div>
+          <div class="beats" id="beats" hidden></div>
         </div>
         <div class="row">
           <button class="btn primary" id="playBtn" style="flex:1">▶ 시작</button>
@@ -365,6 +371,7 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 
 <script type="module">
 import * as C from './core.js';
+import * as TR from './track.js';
 
 const MP_VER = '0.10.14';
 const CFG = window.CHORD_CFG || {
@@ -395,6 +402,58 @@ const S = {
   corners: store.get('corners', null) || C.defaultCorners(true),
 };
 S.neck = C.makeNeck(S.corners);
+S.follow = store.get('follow', true);
+function setCorners(c, save = true) { S.corners = c; S.neck = C.makeNeck(c); if (save) store.set('corners', c); }
+
+// ---------- 지판 자동 따라가기 ----------
+const tcv = document.createElement('canvas');
+const tctx = tcv.getContext('2d', { willReadFrequently: true });
+const follow = { t: null, n: 0, lostFor: 0, lost: false, saveAt: 0 };
+function resetFollow() { follow.t = null; follow.lostFor = 0; follow.lost = false; }
+function followNeck(hands, dt) {
+  if (++follow.n % 2) return;                 // 두 프레임에 한 번
+  const W = video.videoWidth, H = video.videoHeight, w = TR.TRACK_W, h = Math.round(TR.TRACK_W * H / W);
+  if (tcv.width !== w || tcv.height !== h) { tcv.width = w; tcv.height = h; follow.t = null; }
+  tctx.drawImage(video, 0, 0, w, h);
+  const e = TR.edges(tctx.getImageData(0, 0, w, h).data, w, h);
+  const c = S.corners;
+  if (!follow.t) { follow.t = TR.makeTemplate(e, w, h, [c.nut6, c.nut1, c.fret1, c.fret6], hands); return; }
+  const r = TR.trackStep(follow.t, e, w, h, hands);
+  if (r.ok && (r.sx || r.sy)) {
+    const m = {}; for (const k of Object.keys(c)) m[k] = [c[k][0] + r.sx / w, c[k][1] + r.sy / h];
+    setCorners(m, false);
+    if (performance.now() > follow.saveAt) { store.set('corners', m); follow.saveAt = performance.now() + 2000; }
+  }
+  follow.lostFor = r.ok ? 0 : follow.lostFor + dt * 2;
+  follow.lost = follow.lostFor > 1.5;
+}
+
+// ---------- 스트럼(오른손) 감지 ----------
+// 줄 잡는 손이 아닌 다른 손이 6번줄→1번줄 방향으로 빠르게 움직이면 다운, 반대면 업 스트로크
+const strum = { p: null, v: 0, dir: 0, last: 0, strokes: [], seenAt: 0, flash: null };
+function updateStrum(hands, idx, dt) {
+  const T = performance.now() / 1000;
+  const other = hands.length > 1 ? hands.find((_, i) => i !== idx) : null;
+  if (!other || !dt) { strum.p = null; return; }
+  strum.seenAt = T;
+  const W = video.videoWidth, H = video.videoHeight, c = S.corners;
+  let ax = ((c.nut1[0] + c.fret1[0]) - (c.nut6[0] + c.fret6[0])) / 2 * W, ay = ((c.nut1[1] + c.fret1[1]) - (c.nut6[1] + c.fret6[1])) / 2 * H;
+  const L = Math.hypot(ax, ay) || 1; ax /= L; ay /= L;
+  const px = (other[0].x + other[5].x + other[9].x + other[17].x) / 4 * W, py = (other[0].y + other[5].y + other[9].y + other[17].y) / 4 * H;
+  const p = (px * ax + py * ay) / H;
+  if (strum.p != null) {
+    strum.v = strum.v * 0.4 + ((p - strum.p) / dt) * 0.6;
+    const TH = 0.9, dir = strum.v > TH ? 1 : strum.v < -TH ? -1 : 0;
+    if (dir && dir !== strum.dir && T - strum.last > 0.12) {
+      strum.strokes.push({ t: T, dir }); strum.last = T; strum.dir = dir;
+      strum.flash = { dir, until: T + 0.3, x: px / W, y: py / H };
+    }
+    if (Math.abs(strum.v) < TH * 0.3) strum.dir = 0;
+  }
+  strum.p = p;
+  strum.strokes = strum.strokes.filter((s) => T - s.t < 4);
+}
+const recentDown = (sec) => { const T = performance.now() / 1000; return strum.strokes.some((s) => s.dir === 1 && T - s.t < sec); };
 
 // ---------- 코드 다이어그램 (SVG) ----------
 function diagramSVG(svg, key) {
@@ -542,14 +601,17 @@ function loop(ts) {
     let hands = [];
     if (window.CHORD_DEBUG?.hands) hands = window.CHORD_DEBUG.hands(S);
     else { const r = handLm.detectForVideo(video, performance.now()); hands = r.landmarks; }
+    if (S.follow && !S.calib) followNeck(hands, dt);
     const idx = hands.length ? C.pickFrettingHand(S.neck, hands) : -1;
     const lm = idx >= 0 ? hands[idx] : null;
+    updateStrum(hands, idx, dt);
     const key = S.tab === 'play' ? play.current() : S.chord;
     const ev = smooth(lm && key ? C.evaluateChord(S.neck, lm, C.CHORDS[key]) : null, key);
     if (S.tab === 'code') onCodeFrame(ev, dt, !!lm);
     if (S.tab === 'play') onPlayFrame(ev, dt, !!lm);
     if (lm || S.tab === 'play' && play.running) { day().sec += dt; dirty = true; }
-    const st = stageEl(); if (st) draw($('canvas', st), hands, idx, ev);
+    const st = stageEl();
+    if (st) { draw($('canvas', st), hands, idx, ev); setStageMsg(st, follow.lost && !S.calib ? '지판을 놓쳤어요. “위치 맞추기”로 가이드를 다시 맞춰 주세요' : ''); }
   }
   requestAnimationFrame(loop);
 }
@@ -598,13 +660,22 @@ function draw(cv, hands, idx, ev) {
     ctx.strokeStyle = n === 0 ? 'rgba(255,255,255,.95)' : 'rgba(203,213,225,.75)'; ctx.lineWidth = (n === 0 ? 5 : 2) * u;
     ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
   }
+  // 줄: 치는 줄은 밝게(몸통 쪽으로 이어서), 치지 않는 줄은 붉게 흐리게
+  const ch = ev?.chord || C.CHORDS[S.tab === 'play' ? play.current() : S.chord];
   for (let s = 1; s <= 6; s++) {
-    const y = C.stringToY(s), [a, b] = [P(0, y), P(1, y)];
-    ctx.strokeStyle = 'rgba(226,232,240,.55)'; ctx.lineWidth = (0.6 + (s - 1) * 0.25) * u;
+    const y = C.stringToY(s), muted = ch.mute.includes(s), [a, b] = [P(0, y), P(muted ? 1 : 1.35, y)];
+    ctx.strokeStyle = muted ? 'rgba(248,113,113,.45)' : 'rgba(226,232,240,.7)'; ctx.lineWidth = (0.6 + (s - 1) * 0.25) * u;
     ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
   }
+  // 박자대로 진행: 마디 마지막 박에는 다음 코드 자리를 점선 동그라미로 미리 보여 준다
+  const preview = S.tab === 'play' && play.running && play.mode === 'tempo' && play.beat === 3 ? C.CHORDS[SONGS[play.song].bars[play.bar + 1]] : null;
+  const previewLabels = [];
+  if (preview) for (const n of preview.notes) {
+    const [tx, ty] = P(...C.targetPoint(n));
+    ctx.beginPath(); ctx.arc(tx, ty, Math.max(7 * u, 9 * u), 0, 7); ctx.setLineDash([4 * u, 3 * u]); ctx.strokeStyle = 'rgba(253,224,71,.95)'; ctx.lineWidth = 2.5 * u; ctx.stroke(); ctx.setLineDash([]);
+    previewLabels.push([tx, ty, String(n.finger)]);
+  }
   // 목표 위치 + 손가락 끝 → 목표 연결선
-  const ch = ev?.chord || C.CHORDS[S.tab === 'play' ? play.current() : S.chord];
   const sp = Math.hypot(...sub2(P(0.5, C.stringToY(1)), P(0.5, C.stringToY(2))));
   const r = Math.max(7 * u, sp * 0.42);
   const labels = [];
@@ -624,7 +695,8 @@ function draw(cv, hands, idx, ev) {
     ctx.lineWidth = 2 * u; ctx.strokeStyle = '#fff'; ctx.stroke();
     labels.push([tx, ty, String(n.finger), r]);
   });
-  for (const m of ch.mute) { const [x, y] = P(-0.06, C.stringToY(m)); labels.push([x, y, '×', r * 0.8, 'rgba(255,255,255,.8)']); }
+  for (const m of ch.mute) { const [x, y] = P(-0.06, C.stringToY(m)); labels.push([x, y, '×', r * 0.8, '#f87171']); }
+  for (const [x, y, t] of previewLabels) labels.push([x, y - r * 1.6, t, r * 0.8, '#fde047']);
 
   // 손 뼈대 (줄 잡는 손은 진하게)
   hands.forEach((lm, hi) => {
@@ -643,6 +715,11 @@ function draw(cv, hands, idx, ev) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const [x, y, t, rr, col] of labels) { ctx.fillStyle = col || '#fff'; ctx.font = `800 ${Math.round(rr * 1.1)}px ${getComputedStyle(document.body).fontFamily}`; ctx.fillText(t, dx(x), y + 1); }
   ctx.font = `700 ${Math.round(11 * u)}px sans-serif`;
+  if (preview) { const [x, y] = P(0.5, 1.45); ctx.fillStyle = '#fde047'; ctx.font = `800 ${Math.round(13 * u)}px sans-serif`; ctx.fillText(`다음: ${preview.name}`, dx(x), y); }
+  if (strum.flash && performance.now() / 1000 < strum.flash.until) {
+    ctx.fillStyle = 'rgba(253,224,71,.95)'; ctx.font = `800 ${Math.round(34 * u)}px sans-serif`;
+    ctx.fillText(strum.flash.dir > 0 ? '↓' : '↑', dx(strum.flash.x * W), strum.flash.y * H - 40 * u);
+  }
   for (let n = 1; n <= C.GUIDE_FRET; n++) { const [x, y] = P((C.fretToX(n - 1) + C.fretToX(n)) / 2, -0.16); ctx.fillStyle = 'rgba(191,219,254,.95)'; ctx.fillText(String(n), dx(x), y); }
   for (const [k, name] of handles) {
     const [x, y] = S.corners[k];
@@ -655,13 +732,15 @@ const sub2 = (a, b) => [a[0] - b[0], a[1] - b[1]];
 
 // ---------- 지판 위치 맞추기 (모서리 끌기) ----------
 function setCalib(on) {
-  S.calib = on;
+  S.calib = on; resetFollow();
   $('#calibHelp').hidden = !(on && S.tab === 'code');
   $$('[data-calib]').forEach((b) => { b.classList.toggle('on', on); b.textContent = on ? '✓ 맞추는 중' : '⟷ 지판 위치 맞추기'; });
 }
 $$('[data-calib]').forEach((b) => (b.onclick = () => { if (S.tab === 'play') go('code'); setCalib(!S.calib); }));
 $('#calibDone').onclick = () => setCalib(false);
-$('#calibReset').onclick = () => { S.corners = C.defaultCorners(S.mirror); S.neck = C.makeNeck(S.corners); store.set('corners', S.corners); };
+$('#calibReset').onclick = () => { setCorners(C.defaultCorners(S.mirror)); resetFollow(); };
+$('#followChk').checked = S.follow;
+$('#followChk').onchange = (e) => { S.follow = e.target.checked; store.set('follow', S.follow); resetFollow(); };
 for (const st of [$('#codeStage'), $('#playStage')]) {
   const cv = $('canvas', st);
   let drag = null;
@@ -680,8 +759,8 @@ for (const st of [$('#codeStage'), $('#playStage')]) {
     for (const k of Object.keys(S.corners)) { const d = Math.hypot(S.corners[k][0] - x, (S.corners[k][1] - y) * cv.height / cv.width); if (d < bd) { bd = d; best = k; } }
     if (best) { drag = best; cv.setPointerCapture(e.pointerId); e.preventDefault(); }
   });
-  cv.addEventListener('pointermove', (e) => { if (!drag) return; S.corners[drag] = pos(e); S.neck = C.makeNeck(S.corners); });
-  cv.addEventListener('pointerup', () => { if (drag) { drag = null; store.set('corners', S.corners); } });
+  cv.addEventListener('pointermove', (e) => { if (!drag) return; setCorners({ ...S.corners, [drag]: pos(e) }, false); });
+  cv.addEventListener('pointerup', () => { if (drag) { drag = null; store.set('corners', S.corners); resetFollow(); } });
 }
 
 // ---------- 코드 수업 ----------
@@ -739,6 +818,7 @@ const SONGS = {
   minor: { title: 'Am·C·G·Em 진행', sub: '보통', bpm: 75, bars: 'Am C G Em Am C G Em Am C G Em Am C G Am'.split(' ') },
 };
 const play = {
+  rh: { hit: 0, near: 0, miss: 0 }, pending: [], beats: [null, null, null, null],
   song: 'twinkle', bar: 0, running: false, mode: 'wait', bpm: 75, metro: true,
   results: [], pts: 0, combo: 0, maxCombo: 0, t: 0, hold: 0, holdSum: 0, best: 0, accSum: 0, accN: 0,
   current() { return SONGS[this.song].bars[Math.min(this.bar, SONGS[this.song].bars.length - 1)]; },
@@ -760,8 +840,8 @@ $('#playBtn').onclick = async () => {
 $('#retryBar').onclick = () => { play.results[play.bar] = undefined; resetBar(); renderPlay(); };
 $('#skipBar').onclick = () => { if (play.bar < SONGS[play.song].bars.length) judgeBar(true); };
 function pausePlay() { if (play.running) { play.running = false; renderPlay(); } }
-function resetBar() { play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; }
-function resetSong() { play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; resetBar(); $('#summary').hidden = true; renderPlay(); }
+function resetBar() { play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; play.beats = [null, null, null, null]; }
+function resetSong() { play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; play.rh = { hit: 0, near: 0, miss: 0 }; play.pending = []; resetBar(); $('#summary').hidden = true; renderPlay(); }
 
 let actx = null;
 function audio() { try { actx ||= new AudioContext(); actx.resume(); } catch {} }
@@ -781,28 +861,50 @@ function onPlayFrame(ev, dt, hasHand) {
     if (ev?.onNeck) { play.accSum += score * dt; play.accN += dt; }
     if (play.mode === 'wait') {
       if (ev?.ok) { play.hold += dt; play.holdSum += score * dt; } else { play.hold = 0; play.holdSum = 0; }
-      if (play.hold >= 0.8) judgeBar(false);
+      // 맞게 잡고 한 번 치면 바로 통과, 안 쳐도 0.8초 유지하면 통과
+      if (play.hold >= 0.8 || (play.hold >= 0.25 && recentDown(0.4))) judgeBar(false, recentDown(0.4));
     } else {
       const beatLen = 60 / play.bpm, barLen = beatLen * 4;
       const beat = Math.floor(play.t / beatLen);
-      if (beat !== play.beat) { play.beat = beat; click(beat % 4 === 0); }
+      if (beat !== play.beat && beat < 4) { play.beat = beat; click(beat % 4 === 0); play.pending.push({ tb: performance.now() / 1000, bar: play.bar, k: beat }); }
       play.t += dt;
       // 0.4초 동안 이어진 점수의 최고값을 마디 점수로
       if (ev?.ok || score >= 60) { play.hold += dt; play.holdSum += score * dt; if (play.hold >= 0.4) play.best = Math.max(play.best, play.holdSum / play.hold); } else { play.hold = 0; play.holdSum = 0; }
       if (play.t >= barLen) judgeBar(false);
     }
   }
+  judgeBeats();
   playUiT += dt; if (playUiT < 0.1) return; playUiT = 0;
   renderPlay();
 }
-function judgeBar(skipped) {
+// 박자: 각 박 시각 ±0.12초 안에 다운 스트로크 = 정타, ±0.25초 = 빠름/느림, 그 밖 = 놓침
+function judgeBeats() {
+  const T = performance.now() / 1000;
+  while (play.pending.length && T > play.pending[0].tb + 0.3) {
+    const b = play.pending.shift();
+    if (T - strum.seenAt > 1.2) continue;            // 오른손이 안 보이면 박자는 채점하지 않음
+    let best = null;
+    for (const s of strum.strokes) if (s.dir === 1 && (!best || Math.abs(s.t - b.tb) < Math.abs(best.t - b.tb))) best = s;
+    const d = best ? best.t - b.tb : 9;
+    const g = Math.abs(d) <= 0.12 ? 'hit' : Math.abs(d) <= 0.25 ? 'near' : 'miss';
+    play.rh[g]++;
+    play.lastBeat = { g, d };
+    if (b.bar === play.bar) play.beats[b.k] = g; else if (b.bar === play.bar - 1) play.prevBeats = { ...(play.prevBeats || {}), [b.k]: g };
+  }
+}
+function rhythmText() {
+  if (play.mode !== 'tempo') return recentDown(1) ? '스트럼 확인' : '';
+  const lb = play.lastBeat; if (!lb) return performance.now() / 1000 - strum.seenAt > 1.2 ? '오른손이 보이면 박자도 채점해요' : '';
+  return lb.g === 'hit' ? '박자 정타' : lb.g === 'near' ? (lb.d < 0 ? '박자 조금 빠름' : '박자 조금 느림') : '박자 놓침';
+}
+function judgeBar(skipped, strummed) {
   let grade, avg;
   if (skipped) { grade = 'm'; avg = 0; }
   else if (play.mode === 'wait') { avg = play.holdSum / Math.max(play.hold, 1e-6); grade = avg >= 88 ? 'p' : 'g'; }
   else { avg = play.best; grade = avg >= 88 ? 'p' : avg >= 70 ? 'g' : 'm'; }
   play.results[play.bar] = grade;
   if (grade === 'm') play.combo = 0; else { play.combo++; play.maxCombo = Math.max(play.maxCombo, play.combo); play.pts += Math.round((grade === 'p' ? 100 : 50) * (1 + Math.min(play.combo, 10) * 0.1)); }
-  play.flash = { grade, until: performance.now() + 900 };
+  play.flash = { grade, until: performance.now() + 900, strummed };
   play.bar++; resetBar();
   if (play.bar >= SONGS[play.song].bars.length) finishSong();
   renderPlay();
@@ -811,9 +913,10 @@ function finishSong() {
   play.running = false;
   const r = play.results, p = r.filter((x) => x === 'p').length, g = r.filter((x) => x === 'g').length, m = r.filter((x) => x === 'm').length;
   const acc = play.accN ? Math.round(play.accSum / play.accN) : 0;
+  const rn = play.rh.hit + play.rh.near + play.rh.miss, rAcc = rn ? Math.round((play.rh.hit + play.rh.near * 0.5) / rn * 100) : null;
   stats.lastSong = play.song; dirty = true;
   $('#summary').hidden = false;
-  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">⚡ ${play.pts}</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div><div class="muted">평균 운지 정확도 ${acc}%</div><button class="btn primary" onclick="this.closest('.summary').hidden=true" style="margin-top:6px">닫기</button>`;
+  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">⚡ ${play.pts}</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div><div class="muted">평균 운지 정확도 ${acc}%${rAcc != null ? ` · 박자 정확도 ${rAcc}% (정타 ${play.rh.hit} · 빠름/느림 ${play.rh.near} · 놓침 ${play.rh.miss})` : ''}</div><button class="btn primary" onclick="this.closest('.summary').hidden=true" style="margin-top:6px">닫기</button>`;
 }
 function renderPlay() {
   const song = SONGS[play.song], n = song.bars.length, key = play.current(), ch = C.CHORDS[key];
@@ -831,12 +934,18 @@ function renderPlay() {
   $('#ringArc').style.stroke = lastEv?.ok ? '#4ade80' : '#4b8bff';
   const v = $('#verdict');
   const fl = play.flash && performance.now() < play.flash.until ? play.flash.grade : null;
-  if (fl) { v.className = 'verdict ' + fl; v.textContent = { p: '✓ PERFECT!', g: 'GOOD', m: 'MISS' }[fl]; }
+  if (fl) { v.className = 'verdict ' + fl; v.textContent = { p: '✓ PERFECT!', g: 'GOOD', m: 'MISS' }[fl] + (play.flash.strummed ? ' · 스트럼 ✓' : ''); }
   else if (play.bar >= n) { v.className = 'verdict'; v.textContent = '완주! 다시 하려면 시작'; }
   else if (!play.running) { v.className = 'verdict'; v.textContent = play.bar ? '일시정지' : '시작을 눌러 주세요'; }
   else if (!lastEv?.onNeck) { v.className = 'verdict'; v.textContent = '지판 위에 손을 올려 주세요'; }
   else { v.className = 'verdict' + (lastEv.ok ? ' p' : ''); v.textContent = lastEv.ok ? '좋아요, 유지!' : '잡는 중…'; }
-  $('#playAcc').textContent = lastEv?.onNeck ? `운지 정확도 ${lastEv.score}%` : '';
+  const rt = rhythmText();
+  $('#playAcc').textContent = [lastEv?.onNeck ? `운지 정확도 ${lastEv.score}%` : '', rt].filter(Boolean).join(' · ');
+  const bt = $('#beats');
+  bt.hidden = !(cam.running && play.running);
+  if (!bt.hidden) bt.innerHTML = play.mode === 'tempo'
+    ? play.beats.map((g, k) => `<i class="${g || (k === play.beat ? 'now' : '')}">↓</i>`).join('')
+    : `<i class="${recentDown(0.4) ? 'hit' : 'now'}" style="width:auto;padding:0 10px;font-size:13px">↓ 잡고 한 번 치기</i>`;
   const w = lastEv?.fingers?.reduce((a, b) => (b.score < a.score ? b : a));
   $('#hintMain').textContent = w ? (w.status === 'good' ? '모든 손가락 위치가 좋아요' : w.label) : fingerGuide(key);
   $('#hintSub').textContent = w && w.status !== 'good' ? w.msg : '';
@@ -869,7 +978,7 @@ function coachTip(key) {
 // ---------- 도움말 ----------
 $('#helpBtn').onclick = () => alert('사용법\n\n1. 코드 수업에서 카메라를 켜고 “지판 위치 맞추기”로 파란 가이드를 기타 지판(너트~5프렛)에 맞춥니다.\n2. 화면의 번호 동그라미(손가락 번호) 위에 손가락을 올리면 줄·프렛 단위로 판정합니다.\n3. 연주해보자에서 곡의 코드 진행을 따라 잡아 보세요.\n\n카메라 영상과 기록은 이 브라우저 밖으로 보내지 않습니다.');
 
-window.__app = { S, C, play, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
+window.__app = { S, C, play, follow, strum, setCorners, video, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
 setChord('A');
 renderPlay();
 renderHome();
