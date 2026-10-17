@@ -4,461 +4,875 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>기타 코드 손 모양 판정</title>
+<meta name="theme-color" content="#f3f5f9">
+<title>코드 코치</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 :root {
-  --bg: #f4f6f3; --panel: #ffffff; --ink: #17211c; --ink-2: #4c5852; --ink-3: #7b8680;
-  --line: #dde3de; --accent: #0e6b58; --accent-soft: #e2f0eb;
-  --good: #1baf7a; --bad: #d95926; --warn: #c28a12;
-  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --bg: #f3f5f9; --card: #ffffff; --ink: #111827; --ink-2: #4b5563; --ink-3: #9ca3af; --line: #e5e7eb;
+  --blue: #2563eb; --blue-ink: #1d4ed8; --blue-soft: #eaf1ff;
+  --navy: #0f1d3a; --navy-2: #172a52; --navy-line: #2a3d66;
+  --green: #16a34a; --green-soft: #e8f7ee; --red: #dc2626; --red-soft: #fdecec; --orange: #ea580c; --orange-soft: #fff1e7;
+  --font: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #111714; --panel: #19211d; --ink: #eef3ef; --ink-2: #b9c4be; --ink-3: #87938c;
-    --line: #2b3631; --accent: #4fc0a3; --accent-soft: #1d3a31;
+    --bg: #0b1020; --card: #141b2d; --ink: #eef2f8; --ink-2: #b3bdcf; --ink-3: #7c879b; --line: #263049;
+    --blue-soft: #1a2747; --green-soft: #12301f; --red-soft: #3a1717; --orange-soft: #3a2413;
   }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
-main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 64px; display: grid; gap: 18px; }
-.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--accent); font-weight: 600; }
-h1 { font-size: clamp(24px, 4vw, 30px); line-height: 1.25; margin: 4px 0 8px; }
-h2 { font-size: 17px; margin: 0 0 10px; }
-.lede, .hint { color: var(--ink-2); margin: 0; }
-.hint { font-size: 13px; }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
-.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-button, .filebtn, select {
-  font: inherit; font-size: 14px; border-radius: 8px; border: 1px solid var(--line);
-  background: var(--panel); color: var(--ink); padding: 8px 14px; cursor: pointer;
-}
-button.primary, .filebtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
 button:disabled { opacity: .45; cursor: not-allowed; }
-.filebtn input { display: none; }
-input[type=text] { font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); width: 110px; }
-#status { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
-.card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg); position: relative; }
-.card canvas { display: block; width: 100%; height: auto; }
-.card .meta { padding: 6px 8px; font-size: 12px; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
-.card .meta b { font-family: var(--mono); }
-.card.off { opacity: .4; }
-.card.off canvas { filter: grayscale(1); }
-.card .x { padding: 2px 8px; font-size: 12px; }
-.tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-.tag.none { background: #f6e3da; color: var(--bad); }
-.tag.fail { background: #f3ead1; color: var(--warn); }
-.ok { color: var(--good); } .ng { color: var(--bad); }
-table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 10px; }
-th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); }
-td.num { font-family: var(--mono); text-align: right; }
-.live { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-@media (max-width: 720px) { .live { grid-template-columns: 1fr; } }
-.stage { position: relative; background: #000; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; }
-.stage video, .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.stage.mirror video, .stage.mirror canvas { transform: scaleX(-1); }
-.verdict { font-size: 44px; font-weight: 700; line-height: 1.1; }
-.meter { height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; margin: 8px 0 4px; position: relative; }
-.meter span { position: absolute; inset: 0 auto 0 0; background: var(--accent); width: 0; transition: width .1s; }
-.meter i { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 2px; background: var(--ink); }
-.big { font-family: var(--mono); font-size: 20px; }
-code { font-family: var(--mono); font-size: 13px; }
+.app { max-width: 520px; margin: 0 auto; min-height: 100vh; padding-bottom: 84px; }
+
+/* 상단바 */
+.top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); }
+.logo { width: 34px; height: 34px; border-radius: 9px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 15px; flex: none; }
+.top h1 { font-size: 18px; margin: 0; font-weight: 800; flex: 1; }
+.iconbtn { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); }
+.iconbtn:hover { background: var(--line); }
+main > section { padding: 4px 16px 16px; display: grid; gap: 14px; }
+
+/* 공통 */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
+.pill.green { background: var(--green-soft); color: var(--green); }
+.pill.red { background: var(--red-soft); color: var(--red); }
+.pill.orange { background: var(--orange-soft); color: var(--orange); }
+.pill.dark { background: rgba(255,255,255,.1); color: #dbe6ff; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 15px; }
+.btn.primary { background: var(--blue); color: #fff; }
+.btn.primary:hover { background: var(--blue-ink); }
+.btn.ghost { background: var(--blue-soft); color: var(--blue); }
+.btn.line { border: 1px solid var(--line); background: var(--card); }
+.btn.block { width: 100%; }
+.row { display: flex; align-items: center; gap: 8px; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.muted { color: var(--ink-2); font-size: 13px; }
+.tiny { color: var(--ink-3); font-size: 12px; }
+h2 { font-size: 17px; margin: 0; font-weight: 800; }
+h3 { font-size: 15px; margin: 0; font-weight: 700; }
+.link { color: var(--blue); font-size: 13px; font-weight: 700; }
+
+/* 홈 */
+.hello h2 { font-size: 21px; margin-top: 8px; }
+.hero { background: linear-gradient(160deg, var(--navy-2), var(--navy)); color: #fff; border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+.hero .big { font-size: 26px; font-weight: 800; line-height: 1.25; }
+.hero .big em { font-style: normal; color: #6ea8ff; }
+.hero .pct { font-size: 30px; font-weight: 800; color: #4ade80; }
+.segs { display: flex; gap: 6px; }
+.segs i { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.18); }
+.segs i.on { background: #4b8bff; }
+.course { display: flex; gap: 14px; align-items: center; text-align: left; width: 100%; }
+.course .ic { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; flex: none; }
+.course .ic.blue { background: var(--blue-soft); color: var(--blue); }
+.course .ic.red { background: var(--red-soft); color: var(--red); }
+.course .body { flex: 1; display: grid; gap: 2px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+.learned { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.ltile { display: grid; justify-items: center; gap: 4px; }
+.ltile b { width: 100%; aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; font-size: 18px; font-weight: 800; background: var(--bg); border: 1px solid var(--line); color: var(--ink-2); }
+.ltile.done b { background: var(--blue); border-color: var(--blue); color: #fff; }
+.ltile.tried b { background: var(--blue-soft); border-color: transparent; color: var(--blue); }
+.ltile span { font-size: 11px; color: var(--ink-2); }
+.tip { display: flex; gap: 8px; background: var(--bg); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--ink-2); }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 96px; margin-top: 10px; }
+.week div { display: grid; gap: 4px; justify-items: center; align-items: end; height: 100%; grid-template-rows: 1fr auto; }
+.week i { width: 100%; border-radius: 6px 6px 2px 2px; background: #b9cdf8; min-height: 3px; display: block; align-self: end; }
+.week .today i { background: var(--blue); }
+.week span { font-size: 11px; color: var(--ink-3); }
+.week .today span { color: var(--blue); font-weight: 700; }
+
+/* 카메라 무대 */
+.stage { position: relative; background: #0b1224; border-radius: 18px; overflow: hidden; aspect-ratio: 4 / 3; touch-action: none; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.stage .ov { position: absolute; left: 12px; right: 12px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+.stage .ov > * { pointer-events: auto; }
+.stage .ov.t { top: 12px; } .stage .ov.b { bottom: 12px; justify-content: center; }
+.stage .badge { font-size: 12px; font-weight: 700; color: #fff; background: rgba(15,29,58,.72); border: 1px solid rgba(255,255,255,.15); padding: 5px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+.stage .badge.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+.stage .badge.on { background: var(--blue); border-color: var(--blue); }
+.stage .shutter { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.95); color: var(--blue); display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(255,255,255,.25); }
+.stage .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #c9d5ee; padding: 24px; font-size: 14px; }
+.stage .empty b { display: block; color: #fff; font-size: 16px; margin-bottom: 6px; }
+.stage .center-msg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(15,29,58,.8); color: #fff; font-size: 13px; padding: 8px 12px; border-radius: 10px; text-align: center; max-width: 80%; pointer-events: none; }
+
+/* 코드 수업 */
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.tabs button { flex: none; min-width: 48px; height: 48px; padding: 0 12px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); font-weight: 800; font-size: 15px; }
+.tabs button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+.result-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.result-head .name { font-size: 24px; font-weight: 800; }
+.meter { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.meter span { display: block; height: 100%; width: 0; background: var(--green); transition: width .15s; }
+.meter.close span { background: var(--orange); } .meter.bad span { background: var(--red); }
+.fingers { display: grid; gap: 8px; }
+.finger { display: flex; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--bg); align-items: flex-start; }
+.finger .mark { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--ink-3); display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; margin-top: 1px; }
+.finger.good .mark { border-color: var(--green); color: var(--green); }
+.finger.close { background: var(--orange-soft); } .finger.close .mark { border-color: var(--orange); color: var(--orange); }
+.finger.bad { background: var(--red-soft); } .finger.bad .mark { border-color: var(--red); color: var(--red); }
+.finger b { font-size: 14px; display: block; }
+.finger.close b { color: var(--orange); } .finger.bad b { color: var(--red); }
+.finger p { margin: 1px 0 0; font-size: 13px; color: var(--ink-2); }
+.finger.bad p, .finger.close p { color: var(--ink); }
+.diagram { flex: none; }
+.calib-help { background: var(--blue-soft); color: var(--ink); border-radius: 12px; padding: 12px; font-size: 13px; display: grid; gap: 8px; }
+.calib-help ol { margin: 0; padding-left: 18px; }
+
+/* 연주해보자 */
+.player { background: linear-gradient(170deg, var(--navy-2), var(--navy)); color: #fff; border-radius: 20px; padding: 16px; display: grid; gap: 14px; }
+.player select { font: inherit; font-weight: 800; font-size: 17px; color: #fff; background: transparent; border: 0; padding: 0; max-width: 100%; }
+.player select option { color: #111; }
+.player .sub { color: #a8b8d8; font-size: 12px; }
+.player .pts { font-weight: 800; color: #ffd54a; background: rgba(255,255,255,.08); padding: 4px 10px; border-radius: 999px; font-size: 13px; }
+.bars { display: flex; gap: 4px; }
+.bars i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); }
+.bars i.p { background: #4ade80; } .bars i.g { background: #60a5fa; } .bars i.m { background: #f87171; } .bars i.now { background: #fff; }
+.ring { position: relative; width: 210px; height: 210px; margin: 0 auto; }
+.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring .in { position: absolute; inset: 22px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #213a72, #101e3e); display: grid; place-items: center; text-align: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.ring .chord { font-size: 64px; font-weight: 800; line-height: 1; }
+.ring .kind { font-size: 11px; letter-spacing: .15em; color: #a8b8d8; margin-top: 4px; }
+.verdict { justify-self: center; font-weight: 800; padding: 7px 16px; border-radius: 999px; font-size: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); min-width: 150px; text-align: center; }
+.verdict.p { background: rgba(74,222,128,.15); border-color: #4ade80; color: #4ade80; }
+.verdict.g { background: rgba(96,165,250,.15); border-color: #60a5fa; color: #93c5fd; }
+.verdict.m { background: rgba(248,113,113,.15); border-color: #f87171; color: #fca5a5; }
+.hintbar { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.hintbar b { display: block; }
+.hintbar .tiny { color: #a8b8d8; }
+.next { display: flex; gap: 8px; overflow: hidden; }
+.next div { flex: none; width: 58px; height: 64px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); display: grid; place-items: center; align-content: center; gap: 2px; font-weight: 800; font-size: 18px; }
+.next div small { font-size: 10px; color: #a8b8d8; font-weight: 500; }
+.next div.cur { background: var(--blue); border-color: var(--blue); }
+.player .stage { aspect-ratio: 16 / 9; border-radius: 14px; }
+.ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; }
+.seg button { flex: 1; padding: 7px 8px; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); font-weight: 800; }
+.stepper output { min-width: 64px; text-align: center; font-weight: 700; font-size: 14px; }
+.summary { text-align: center; display: grid; gap: 6px; }
+.summary .big { font-size: 40px; font-weight: 800; color: var(--blue); }
+
+/* 하단 탭 */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+.nav div { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+.nav button { display: grid; justify-items: center; gap: 2px; padding: 10px 0 8px; font-size: 12px; color: var(--ink-3); font-weight: 700; }
+.nav button.on { color: var(--blue); }
+.nav svg { width: 22px; height: 22px; }
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <div class="eyebrow">MediaPipe 손 인식 · 브라우저 안에서만 계산</div>
-    <h1>기타 코드 손 모양 판정</h1>
-    <p class="lede">코드를 잡은 사진을 올리면 손 관절 21개를 찾아 학습하고, 웹캠으로 지금 잡은 손이 그 코드인지 판정합니다. 사진은 서버로 보내지 않습니다.</p>
+<div class="app">
+  <header class="top">
+    <div class="logo" aria-hidden="true">코</div>
+    <h1 id="title">홈</h1>
+    <button class="iconbtn" id="helpBtn" title="사용법" aria-label="사용법">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor"/></svg>
+    </button>
   </header>
 
-  <section class="panel">
-    <h2>① 사진 올리기</h2>
-    <div class="row">
-      <label>라벨 <input type="text" id="label" value="A" aria-label="라벨"></label>
-      <label class="filebtn primary">사진 선택 (여러 장, zip 가능)<input type="file" id="files" accept="image/*,.zip" multiple></label>
-      <button id="mpnone">MediaPipe 샘플을 none으로 추가</button>
-      <button id="clear">전체 지우기</button>
-      <span id="status">모델 불러오는 중…</span>
-    </div>
-    <p class="hint" style="margin-top:8px">코드 사진은 라벨을 <code>A</code>로, 코드가 아닌 손(넥만 잡은 손, 다른 코드, 편 손)은 라벨을 <code>none</code>으로 바꾼 뒤 올리세요. 뼈대가 꼬이게 잡힌 사진은 <b>빼기</b>를 누르세요.<br><b>MediaPipe 샘플</b> 버튼은 구글이 공개한 손 모양 사진(가위·바위·보·기타)을 12MB 받아 종류별 20장씩 <code>none</code>으로 넣습니다. 편 손·주먹 같은 확연히 다른 손을 걸러 주지만, 다른 코드나 넥만 잡은 손은 직접 찍어 넣어야 합니다.</p>
-    <div class="grid" id="grid"></div>
-  </section>
-
-  <section class="panel">
-    <h2>② 학습 · 검증</h2>
-    <div class="row">
-      <button class="primary" id="train" disabled>학습 + 한 장씩 빼고 검증</button>
-      <button id="export" disabled>모델 저장(JSON)</button>
-      <label class="filebtn">모델 불러오기<input type="file" id="import" accept=".json"></label>
-    </div>
-    <div id="report" class="hint" style="margin-top:10px">사진을 올린 뒤 학습을 누르세요.</div>
-  </section>
-
-  <section class="panel">
-    <h2>③ 웹캠 실시간 판정</h2>
-    <div class="row" style="margin-bottom:12px">
-      <button class="primary" id="cam" disabled>웹캠 켜기</button>
-      <label><input type="checkbox" id="mirror" checked> 거울 모드 화면</label>
-      <label>너그러움 <input type="range" id="sens" min="0.5" max="2" step="0.1" value="1"> <output id="sensv">×1.0</output></label>
-    </div>
-    <div class="live">
-      <div class="stage mirror" id="stage"><video id="video" playsinline muted></video><canvas id="overlay"></canvas></div>
-      <div>
-        <div class="hint">판정</div>
-        <div class="verdict" id="verdict">—</div>
-        <div class="meter"><span id="bar"></span><i title="합격선"></i></div>
-        <div class="hint">점수 <span class="big" id="score">—</span> / 100 · 50점이 합격선</div>
-        <p class="hint" id="liveinfo" style="margin-top:12px">손목까지 화면에 나오는 반신 구도가 가장 안정적입니다.</p>
+  <main>
+    <!-- ================= 홈 ================= -->
+    <section id="tab-home">
+      <div class="hello">
+        <span class="pill">✦ 카메라 실시간 운지 피드백</span>
+        <h2>오늘도 즐거운 기타 한 곡!</h2>
+        <p class="muted" style="margin:2px 0 0">카메라로 손가락이 어느 줄, 어느 프렛에 있는지 보고 바로 고쳐 드려요.</p>
       </div>
-    </div>
-  </section>
-</main>
+
+      <div class="hero">
+        <div class="between">
+          <span class="pill dark">오늘의 연습</span>
+          <span class="tiny" id="streak" style="color:#ffb27a;font-weight:700"></span>
+        </div>
+        <div>
+          <div class="tiny" style="color:#a8b8d8">추천 학습 루틴</div>
+          <div class="big" id="heroTitle"></div>
+          <div class="pct" id="heroPct"></div>
+        </div>
+        <div>
+          <div class="segs" id="heroSegs"></div>
+          <div class="between tiny" style="color:#a8b8d8;margin-top:6px"><span>오늘 코드 성공</span><span id="heroCount"></span></div>
+        </div>
+        <button class="btn primary block" id="heroGo">▶ 이어서 연습하기</button>
+      </div>
+
+      <div class="between"><h2>학습 코스</h2></div>
+      <button class="card course" data-go="code">
+        <div class="ic blue"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h11a2 2 0 0 1 2 2v1.5l4-2.5v10l-4-2.5V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg></div>
+        <div class="body">
+          <div class="row"><h3>코드 수업</h3><span class="pill" style="padding:1px 7px;font-size:11px">AI 피드백</span></div>
+          <span class="muted">카메라로 손가락 위치를 줄·프렛 단위로 확인해요</span>
+          <div class="row tiny">오늘 추천: <span class="chips" id="recChips"></span></div>
+        </div>
+        <span class="tiny">›</span>
+      </button>
+      <button class="card course" data-go="play">
+        <div class="ic red"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M10 3v11.6A3.5 3.5 0 1 0 12 18V8h6V3h-8z"/></svg></div>
+        <div class="body">
+          <div class="row"><h3>연주해보자!</h3><span class="pill green" style="padding:1px 7px;font-size:11px">곡 연습</span></div>
+          <span class="muted">배운 코드로 곡의 코드 진행을 따라 잡아요</span>
+          <span class="tiny" id="lastSong"></span>
+        </div>
+        <span class="tiny">›</span>
+      </button>
+
+      <div class="card" style="display:grid;gap:12px">
+        <div class="between"><div class="row"><h2>배운 코드</h2><span class="pill" id="learnedCount"></span></div><span class="tiny">80% 이상이면 습득</span></div>
+        <div class="learned" id="learned"></div>
+        <div class="tip" id="tip"></div>
+      </div>
+
+      <div class="card">
+        <div class="between"><h3>이번 주 누적 연습</h3><b style="color:var(--blue)" id="weekTotal"></b></div>
+        <div class="week" id="week"></div>
+      </div>
+
+      <p class="tiny" style="text-align:center">기록은 이 브라우저에만 저장됩니다 · <a href="photo.html" style="color:inherit">사진으로 손 모양 학습(이전 실험)</a></p>
+    </section>
+
+    <!-- ================= 코드 수업 ================= -->
+    <section id="tab-code" hidden>
+      <div class="tabs" id="chordTabs" role="tablist"></div>
+
+      <div class="stage" id="codeStage">
+        <canvas></canvas>
+        <div class="empty" data-empty><div><b>카메라를 켜 주세요</b>기타를 든 상반신과 지판이 화면에 나오게 해 주세요.<br><br><button class="btn primary" data-camon>카메라 켜기</button></div></div>
+        <div class="ov t">
+          <span class="badge live" data-live hidden>실시간 AI 인식 중</span>
+          <button class="badge" data-calib hidden>⟷ 지판 위치 맞추기</button>
+        </div>
+        <div class="center-msg" data-msg hidden></div>
+        <div class="ov b"><button class="shutter" data-flip hidden title="전면/후면 카메라 전환" aria-label="카메라 전환"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><path d="M9 13a3 3 0 0 0 5.6 1.5M15 12a3 3 0 0 0-5.6-1.5"/><path d="M14.5 15.5v-1h1M9.5 9.5v1h-1"/></svg></button></div>
+      </div>
+
+      <div class="calib-help" id="calibHelp" hidden>
+        <b>지판 위치 맞추기</b>
+        <ol>
+          <li>파란 가이드에 기타 지판을 맞춰 들거나, 모서리 동그라미 4개를 끌어 지판에 맞추세요.</li>
+          <li><b>너트</b>(헤드 쪽 흰 막대)와 <b>5번 프렛</b>, <b>6번줄</b>(가장 굵은 줄)과 <b>1번줄</b> 위치를 맞추면 됩니다.</li>
+          <li>맞춘 뒤에는 기타와 카메라를 움직이지 마세요. 움직였다면 다시 맞추면 돼요.</li>
+        </ol>
+        <div class="row"><button class="btn primary" id="calibDone" style="flex:1">완료</button><button class="btn line" id="calibReset">가이드 초기화</button></div>
+      </div>
+
+      <div class="card" style="display:grid;gap:12px">
+        <div class="result-head">
+          <div>
+            <div class="tiny">연습 중인 코드</div>
+            <div class="name" id="codeName">A 코드</div>
+            <div class="tiny" id="codeFull"></div>
+          </div>
+          <div class="row" style="align-items:flex-start;gap:10px">
+            <span class="pill" id="codeBadge">대기 중</span>
+            <svg class="diagram" id="diagram" width="74" height="92" viewBox="0 0 74 92" aria-label="코드 다이어그램"></svg>
+          </div>
+        </div>
+        <div>
+          <div class="between muted"><span>코드 매칭 정확도</span><b id="codePct" style="color:var(--ink)">—</b></div>
+          <div class="meter" id="codeMeter"><span></span></div>
+        </div>
+        <div class="fingers" id="fingers"></div>
+        <button class="btn primary block" id="nextChord">다음 코드로 넘어가기 →</button>
+      </div>
+    </section>
+
+    <!-- ================= 연주해보자 ================= -->
+    <section id="tab-play" hidden>
+      <div class="player">
+        <div class="between">
+          <div>
+            <select id="song" aria-label="곡 선택"></select>
+            <div class="sub" id="songSub"></div>
+          </div>
+          <span class="pts" id="pts">⚡ 0</span>
+        </div>
+        <div>
+          <div class="bars" id="bars"></div>
+          <div class="between sub" style="margin-top:6px"><span id="barNo">BAR 1/16</span><span id="combo" style="color:#4ade80;font-weight:700"></span></div>
+        </div>
+        <div style="text-align:center" class="sub">지금 잡을 코드</div>
+        <div class="ring">
+          <svg viewBox="0 0 210 210"><circle cx="105" cy="105" r="98" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/><circle id="ringArc" cx="105" cy="105" r="98" fill="none" stroke="#4b8bff" stroke-width="8" stroke-linecap="round" stroke-dasharray="615.75" stroke-dashoffset="615.75"/></svg>
+          <div class="in"><div><div class="chord" id="nowChord">G</div><div class="kind" id="nowKind">MAJOR</div></div></div>
+        </div>
+        <div class="verdict" id="verdict">시작을 눌러 주세요</div>
+        <div class="sub" style="text-align:center" id="playAcc"></div>
+        <div class="hintbar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M3 12h3l2-6 4 12 2-6h7"/></svg>
+          <div style="flex:1"><b id="hintMain">손가락 위치를 확인하는 중</b><span class="tiny" id="hintSub"></span></div>
+        </div>
+        <div>
+          <div class="between sub" style="margin-bottom:8px"><span>다음 코드 순서</span><span id="nextInfo"></span></div>
+          <div class="next" id="nextList"></div>
+        </div>
+        <div class="stage" id="playStage">
+          <canvas></canvas>
+          <div class="empty" data-empty><div><b>카메라를 켜 주세요</b><button class="btn primary" data-camon style="margin-top:8px">카메라 켜기</button></div></div>
+          <div class="ov t"><span class="badge live" data-live hidden>실시간 지판 감지 중</span><button class="badge" data-calib hidden>⟷ 위치 맞추기</button></div>
+          <div class="center-msg" data-msg hidden></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="playBtn" style="flex:1">▶ 시작</button>
+          <button class="btn line" id="metroBtn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.25)" title="메트로놈">♩ 메트로놈 켬</button>
+        </div>
+      </div>
+
+      <div class="card" style="display:grid;gap:12px">
+        <div class="between"><h3>연주 방식</h3></div>
+        <div class="seg" id="mode"><button data-mode="wait" class="on">맞출 때까지 기다리기</button><button data-mode="tempo">박자대로 진행</button></div>
+        <div class="between"><span class="muted">빠르기 (박자대로 진행)</span><div class="stepper"><button id="bpmDown" aria-label="느리게">−</button><output id="bpm">BPM 75</output><button id="bpmUp" aria-label="빠르게">+</button></div></div>
+      </div>
+
+      <div class="card" style="display:grid;gap:10px">
+        <div class="row"><span class="pill">✦ AI 코치 팁</span></div>
+        <div id="coach" class="muted"></div>
+        <div class="row" style="background:var(--bg);border-radius:12px;padding:10px;gap:12px">
+          <svg id="playDiagram" width="62" height="78" viewBox="0 0 74 92"></svg>
+          <div style="flex:1"><b id="guideTitle" style="font-size:14px"></b><div class="muted" id="guideBody"></div></div>
+        </div>
+      </div>
+
+      <div class="ctrl">
+        <button class="btn line" id="retryBar">↺ 이 마디 다시 연습</button>
+        <button class="btn primary" id="skipBar">다음 마디로 ⏭</button>
+      </div>
+
+      <div class="card summary" id="summary" hidden></div>
+    </section>
+  </main>
+</div>
+
+<nav class="nav">
+  <div>
+    <button data-tab="home" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</button>
+    <button data-tab="code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>코드수업</button>
+    <button data-tab="play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>연주해보기</button>
+  </div>
+</nav>
 
 <script type="module">
+import * as C from './core.js';
+
 const MP_VER = '0.10.14';
 const CFG = window.CHORD_CFG || {
   bundle: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/vision_bundle.mjs`,
   wasm: `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/wasm`,
   model: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-  zip: 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js',
-  mpSamples: 'https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/rps_data_sample.zip',
 };
-const MAX_SIDE = 1200;   // 사진을 이 크기로 줄여서 인식 (이전 테스트와 동일)
-const K = 3;             // 가까운 사진 몇 장의 평균 거리로 판정할지
-const MP_PER = 20;       // MediaPipe 샘플에서 손 모양 종류별로 가져올 장수
-const MIN_THR = 0.10;    // 같은 손 모양을 웹캠(저해상도)으로 보면 0.07 정도, 다른 손 모양은 0.26 이상 떨어짐
-const $ = (id) => document.getElementById(id);
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-const EDGES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],
-  [9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+// ---------- 저장 ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('gc-' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('gc-' + k, JSON.stringify(v)); } catch {} },
+};
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+let stats = store.get('stats', { days: {}, chords: {}, tip: '', lastSong: '' });
+function day() { return (stats.days[today()] ||= { sec: 0, ok: [] }); }
+let dirty = false;
+setInterval(() => { if (dirty) { store.set('stats', stats); dirty = false; } }, 3000);
+addEventListener('pagehide', () => store.set('stats', stats));
 
-let vision, imgLm, vidLm;
-let samples = [];       // {id, name, label, feat|null, handed, on}
-let model = null;       // {mode, target, labels, items:[{label, feat}], thr}
-let nextId = 1;
-let sens = 1;           // 웹캠 화면의 합격선 배율 (클수록 너그럽게)
+// ---------- 상태 ----------
+const S = {
+  tab: 'home', chord: 'A', calib: false,
+  facing: 'user', mirror: true,
+  corners: store.get('corners', null) || C.defaultCorners(true),
+};
+S.neck = C.makeNeck(S.corners);
 
-// ---------- 특징: 손바닥 좌표계로 옮긴 21개 관절 (world 좌표, 크기 정규화) ----------
-function sub(a, b) { return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
-function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
-function cross(a, b) { return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
-function norm(a) { const n = Math.hypot(...a) || 1; return [a[0]/n, a[1]/n, a[2]/n]; }
-
-function features(world, handed) {
-  const P = world.map(p => [p.x, p.y, p.z]);
-  const o = P[0];
-  const up = sub(P[9], o);
-  const scale = Math.hypot(...up) || 1;
-  const y = norm(up);
-  let x = sub(P[17], P[5]);
-  x = norm(sub(x, y.map(v => v * dot(x, y))));
-  const z = cross(x, y);
-  // 왼손 라벨은 좌우를 뒤집어 한 좌표계로 맞춘다 (손 지정 any)
-  const flip = handed === 'Left' ? -1 : 1;
-  const f = [];
-  for (let i = 1; i < 21; i++) {
-    const d = sub(P[i], o);
-    f.push(flip * dot(d, x) / scale, dot(d, y) / scale, flip * dot(d, z) / scale);
+// ---------- 코드 다이어그램 (SVG) ----------
+function diagramSVG(svg, key) {
+  const ch = C.CHORDS[key], x0 = 12, y0 = 18, dx = 10, dy = 16;
+  let h = `<rect x="${x0}" y="${y0 - 2}" width="${dx * 5}" height="3" fill="currentColor"/>`;
+  for (let i = 0; i <= 4; i++) h += `<line x1="${x0}" x2="${x0 + dx * 5}" y1="${y0 + i * dy}" y2="${y0 + i * dy}" stroke="currentColor" stroke-opacity=".35"/>`;
+  for (let s = 0; s < 6; s++) h += `<line x1="${x0 + s * dx}" x2="${x0 + s * dx}" y1="${y0}" y2="${y0 + 4 * dy}" stroke="currentColor" stroke-opacity=".6"/>`;
+  for (const m of ch.mute) h += `<text x="${x0 + (6 - m) * dx}" y="${y0 - 6}" font-size="9" text-anchor="middle" fill="currentColor" opacity=".6">×</text>`;
+  for (const n of ch.notes) {
+    const y = y0 + (n.fret - 0.5) * dy;
+    if (n.barre) h += `<rect x="${x0 - 4}" y="${y - 5}" width="${dx * 5 + 8}" height="10" rx="5" fill="#2563eb"/><text x="${x0 + 25}" y="${y + 3.5}" font-size="8" fill="#fff" text-anchor="middle" font-weight="700">1</text>`;
+    else { const x = x0 + (6 - n.string) * dx; h += `<circle cx="${x}" cy="${y}" r="5" fill="#2563eb"/><text x="${x}" y="${y + 3}" font-size="8" fill="#fff" text-anchor="middle" font-weight="700">${n.finger}</text>`; }
   }
-  return f;
+  h += `<text x="${x0 + dx * 5 + 5}" y="${y0 + dy * 0.5 + 3}" font-size="8" fill="currentColor" opacity=".55">1</text>`;
+  svg.innerHTML = h;
+  svg.style.color = 'var(--ink)';
 }
-function dist(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += (a[i]-b[i]) ** 2; return Math.sqrt(s / (a.length / 3)); }
+const fingerGuide = (key) => C.CHORDS[key].notes.map((n) => `${C.FINGER_NAME[n.finger]}: ${n.barre ? '1프렛 바레' : `${n.string}번줄 ${n.fret}프렛`}`).join(' · ');
 
-// 라벨별로 가장 가까운 K장 평균 거리
-function labelDists(feat, items) {
-  const by = {};
-  for (const it of items) (by[it.label] ||= []).push(dist(feat, it.feat));
-  const out = {};
-  for (const [l, ds] of Object.entries(by)) {
-    ds.sort((a, b) => a - b);
-    const k = Math.min(K, ds.length);
-    out[l] = ds.slice(0, k).reduce((s, v) => s + v, 0) / k;
-  }
-  return out;
+// ---------- 탭 ----------
+const TITLES = { home: '홈', code: '코드 수업', play: '연주해보자' };
+function go(tab) {
+  S.tab = tab;
+  for (const t of ['home', 'code', 'play']) $(`#tab-${t}`).hidden = t !== tab;
+  $$('.nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#title').textContent = TITLES[tab];
+  if (tab === 'home') { stopCamera(); renderHome(); }
+  else if (cam.running) attachStage();
+  if (tab !== 'play') pausePlay();
+  scrollTo(0, 0);
+}
+$$('.nav button').forEach((b) => (b.onclick = () => go(b.dataset.tab)));
+$$('[data-go]').forEach((b) => (b.onclick = () => go(b.dataset.go)));
+
+// ---------- 홈 ----------
+function chordOK(k) { return (stats.chords[k]?.best || 0) >= 80; }
+function renderHome() {
+  // 추천: 연습했지만 아직 80% 미만인 코드 → 안 해본 코드 순
+  const order = C.CHORD_ORDER;
+  const rec = order.find((k) => stats.chords[k] && !chordOK(k)) || order.find((k) => !stats.chords[k]) || order[0];
+  const best = stats.chords[rec]?.best;
+  $('#heroTitle').innerHTML = `<em>${rec}</em>코드 ${best != null ? '정확도' : '시작하기'}`;
+  $('#heroPct').textContent = best != null ? `${best}%` : '';
+  const okToday = day().ok.length, goal = 3;
+  $('#heroSegs').innerHTML = Array.from({ length: goal }, (_, i) => `<i class="${i < okToday ? 'on' : ''}"></i>`).join('');
+  $('#heroCount').textContent = `${Math.min(okToday, goal)}/${goal} 완료`;
+  $('#heroGo').onclick = () => { setChord(rec); go('code'); };
+  // 연속 연습일
+  let streak = 0; const d = new Date();
+  for (;;) { const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; if ((stats.days[k]?.sec || 0) >= 30) { streak++; d.setDate(d.getDate() - 1); } else if (streak === 0 && k === today()) d.setDate(d.getDate() - 1); else break; if (streak > 365) break; }
+  $('#streak').textContent = streak ? `🔥 ${streak}일 연속 연습 중!` : '';
+  const recs = order.filter((k) => !chordOK(k)).slice(0, 3);
+  $('#recChips').innerHTML = (recs.length ? recs : order.slice(0, 3)).map((k) => `<span class="chip">${k}</span>`).join('');
+  $('#lastSong').textContent = stats.lastSong ? `최근 연주: ${SONGS[stats.lastSong]?.title || ''}` : '작은별, 4코드 팝 진행 외';
+  const learned = order.filter(chordOK);
+  $('#learnedCount').textContent = `${learned.length}개 습득`;
+  $('#learned').innerHTML = order.map((k) => {
+    const c = stats.chords[k];
+    return `<button class="ltile ${chordOK(k) ? 'done' : c ? 'tried' : ''}" data-ch="${k}"><b>${k}</b><span>${c ? `${chordOK(k) ? '✓ ' : ''}${c.best}%` : '미연습'}</span></button>`;
+  }).join('');
+  $$('#learned [data-ch]').forEach((b) => (b.onclick = () => { setChord(b.dataset.ch); go('code'); }));
+  $('#tip').innerHTML = `💡 <span>${stats.tip ? esc(stats.tip) : 'Tip: 코드 수업에서 처음 한 번 “지판 위치 맞추기”를 하면 줄·프렛 판정이 정확해져요.'}</span>`;
+  // 이번 주 (월~일)
+  const now = new Date(), dow = (now.getDay() + 6) % 7, mon = new Date(now); mon.setDate(now.getDate() - dow);
+  const mins = [];
+  for (let i = 0; i < 7; i++) { const x = new Date(mon); x.setDate(mon.getDate() + i); const k = `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; mins.push(Math.round((stats.days[k]?.sec || 0) / 60)); }
+  const max = Math.max(10, ...mins);
+  $('#weekTotal').textContent = `총 ${mins.reduce((a, b) => a + b, 0)}분`;
+  $('#week').innerHTML = '월화수목금토일'.split('').map((n, i) => `<div class="${i === dow ? 'today' : ''}" title="${mins[i]}분"><i style="height:${(mins[i] / max) * 100}%"></i><span>${i === dow ? '오늘' : n}</span></div>`).join('');
 }
 
-// 판정: 목표 라벨과의 거리가 임계값 안이고, (none 데이터가 있으면) none보다 가까워야 통과
-function judge(feat, m) {
-  const d = labelDists(feat, m.items);
-  const dT = d[m.target];
-  const thr = m.thr * (m === model ? sens : 1);
-  let score = 100 * Math.pow(0.5, (dT / thr) ** 2);  // 임계값에서 50점
-  if (m.mode === 'knn') {
-    const others = Object.entries(d).filter(([l]) => l !== m.target).map(([, v]) => v);
-    const dO = Math.min(...others);
-    // 다른 라벨이 더 가까우면 점수를 50 아래로 누른다
-    const ratio = dO / (dT + dO);          // 0.5 = 경계
-    score = Math.min(score, 100 * ratio);
-  }
-  return { score, pass: score >= 50, d };
-}
+// ---------- 카메라 & 손 인식 ----------
+const video = document.createElement('video');
+video.playsInline = true; video.muted = true;
+const cam = { stream: null, running: false, lm: null, lastT: -1, fps: 0 };
+let handLm = null, mpLoading = null;
 
-function buildModel(list) {
-  const labels = [...new Set(list.map(s => s.label))];
-  const target = labels.includes('A') ? 'A' : labels.find(l => l !== 'none') || labels[0];
-  const items = list.map(s => ({ label: s.label, feat: s.feat }));
-  // 임계값: 목표 라벨 사진끼리 한 장씩 뺐을 때의 거리 중 최댓값 × 1.25
-  const own = items.filter(i => i.label === target);
-  const loo = own.map((it, i) => labelDists(it.feat, own.filter((_, j) => j !== i))[target]).filter(v => v != null);
-  const thr = Math.max(MIN_THR, (loo.length ? Math.max(...loo) : 0.3) * 1.25);
-  return { mode: labels.length > 1 ? 'knn' : 'template', target, labels, items, thr, k: K, version: 1 };
-}
-
-// ---------- MediaPipe ----------
-async function init() {
-  try {
-    vision = await import(CFG.bundle);
+async function loadMP() {
+  if (handLm) return handLm;
+  mpLoading ||= (async () => {
+    const vision = await import(CFG.bundle);
     const fs = await vision.FilesetResolver.forVisionTasks(CFG.wasm);
-    const opts = (mode) => ({ baseOptions: { modelAssetPath: CFG.model, delegate: 'CPU' }, runningMode: mode, numHands: 1,
-      minHandDetectionConfidence: 0.3, minHandPresenceConfidence: 0.3, minTrackingConfidence: 0.3 });
-    imgLm = await vision.HandLandmarker.createFromOptions(fs, opts('IMAGE'));
-    vidLm = await vision.HandLandmarker.createFromOptions(fs, opts('VIDEO'));
-    setStatus('준비됨');
-    try { const saved = localStorage.getItem('chord-model'); if (saved) setModel(JSON.parse(saved), '이전에 학습한 모델을 불러왔습니다.'); } catch {}
-  } catch (e) {
-    setStatus('모델 로드 실패: ' + e.message);
-    console.error(e);
-  }
-}
-function setStatus(t) { $('status').textContent = t; }
-
-async function toBitmap(blob) {
-  const bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
-  const s = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
-  const c = document.createElement('canvas');
-  c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
-  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-  bmp.close?.();
-  return c;
+    handLm = await vision.HandLandmarker.createFromOptions(fs, {
+      baseOptions: { modelAssetPath: CFG.model, delegate: 'GPU' }, runningMode: 'VIDEO', numHands: 2,
+      minHandDetectionConfidence: 0.4, minHandPresenceConfidence: 0.4, minTrackingConfidence: 0.4,
+    }).catch(() => vision.HandLandmarker.createFromOptions(fs, {
+      baseOptions: { modelAssetPath: CFG.model, delegate: 'CPU' }, runningMode: 'VIDEO', numHands: 2,
+      minHandDetectionConfidence: 0.4, minHandPresenceConfidence: 0.4, minTrackingConfidence: 0.4,
+    }));
+    return handLm;
+  })();
+  return mpLoading;
 }
 
-function drawSkeleton(ctx, lm, w, h, color) {
-  ctx.lineWidth = Math.max(2, w / 250); ctx.strokeStyle = color; ctx.fillStyle = '#fff';
-  for (const [a, b] of EDGES) { ctx.beginPath(); ctx.moveTo(lm[a].x*w, lm[a].y*h); ctx.lineTo(lm[b].x*w, lm[b].y*h); ctx.stroke(); }
-  const r = Math.max(2.5, w / 200);
-  for (const p of lm) { ctx.beginPath(); ctx.arc(p.x*w, p.y*h, r, 0, 7); ctx.fill(); }
-}
+function stageEl() { return S.tab === 'code' ? $('#codeStage') : S.tab === 'play' ? $('#playStage') : null; }
+function setStageMsg(st, t) { const m = $('[data-msg]', st); m.hidden = !t; if (t) m.textContent = t; }
 
-async function unzipImages(bytes) {
-  const { unzipSync } = await import(CFG.zip);
-  const out = [];
-  for (const [name, data] of Object.entries(unzipSync(bytes))) {
-    if (/(^|\/)(__MACOSX|\.)/.test(name) || !/\.(jpe?g|png|webp|bmp)$/i.test(name)) continue;
-    out.push({ name: name.split('/').pop(), blob: new Blob([data]), folder: name.includes('/') ? name.split('/').slice(-2, -1)[0] : null });
-  }
-  return out;
-}
-
-async function expandFiles(fileList) {
-  const out = [];
-  for (const f of fileList) {
-    if (/\.zip$/i.test(f.name)) out.push(...await unzipImages(new Uint8Array(await f.arrayBuffer())));
-    else out.push({ name: f.name, blob: f, folder: null });
-  }
-  return out;
-}
-
-async function addFiles(fileList) {
-  await addEntries(await expandFiles(fileList));
-}
-
-// forceLabel이 없으면 zip 안의 폴더 이름(A/none)을 라벨로, 그것도 없으면 입력칸의 라벨을 쓴다
-async function addEntries(files, forceLabel) {
-  const label = $('label').value.trim() || 'A';
-  let i = 0;
-  for (const f of files) {
-    setStatus(`손 인식 중 ${++i}/${files.length}`);
-    const lab = forceLabel || (f.folder && /^(none|[A-Za-z][A-Za-z0-9#]*)$/.test(f.folder) ? f.folder : label);
-    try {
-      const canvas = await toBitmap(f.blob);
-      const r = imgLm.detect(canvas);
-      const s = { id: nextId++, name: f.name, label: lab, on: true, feat: null, handed: null, conf: 0 };
-      if (r.landmarks.length) {
-        const cat = r.handedness[0][0];
-        s.handed = cat.categoryName; s.conf = cat.score;
-        s.feat = features(r.worldLandmarks[0], s.handed);
-        drawSkeleton(canvas.getContext('2d'), r.landmarks[0], canvas.width, canvas.height, '#1baf7a');
-      } else s.on = false;
-      s.thumb = canvas;
-      samples.push(s);
-      renderCard(s);
-    } catch (e) { console.error(f.name, e); }
-  }
-  const found = samples.filter(s => s.feat).length;
-  setStatus(`${samples.length}장 중 ${found}장에서 손 검출`);
-  $('train').disabled = samples.filter(s => s.on && s.feat).length < 2;
-}
-
-// MediaPipe 공개 손 모양 샘플(가위·바위·보·none 각 125장)에서 종류별로 고르게 뽑아 none으로 추가
-async function addMediaPipeSamples() {
-  const btn = $('mpnone');
-  btn.disabled = true;
+async function startCamera() {
+  const st = stageEl(); if (!st) return;
+  setStageMsg(st, '손 인식 모델 불러오는 중…');
+  $('[data-empty]', st).hidden = true;
   try {
-    setStatus('MediaPipe 샘플 받는 중…');
-    const res = await fetch(CFG.mpSamples);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const total = +res.headers.get('content-length') || 0;
-    const reader = res.body.getReader(), chunks = [];
-    let got = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value); got += value.length;
-      setStatus(`MediaPipe 샘플 받는 중 ${total ? Math.round(got / total * 100) + '%' : (got / 1e6).toFixed(1) + 'MB'}`);
-    }
-    const bytes = new Uint8Array(got);
-    let off = 0; for (const c of chunks) { bytes.set(c, off); off += c.length; }
-    const byClass = {};
-    for (const e of await unzipImages(bytes)) (byClass[e.folder] ||= []).push(e);
-    const picked = [];
-    for (const [cls, list] of Object.entries(byClass)) {
-      list.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-      const step = list.length / Math.min(MP_PER, list.length);
-      for (let i = 0; i < Math.min(MP_PER, list.length); i++) {
-        const e = list[Math.floor(i * step)];
-        picked.push({ ...e, name: `mp_${cls}_${e.name}` });
-      }
-    }
-    await addEntries(picked, 'none');
-    btn.textContent = 'MediaPipe 샘플 추가됨';
+    const [stream] = await Promise.all([
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: S.facing, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }),
+      loadMP(),
+    ]);
+    cam.stream = stream; video.srcObject = stream; await video.play();
+    cam.running = true;
+    attachStage();
+    requestAnimationFrame(loop);
   } catch (e) {
-    setStatus('MediaPipe 샘플을 받지 못했습니다: ' + e.message);
-    btn.disabled = false;
+    $('[data-empty]', st).hidden = false;
+    setStageMsg(st, '카메라를 켤 수 없어요: ' + (e.message || e.name));
   }
 }
-
-function renderCard(s) {
-  let card = document.querySelector(`[data-id="${s.id}"]`);
-  if (!card) {
-    card = document.createElement('div'); card.className = 'card'; card.dataset.id = s.id;
-    const c = document.createElement('canvas');
-    c.width = 300; c.height = Math.round(300 * s.thumb.height / s.thumb.width);
-    c.getContext('2d').drawImage(s.thumb, 0, 0, c.width, c.height);
-    card.append(c);
-    const meta = document.createElement('div'); meta.className = 'meta'; card.append(meta);
-    $('grid').append(card);
+function stopCamera() {
+  if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop());
+  cam.stream = null; cam.running = false;
+  for (const st of [$('#codeStage'), $('#playStage')]) { $('[data-empty]', st).hidden = false; $('[data-live]', st).hidden = true; $('[data-calib]', st).hidden = true; const f = $('[data-flip]', st); if (f) f.hidden = true; setStageMsg(st, ''); }
+}
+function attachStage() {
+  for (const st of [$('#codeStage'), $('#playStage')]) {
+    const on = st === stageEl() && cam.running;
+    $('[data-empty]', st).hidden = cam.running;
+    $('[data-live]', st).hidden = !on; $('[data-calib]', st).hidden = !on;
+    const f = $('[data-flip]', st); if (f) f.hidden = !on;
+    if (on) setStageMsg(st, '');
   }
-  card.classList.toggle('off', !s.on);
-  const meta = card.querySelector('.meta');
-  const tagCls = !s.feat ? 'fail' : s.label === 'none' ? 'none' : '';
-  meta.innerHTML = `<span><span class="tag ${tagCls}">${s.feat ? esc(s.label) : '손 없음'}</span> <b>${s.loo ?? ''}</b></span>`;
-  if (s.feat) {
-    const b = document.createElement('button'); b.className = 'x'; b.textContent = s.on ? '빼기' : '넣기';
-    b.onclick = () => { s.on = !s.on; renderCard(s); $('train').disabled = samples.filter(x => x.on && x.feat).length < 2; };
-    meta.append(b);
-  }
-  card.title = `${s.name}${s.handed ? ` · ${s.handed} ${(s.conf*100).toFixed(0)}%` : ''}`;
 }
-const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+$$('[data-camon]').forEach((b) => (b.onclick = startCamera));
+$$('[data-flip]').forEach((b) => (b.onclick = async () => {
+  S.facing = S.facing === 'user' ? 'environment' : 'user';
+  S.mirror = S.facing === 'user';
+  stopCamera(); await startCamera();
+}));
 
-function train() {
-  const used = samples.filter(s => s.on && s.feat);
-  const m = buildModel(used);
-  // 한 장씩 빼고 나머지로 학습해서 판정
-  const rows = [];
-  for (const s of samples.filter(x => x.feat)) {
-    const rest = used.filter(x => x !== s);
-    if (!rest.some(x => x.label === m.target)) continue;
-    const mm = buildModel(rest);
-    const j = judge(s.feat, mm);
-    const truth = s.label === m.target;
-    const ok = s.on ? j.pass === truth : !j.pass;   // 뺀 사진은 '아님'으로 나와야 맞음
-    s.loo = Math.round(j.score);
-    rows.push({ s, j, truth, ok });
-    renderCard(s);
-  }
-  const counted = rows.filter(r => r.s.on);
-  const acc = counted.filter(r => r.ok).length;
-  const excluded = rows.filter(r => !r.s.on);
-  let html = `<p><b>${m.mode === 'template' ? `라벨이 <code>${esc(m.target)}</code> 하나뿐이라 “저장된 ${esc(m.target)} 모양과 얼마나 가까운가”로 판정합니다.` :
-    `라벨 ${m.labels.map(l => `<code>${esc(l)}</code>`).join(', ')} — 가장 가까운 사진들의 라벨로 판정합니다.`}</b></p>`;
-  html += `<p>학습에 쓴 ${counted.length}장을 한 장씩 빼고 나머지로 판정: <b class="${acc === counted.length ? 'ok' : 'ng'}">${acc}/${counted.length} 정답</b>`;
-  if (excluded.length) html += ` · 뺀 사진 ${excluded.length}장: ${excluded.map(r => `${esc(r.s.name)} ${Math.round(r.j.score)}점 ${r.ok ? '(A 아님으로 판정 ✓)' : '(A로 판정 ✗)'}`).join(', ')}`;
-  html += `</p>`;
-  if (m.mode === 'template') html += `<p class="ng">⚠ <code>none</code> 사진이 없어서 다른 손 모양을 ${esc(m.target)}로 잘못 판정하는지는 아직 확인할 수 없습니다. 라벨을 <code>none</code>으로 바꿔 10~20장 올려 주세요.</p>`;
-  html += `<table><thead><tr><th>사진</th><th>라벨</th><th>손</th><th class="num">점수</th><th>결과</th></tr></thead><tbody>` +
-    rows.map(r => `<tr><td>${esc(r.s.name)}${r.s.on ? '' : ' (뺌)'}</td><td>${esc(r.s.label)}</td><td>${r.s.handed}</td><td class="num">${Math.round(r.j.score)}</td><td class="${r.ok ? 'ok' : 'ng'}">${r.j.pass ? esc(m.target) : '아님'} ${r.ok ? '✓' : '✗'}</td></tr>`).join('') + `</tbody></table>`;
-  setModel(m, html);
-}
-
-function setModel(m, html) {
-  model = m;
-  $('report').innerHTML = html;
-  $('export').disabled = false;
-  $('cam').disabled = false;
-  try { localStorage.setItem('chord-model', JSON.stringify(m)); } catch {}
-}
-
-// ---------- 웹캠 ----------
-let stream = null, lastT = -1, hist = [];
-async function toggleCam() {
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; $('cam').textContent = '웹캠 켜기'; return; }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
-  } catch (e) { $('liveinfo').textContent = '웹캠을 열 수 없습니다: ' + e.message; return; }
-  const v = $('video'); v.srcObject = stream; await v.play();
-  $('cam').textContent = '웹캠 끄기';
-  requestAnimationFrame(loop);
-}
-function loop() {
-  if (!stream) return;
-  const v = $('video'), c = $('overlay');
-  if (v.readyState >= 2 && v.currentTime !== lastT) {
-    lastT = v.currentTime;
-    if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
-    const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
-    const r = vidLm.detectForVideo(v, performance.now());
-    let score = null;
-    if (r.landmarks.length) {
-      const handed = r.handedness[0][0].categoryName;
-      const j = judge(features(r.worldLandmarks[0], handed), model);
-      score = j.score;
-      drawSkeleton(ctx, r.landmarks[0], c.width, c.height, j.pass ? '#1baf7a' : '#d95926');
-      $('liveinfo').textContent = `MediaPipe 표시: ${handed} · 가장 가까운 ${model.target} 거리 ${j.d[model.target].toFixed(3)} (합격선 ${(model.thr * sens).toFixed(3)})`;
-    }
-    hist.push(score); if (hist.length > 8) hist.shift();
-    const vals = hist.filter(x => x != null);
-    if (vals.length < hist.length / 2) { $('verdict').textContent = '손 없음'; $('verdict').className = 'verdict'; $('score').textContent = '—'; $('bar').style.width = '0'; }
-    else {
-      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-      const pass = avg >= 50;
-      $('verdict').textContent = pass ? `${model.target} ✓` : `${model.target} 아님`;
-      $('verdict').className = 'verdict ' + (pass ? 'ok' : 'ng');
-      $('score').textContent = Math.round(avg);
-      $('bar').style.width = avg + '%';
-    }
+// 매 프레임: 손 인식 → 줄 잡는 손 고르기 → 판정 → 그리기
+let lastFrameAt = 0;
+function loop(ts) {
+  if (!cam.running) return;
+  if (video.readyState >= 2 && video.currentTime !== cam.lastT) {
+    cam.lastT = video.currentTime;
+    const dt = lastFrameAt ? Math.min(0.25, (ts - lastFrameAt) / 1000) : 0; lastFrameAt = ts;
+    cam.fps = cam.fps * 0.9 + (dt ? 1 / dt : 0) * 0.1;
+    let hands = [];
+    if (window.CHORD_DEBUG?.hands) hands = window.CHORD_DEBUG.hands(S);
+    else { const r = handLm.detectForVideo(video, performance.now()); hands = r.landmarks; }
+    const idx = hands.length ? C.pickFrettingHand(S.neck, hands) : -1;
+    const lm = idx >= 0 ? hands[idx] : null;
+    const key = S.tab === 'play' ? play.current() : S.chord;
+    const ev = smooth(lm && key ? C.evaluateChord(S.neck, lm, C.CHORDS[key]) : null, key);
+    if (S.tab === 'code') onCodeFrame(ev, dt, !!lm);
+    if (S.tab === 'play') onPlayFrame(ev, dt, !!lm);
+    if (lm || S.tab === 'play' && play.running) { day().sec += dt; dirty = true; }
+    const st = stageEl(); if (st) draw($('canvas', st), hands, idx, ev);
   }
   requestAnimationFrame(loop);
 }
 
-// ---------- 이벤트 ----------
-$('files').onchange = async (e) => { const fl = [...e.target.files]; e.target.value = ''; if (imgLm) await addFiles(fl); };
-$('mpnone').onclick = () => { if (imgLm) addMediaPipeSamples(); };
-$('clear').onclick = () => { $('mpnone').disabled = false; $('mpnone').textContent = 'MediaPipe 샘플을 none으로 추가'; samples = []; $('grid').innerHTML = ''; $('train').disabled = true; setStatus('준비됨'); };
-$('train').onclick = train;
-$('mirror').onchange = (e) => $('stage').classList.toggle('mirror', e.target.checked);
-$('cam').onclick = toggleCam;
-$('sens').oninput = (e) => { sens = +e.target.value; $('sensv').textContent = '×' + sens.toFixed(1); };
-$('export').onclick = () => {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(model)], { type: 'application/json' }));
-  a.download = `chord-model-${model.target}.json`; a.click();
+// 손가락별 점수를 프레임 사이에서 부드럽게 (지수 이동 평균)
+let sm = null;
+function smooth(ev, key) {
+  if (!ev) { if (sm) { sm.miss = (sm.miss || 0) + 1; if (sm.miss > 12) sm = null; } return sm && sm.miss <= 12 ? sm : null; }
+  if (!sm || sm.key !== key) sm = { key, scores: ev.fingers.map((f) => f.score) };
+  const a = 0.35;
+  sm.scores = sm.scores.map((s, i) => s + a * (ev.fingers[i].score - s));
+  sm.miss = 0;
+  const fingers = ev.fingers.map((f, i) => {
+    const sc = Math.round(sm.scores[i]);
+    return { ...f, score: sc, status: sc >= 80 ? 'good' : sc >= 40 ? 'close' : 'bad', msg: sc >= 80 && f.status !== 'good' ? '완벽한 위치예요' : f.msg };
+  });
+  const score = Math.round(fingers.reduce((s, f) => s + f.score, 0) / fingers.length);
+  Object.assign(sm, { chord: ev.chord, fingers, score, ok: score >= 80 && Math.min(...fingers.map((f) => f.score)) >= 50, raw: ev, onNeck: ev.fingers.some((f) => f.at.fret > -1 && f.at.fret < C.GUIDE_FRET + 2 && f.at.string > -0.5 && f.at.string < 7.5) });
+  return sm;
+}
+
+// ---------- 그리기 ----------
+const COLOR = { good: '#22c55e', close: '#f59e0b', bad: '#ef4444', idle: '#ffffff' };
+const EDGES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+function draw(cv, hands, idx, ev) {
+  const W = video.videoWidth, H = video.videoHeight;
+  if (!W) return;
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; cv.parentElement.style.aspectRatio = `${W} / ${H}`; }
+  const ctx = cv.getContext('2d');
+  const P = (x, y) => { const [ix, iy] = C.apply(S.neck.toImage, x, y); return [ix * W, iy * H]; };
+  const dx = (x) => (S.mirror ? W - x : x); // 글자는 거울 반전 없이 쓰기 위한 화면 x
+  const u = Math.max(W, H) / 640;
+  ctx.save();
+  if (S.mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+  ctx.drawImage(video, 0, 0, W, H);
+  ctx.fillStyle = 'rgba(8,14,32,.25)'; ctx.fillRect(0, 0, W, H);
+
+  // 지판 가이드: 테두리, 프렛, 줄
+  const quad = [P(0, 0), P(1, 0), P(1, 1), P(0, 1)];
+  ctx.beginPath(); quad.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath();
+  ctx.fillStyle = 'rgba(37,99,235,.10)'; ctx.fill();
+  ctx.setLineDash(S.calib ? [8 * u, 6 * u] : []);
+  ctx.strokeStyle = 'rgba(96,165,250,.9)'; ctx.lineWidth = 2 * u; ctx.stroke(); ctx.setLineDash([]);
+  for (let n = 0; n <= C.GUIDE_FRET; n++) {
+    const x = C.fretToX(n), [a, b] = [P(x, 0), P(x, 1)];
+    ctx.strokeStyle = n === 0 ? 'rgba(255,255,255,.95)' : 'rgba(203,213,225,.75)'; ctx.lineWidth = (n === 0 ? 5 : 2) * u;
+    ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+  }
+  for (let s = 1; s <= 6; s++) {
+    const y = C.stringToY(s), [a, b] = [P(0, y), P(1, y)];
+    ctx.strokeStyle = 'rgba(226,232,240,.55)'; ctx.lineWidth = (0.6 + (s - 1) * 0.25) * u;
+    ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+  }
+  // 목표 위치 + 손가락 끝 → 목표 연결선
+  const ch = ev?.chord || C.CHORDS[S.tab === 'play' ? play.current() : S.chord];
+  const sp = Math.hypot(...sub2(P(0.5, C.stringToY(1)), P(0.5, C.stringToY(2))));
+  const r = Math.max(7 * u, sp * 0.42);
+  const labels = [];
+  ch.notes.forEach((n, i) => {
+    const f = ev?.fingers[i], st = f ? f.status : 'idle';
+    let pts;
+    if (n.barre) pts = [P(C.fretToX(n.fret - 0.3), C.stringToY(6)), P(C.fretToX(n.fret - 0.3), C.stringToY(1))];
+    if (n.barre) { ctx.strokeStyle = COLOR[st]; ctx.globalAlpha = .55; ctx.lineWidth = r * 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(...pts[0]); ctx.lineTo(...pts[1]); ctx.stroke(); ctx.globalAlpha = 1; }
+    const [tx, ty] = P(...C.targetPoint(n));
+    if (f && st !== 'good' && hands[idx]) {
+      const tip = hands[idx][C.TIP[n.finger]];
+      ctx.strokeStyle = COLOR[st]; ctx.lineWidth = 2 * u; ctx.setLineDash([5 * u, 4 * u]);
+      ctx.beginPath(); ctx.moveTo(tip.x * W, tip.y * H); ctx.lineTo(tx, ty); ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.beginPath(); ctx.arc(tx, ty, r, 0, 7);
+    ctx.fillStyle = st === 'idle' ? 'rgba(37,99,235,.85)' : COLOR[st]; ctx.fill();
+    ctx.lineWidth = 2 * u; ctx.strokeStyle = '#fff'; ctx.stroke();
+    labels.push([tx, ty, String(n.finger), r]);
+  });
+  for (const m of ch.mute) { const [x, y] = P(-0.06, C.stringToY(m)); labels.push([x, y, '×', r * 0.8, 'rgba(255,255,255,.8)']); }
+
+  // 손 뼈대 (줄 잡는 손은 진하게)
+  hands.forEach((lm, hi) => {
+    const main = hi === idx;
+    ctx.strokeStyle = main ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.3)'; ctx.lineWidth = (main ? 2 : 1.5) * u;
+    for (const [a, b] of EDGES) { ctx.beginPath(); ctx.moveTo(lm[a].x * W, lm[a].y * H); ctx.lineTo(lm[b].x * W, lm[b].y * H); ctx.stroke(); }
+    if (main && ev) ev.fingers.forEach((f) => { const p = lm[C.TIP[f.note.finger]]; ctx.beginPath(); ctx.arc(p.x * W, p.y * H, 5 * u, 0, 7); ctx.fillStyle = COLOR[f.status]; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5 * u; ctx.stroke(); });
+  });
+
+  // 모서리 손잡이
+  const handles = S.calib ? [['nut6', '너트·6번줄'], ['nut1', '너트·1번줄'], ['fret6', '5프렛·6번줄'], ['fret1', '5프렛·1번줄']] : [];
+  for (const [k] of handles) { const [x, y] = S.corners[k]; ctx.beginPath(); ctx.arc(x * W, y * H, 13 * u, 0, 7); ctx.fillStyle = 'rgba(37,99,235,.9)'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 * u; ctx.stroke(); }
+  ctx.restore();
+
+  // 글자 (반전 없이)
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const [x, y, t, rr, col] of labels) { ctx.fillStyle = col || '#fff'; ctx.font = `800 ${Math.round(rr * 1.1)}px ${getComputedStyle(document.body).fontFamily}`; ctx.fillText(t, dx(x), y + 1); }
+  ctx.font = `700 ${Math.round(11 * u)}px sans-serif`;
+  for (let n = 1; n <= C.GUIDE_FRET; n++) { const [x, y] = P((C.fretToX(n - 1) + C.fretToX(n)) / 2, -0.16); ctx.fillStyle = 'rgba(191,219,254,.95)'; ctx.fillText(String(n), dx(x), y); }
+  for (const [k, name] of handles) {
+    const [x, y] = S.corners[k];
+    ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(12 * u)}px sans-serif`;
+    const off = k.endsWith('6') ? -26 : 26;
+    ctx.strokeStyle = 'rgba(8,14,32,.8)'; ctx.lineWidth = 4 * u; ctx.strokeText(name, dx(x * W), y * H + off * u); ctx.fillText(name, dx(x * W), y * H + off * u);
+  }
+}
+const sub2 = (a, b) => [a[0] - b[0], a[1] - b[1]];
+
+// ---------- 지판 위치 맞추기 (모서리 끌기) ----------
+function setCalib(on) {
+  S.calib = on;
+  $('#calibHelp').hidden = !(on && S.tab === 'code');
+  $$('[data-calib]').forEach((b) => { b.classList.toggle('on', on); b.textContent = on ? '✓ 맞추는 중' : '⟷ 지판 위치 맞추기'; });
+}
+$$('[data-calib]').forEach((b) => (b.onclick = () => { if (S.tab === 'play') go('code'); setCalib(!S.calib); }));
+$('#calibDone').onclick = () => setCalib(false);
+$('#calibReset').onclick = () => { S.corners = C.defaultCorners(S.mirror); S.neck = C.makeNeck(S.corners); store.set('corners', S.corners); };
+for (const st of [$('#codeStage'), $('#playStage')]) {
+  const cv = $('canvas', st);
+  let drag = null;
+  const pos = (e) => {
+    // 캔버스는 object-fit: contain → 실제 그림 영역 계산
+    const r = cv.getBoundingClientRect(), W = cv.width, H = cv.height, s = Math.min(r.width / W, r.height / H);
+    const ox = (r.width - W * s) / 2, oy = (r.height - H * s) / 2;
+    let x = (e.clientX - r.left - ox) / (W * s), y = (e.clientY - r.top - oy) / (H * s);
+    if (S.mirror) x = 1 - x;
+    return [Math.max(0, Math.min(1, x)), Math.max(0, Math.min(1, y))];
+  };
+  cv.addEventListener('pointerdown', (e) => {
+    if (!S.calib || !cam.running) return;
+    const [x, y] = pos(e);
+    let best = null, bd = 0.08;
+    for (const k of Object.keys(S.corners)) { const d = Math.hypot(S.corners[k][0] - x, (S.corners[k][1] - y) * cv.height / cv.width); if (d < bd) { bd = d; best = k; } }
+    if (best) { drag = best; cv.setPointerCapture(e.pointerId); e.preventDefault(); }
+  });
+  cv.addEventListener('pointermove', (e) => { if (!drag) return; S.corners[drag] = pos(e); S.neck = C.makeNeck(S.corners); });
+  cv.addEventListener('pointerup', () => { if (drag) { drag = null; store.set('corners', S.corners); } });
+}
+
+// ---------- 코드 수업 ----------
+function setChord(k) {
+  S.chord = k; sm = null; okSince = 0; badSince = 0;
+  $$('#chordTabs button').forEach((b) => b.classList.toggle('on', b.dataset.ch === k));
+  const ch = C.CHORDS[k];
+  $('#codeName').textContent = `${k} 코드`;
+  $('#codeFull').textContent = ch.full + (ch.mute.length ? ` · ${ch.mute.join('·')}번줄은 치지 않기` : '');
+  diagramSVG($('#diagram'), k);
+  const next = C.CHORD_ORDER[(C.CHORD_ORDER.indexOf(k) + 1) % C.CHORD_ORDER.length];
+  $('#nextChord').textContent = `다음 코드로 넘어가기 (${next}) →`;
+  $('#nextChord').onclick = () => setChord(next);
+  renderFingers(null, false);
+}
+$('#chordTabs').innerHTML = C.CHORD_ORDER.map((k) => `<button role="tab" data-ch="${k}">${k}</button>`).join('');
+$$('#chordTabs button').forEach((b) => (b.onclick = () => setChord(b.dataset.ch)));
+
+function renderFingers(ev, onNeck) {
+  const ch = C.CHORDS[S.chord];
+  const badge = $('#codeBadge'), meter = $('#codeMeter');
+  if (!ev) {
+    badge.className = 'pill'; badge.textContent = cam.running ? '손을 찾는 중' : '대기 중';
+    $('#codePct').textContent = '—'; $('span', meter).style.width = '0';
+    $('#fingers').innerHTML = ch.notes.map((n) => `<div class="finger"><span class="mark">${n.finger}</span><div><b>${C.FINGER_NAME[n.finger]} (${n.fret}번 프렛 ${n.barre ? '전체 바레' : n.string + '번줄'})</b><p>${cam.running ? '줄 잡는 손을 지판 가이드 위에 올려 주세요' : '카메라를 켜면 위치를 확인해요'}</p></div></div>`).join('');
+    return;
+  }
+  badge.className = 'pill ' + (ev.ok ? 'green' : ev.score >= 50 ? 'orange' : 'red');
+  badge.textContent = ev.ok ? '✓ 맞음' : '조정 필요';
+  $('#codePct').textContent = `${ev.score}%`;
+  meter.className = 'meter ' + (ev.ok ? '' : ev.score >= 50 ? 'close' : 'bad');
+  $('span', meter).style.width = ev.score + '%';
+  $('#fingers').innerHTML = ev.fingers.map((f) => `<div class="finger ${f.status}"><span class="mark">${f.status === 'good' ? '✓' : '!'}</span><div><b>${esc(f.label)}</b><p>${esc(f.msg)}</p></div></div>`).join('')
+    + (onNeck ? '' : `<p class="tiny" style="margin:0">손가락이 지판 가이드 밖에 있어요. 위치가 다르면 “지판 위치 맞추기”로 가이드를 지판에 맞춰 주세요.</p>`);
+}
+let okSince = 0, badSince = 0, uiT = 0;
+function onCodeFrame(ev, dt, hasHand) {
+  if (ev && ev.onNeck) {
+    const c = (stats.chords[S.chord] ||= { best: 0, ok: 0 });
+    // 1초 이상 유지한 점수만 최고 기록으로 인정
+    okSince = ev.score >= (c.best || 0) ? okSince + dt : 0;
+    if (okSince >= 1 && ev.score > c.best) { c.best = ev.score; dirty = true; }
+    if (ev.ok) { badSince = 0; if (!c._held) { c._held = (c._held || 0); } c._held += dt; if (c._held >= 1 && !day().ok.includes(S.chord)) { day().ok.push(S.chord); c.ok++; dirty = true; } }
+    else { c._held = 0; badSince += dt; if (badSince > 3) { const w = ev.fingers.reduce((a, b) => (b.score < a.score ? b : a)); stats.tip = `${S.chord}코드 · ${w.label}: ${w.msg}`; dirty = true; badSince = -10; } }
+  }
+  uiT += dt; if (uiT < 0.12) return; uiT = 0;
+  renderFingers(ev, ev?.onNeck);
+}
+
+// ---------- 연주해보자 ----------
+const SONGS = {
+  twinkle: { title: '작은별 - 연습곡', sub: '앞부분 · 쉬움', bpm: 75, bars: 'G G C G C G D G G C G D C G D G'.split(' ') },
+  pop: { title: '4코드 팝 진행', sub: 'G-D-Em-C · 보통', bpm: 80, bars: 'G D Em C G D Em C G D Em C G D C G'.split(' ') },
+  ade: { title: 'A·D·E 기초 진행', sub: '쉬움', bpm: 70, bars: 'A A D D E E A A D D A A E E A A'.split(' ') },
+  minor: { title: 'Am·C·G·Em 진행', sub: '보통', bpm: 75, bars: 'Am C G Em Am C G Em Am C G Em Am C G Am'.split(' ') },
 };
-$('import').onchange = async (e) => {
-  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { setModel(JSON.parse(await f.text()), `모델을 불러왔습니다: ${esc(f.name)}`); } catch (err) { $('report').textContent = '모델 파일을 읽을 수 없습니다.'; }
+const play = {
+  song: 'twinkle', bar: 0, running: false, mode: 'wait', bpm: 75, metro: true,
+  results: [], pts: 0, combo: 0, maxCombo: 0, t: 0, hold: 0, holdSum: 0, best: 0, accSum: 0, accN: 0,
+  current() { return SONGS[this.song].bars[Math.min(this.bar, SONGS[this.song].bars.length - 1)]; },
 };
-window.__chord = { get samples() { return samples; }, get model() { return model; }, judge, features, train };
-init();
+$('#song').innerHTML = Object.entries(SONGS).map(([k, s]) => `<option value="${k}">${esc(s.title)}</option>`).join('');
+$('#song').onchange = (e) => { play.song = e.target.value; play.bpm = SONGS[play.song].bpm; resetSong(); };
+$$('#mode button').forEach((b) => (b.onclick = () => { play.mode = b.dataset.mode; $$('#mode button').forEach((x) => x.classList.toggle('on', x === b)); resetBar(); renderPlay(); }));
+$('#bpmDown').onclick = () => { play.bpm = Math.max(40, play.bpm - 5); renderPlay(); };
+$('#bpmUp').onclick = () => { play.bpm = Math.min(140, play.bpm + 5); renderPlay(); };
+$('#metroBtn').onclick = () => { play.metro = !play.metro; $('#metroBtn').textContent = play.metro ? '♩ 메트로놈 켬' : '♩ 메트로놈 끔'; };
+$('#playBtn').onclick = async () => {
+  if (play.bar >= SONGS[play.song].bars.length) resetSong();
+  if (!cam.running) await startCamera();
+  if (!cam.running) return;
+  play.running = !play.running;
+  if (play.running) { $('#summary').hidden = true; audio(); }
+  renderPlay();
+};
+$('#retryBar').onclick = () => { play.results[play.bar] = undefined; resetBar(); renderPlay(); };
+$('#skipBar').onclick = () => { if (play.bar < SONGS[play.song].bars.length) judgeBar(true); };
+function pausePlay() { if (play.running) { play.running = false; renderPlay(); } }
+function resetBar() { play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; }
+function resetSong() { play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; resetBar(); $('#summary').hidden = true; renderPlay(); }
+
+let actx = null;
+function audio() { try { actx ||= new AudioContext(); actx.resume(); } catch {} }
+function click(accent) {
+  if (!actx || !play.metro) return;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.frequency.value = accent ? 1500 : 1000; g.gain.setValueAtTime(0.25, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.06);
+  o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.07);
+}
+
+// 판정: 맞출 때까지 기다리기 = 맞는 상태를 0.8초 유지하면 통과, 박자대로 = 마디가 끝날 때 가장 좋았던 점수로
+let lastEv = null, playUiT = 0;
+function onPlayFrame(ev, dt, hasHand) {
+  lastEv = ev;
+  if (play.running && play.bar < SONGS[play.song].bars.length) {
+    const score = ev?.onNeck ? ev.score : 0;
+    if (ev?.onNeck) { play.accSum += score * dt; play.accN += dt; }
+    if (play.mode === 'wait') {
+      if (ev?.ok) { play.hold += dt; play.holdSum += score * dt; } else { play.hold = 0; play.holdSum = 0; }
+      if (play.hold >= 0.8) judgeBar(false);
+    } else {
+      const beatLen = 60 / play.bpm, barLen = beatLen * 4;
+      const beat = Math.floor(play.t / beatLen);
+      if (beat !== play.beat) { play.beat = beat; click(beat % 4 === 0); }
+      play.t += dt;
+      // 0.4초 동안 이어진 점수의 최고값을 마디 점수로
+      if (ev?.ok || score >= 60) { play.hold += dt; play.holdSum += score * dt; if (play.hold >= 0.4) play.best = Math.max(play.best, play.holdSum / play.hold); } else { play.hold = 0; play.holdSum = 0; }
+      if (play.t >= barLen) judgeBar(false);
+    }
+  }
+  playUiT += dt; if (playUiT < 0.1) return; playUiT = 0;
+  renderPlay();
+}
+function judgeBar(skipped) {
+  let grade, avg;
+  if (skipped) { grade = 'm'; avg = 0; }
+  else if (play.mode === 'wait') { avg = play.holdSum / Math.max(play.hold, 1e-6); grade = avg >= 88 ? 'p' : 'g'; }
+  else { avg = play.best; grade = avg >= 88 ? 'p' : avg >= 70 ? 'g' : 'm'; }
+  play.results[play.bar] = grade;
+  if (grade === 'm') play.combo = 0; else { play.combo++; play.maxCombo = Math.max(play.maxCombo, play.combo); play.pts += Math.round((grade === 'p' ? 100 : 50) * (1 + Math.min(play.combo, 10) * 0.1)); }
+  play.flash = { grade, until: performance.now() + 900 };
+  play.bar++; resetBar();
+  if (play.bar >= SONGS[play.song].bars.length) finishSong();
+  renderPlay();
+}
+function finishSong() {
+  play.running = false;
+  const r = play.results, p = r.filter((x) => x === 'p').length, g = r.filter((x) => x === 'g').length, m = r.filter((x) => x === 'm').length;
+  const acc = play.accN ? Math.round(play.accSum / play.accN) : 0;
+  stats.lastSong = play.song; dirty = true;
+  $('#summary').hidden = false;
+  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">⚡ ${play.pts}</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div><div class="muted">평균 운지 정확도 ${acc}%</div><button class="btn primary" onclick="this.closest('.summary').hidden=true" style="margin-top:6px">닫기</button>`;
+}
+function renderPlay() {
+  const song = SONGS[play.song], n = song.bars.length, key = play.current(), ch = C.CHORDS[key];
+  $('#songSub').textContent = `${song.sub} · BPM ${play.bpm}`;
+  $('#bpm').textContent = `BPM ${play.bpm}`;
+  $('#pts').textContent = `⚡ ${play.pts.toLocaleString()}`;
+  $('#bars').innerHTML = song.bars.map((_, i) => `<i class="${play.results[i] || (i === play.bar ? 'now' : '')}"></i>`).join('');
+  $('#barNo').textContent = `BAR ${Math.min(play.bar + 1, n)}/${n}`;
+  $('#combo').textContent = play.combo >= 2 ? `Combo ×${play.combo} 🔥` : '';
+  $('#nowChord').textContent = key;
+  $('#nowKind').textContent = /m$/.test(key) ? 'MINOR' : 'MAJOR';
+  // 링: 기다리기 모드는 유지 진행률, 박자 모드는 마디 진행률
+  const prog = play.mode === 'wait' ? Math.min(1, play.hold / 0.8) : Math.min(1, play.t / (240 / play.bpm));
+  $('#ringArc').style.strokeDashoffset = String(615.75 * (1 - prog));
+  $('#ringArc').style.stroke = lastEv?.ok ? '#4ade80' : '#4b8bff';
+  const v = $('#verdict');
+  const fl = play.flash && performance.now() < play.flash.until ? play.flash.grade : null;
+  if (fl) { v.className = 'verdict ' + fl; v.textContent = { p: '✓ PERFECT!', g: 'GOOD', m: 'MISS' }[fl]; }
+  else if (play.bar >= n) { v.className = 'verdict'; v.textContent = '완주! 다시 하려면 시작'; }
+  else if (!play.running) { v.className = 'verdict'; v.textContent = play.bar ? '일시정지' : '시작을 눌러 주세요'; }
+  else if (!lastEv?.onNeck) { v.className = 'verdict'; v.textContent = '지판 위에 손을 올려 주세요'; }
+  else { v.className = 'verdict' + (lastEv.ok ? ' p' : ''); v.textContent = lastEv.ok ? '좋아요, 유지!' : '잡는 중…'; }
+  $('#playAcc').textContent = lastEv?.onNeck ? `운지 정확도 ${lastEv.score}%` : '';
+  const w = lastEv?.fingers?.reduce((a, b) => (b.score < a.score ? b : a));
+  $('#hintMain').textContent = w ? (w.status === 'good' ? '모든 손가락 위치가 좋아요' : w.label) : fingerGuide(key);
+  $('#hintSub').textContent = w && w.status !== 'good' ? w.msg : '';
+  const ahead = song.bars.slice(play.bar, play.bar + 5);
+  $('#nextList').innerHTML = ahead.map((k, i) => `<div class="${i ? '' : 'cur'}">${k}<small>${i ? `${i}마디 뒤` : '현재'}</small></div>`).join('');
+  $('#nextInfo').textContent = `${Math.min(play.bar + 1, n)}/${n} 마디`;
+  $('#playBtn').textContent = play.running ? '❚❚ 일시정지' : play.bar >= n ? '↺ 처음부터' : play.bar ? '▶ 계속' : '▶ 시작';
+  if (renderPlay.key !== key) {
+    renderPlay.key = key;
+    diagramSVG($('#playDiagram'), key);
+    $('#guideTitle').textContent = `${key} 코드 손가락 번호 가이드`;
+    $('#guideBody').textContent = fingerGuide(key);
+    $('#coach').textContent = coachTip(key);
+  }
+}
+function coachTip(key) {
+  const tips = {
+    G: 'G 코드는 중지로 6번줄(가장 굵은 줄)을 누를 때 손바닥이 넥 아래에 닿지 않게 손목을 살짝 앞으로 밀어 주세요.',
+    C: 'C 코드는 약지가 5번줄 3프렛을 누르면서 4번줄을 건드리기 쉬워요. 손가락을 세워 끝으로 눌러 주세요.',
+    D: 'D 코드는 세 손가락이 삼각형을 이뤄요. 6·5번줄은 치지 말고 4번줄부터 쳐 주세요.',
+    Em: 'Em 코드는 중지·약지 두 손가락만 2프렛에 나란히 놓으면 돼요. 가장 쉬운 코드부터 손에 익혀요.',
+    A: 'A 코드는 세 손가락이 같은 2프렛에 몰려 있어요. 약지가 1번줄에 닿지 않도록 손가락 끝을 세워 주세요.',
+    Am: 'Am 코드는 C 코드에서 약지만 3번줄 2프렛으로 옮기면 돼요.',
+    E: 'E 코드는 Am 모양을 그대로 한 줄씩 위(굵은 줄 쪽)로 옮긴 모양이에요.',
+    F: 'F 바레는 검지를 곧게 펴서 옆면으로 1프렛 전체를 눌러요. 처음엔 소리가 안 나도 정상이에요.',
+  };
+  return tips[key] || '';
+}
+
+// ---------- 도움말 ----------
+$('#helpBtn').onclick = () => alert('사용법\n\n1. 코드 수업에서 카메라를 켜고 “지판 위치 맞추기”로 파란 가이드를 기타 지판(너트~5프렛)에 맞춥니다.\n2. 화면의 번호 동그라미(손가락 번호) 위에 손가락을 올리면 줄·프렛 단위로 판정합니다.\n3. 연주해보자에서 곡의 코드 진행을 따라 잡아 보세요.\n\n카메라 영상과 기록은 이 브라우저 밖으로 보내지 않습니다.');
+
+window.__app = { S, C, play, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
+setChord('A');
+renderPlay();
+renderHome();
 </script>
 </body>
 </html>
