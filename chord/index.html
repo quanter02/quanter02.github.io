@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#f3f5f9">
-<title>코드 코치</title>
+<title>오락가락</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
@@ -48,7 +48,7 @@ main > section { padding: 4px 16px 16px; display: grid; gap: 14px; }
 .pill.red { background: var(--red-soft); color: var(--red); }
 .pill.orange { background: var(--orange-soft); color: var(--orange); }
 .pill.dark { background: rgba(255,255,255,.1); color: #dbe6ff; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 15px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 15px; }
 .btn.primary { background: var(--blue); color: #fff; }
 .btn.primary:hover { background: var(--blue-ink); }
 .btn.ghost { background: var(--blue-soft); color: var(--blue); }
@@ -169,6 +169,59 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 .summary { text-align: center; display: grid; gap: 6px; }
 .summary .big { font-size: 40px; font-weight: 800; color: var(--blue); }
 
+/* 홈 (시안) */
+.brand { padding-top: 22px; }
+.brand .eyebrow { color: var(--blue); font-weight: 800; font-size: 13px; }
+.brand h1 { font-size: 30px; font-weight: 800; margin: 2px 0 6px; letter-spacing: -.02em; }
+button.hero { text-align: left; width: 100%; gap: 10px; }
+.hero .eb { color: #8fb3ff; font-size: 13px; font-weight: 700; }
+.hero .big2 { font-size: 22px; font-weight: 800; }
+.hero .meta { color: #a8b8d8; font-size: 12px; }
+.course .chev { color: var(--ink-3); font-size: 20px; }
+.course .ic.orange { background: var(--orange-soft); color: var(--orange); }
+.lgrid { display: flex; flex-wrap: wrap; gap: 8px; }
+.lgrid button { width: 40px; height: 40px; border-radius: 10px; font-weight: 800; font-size: 14px; display: grid; place-items: center; }
+.lgrid .done { background: var(--blue); color: #fff; }
+.lgrid .todo { background: var(--blue-soft); color: var(--blue); border: 1px dashed #8fb3ff; }
+
+/* 곡 목록 */
+.song { display: grid; gap: 8px; }
+.song .chips .chip.ok { background: var(--blue); border-color: var(--blue); color: #fff; }
+.song .chips .chip.no { border-style: dashed; color: var(--blue); background: var(--blue-soft); border-color: #8fb3ff; }
+
+/* 연주 화면 (전체 화면, 시안) */
+body.playing { overflow: hidden; }
+body.playing .nav, body.playing .top { display: none; }
+#player { position: fixed; inset: 0; z-index: 30; background: #0d1640; color: #fff; overflow-y: auto; }
+#player .wrap { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); gap: 14px; }
+.ptop { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 8px; }
+.ptop .back { width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; }
+.ptitle { text-align: center; display: grid; }
+.ptitle b { font-size: 15px; } .ptitle span { font-size: 11px; color: #a8b8d8; }
+.ptop .pts { background: #1c2a66; color: #ffd54a; font-weight: 800; font-size: 14px; padding: 6px 12px; border-radius: 999px; }
+.prog { height: 5px; border-radius: 3px; background: #1c2a66; overflow: hidden; }
+.prog span { display: block; height: 100%; width: 0; background: #3b6cff; transition: width .3s; }
+.pmid { flex: 1; display: grid; align-content: center; justify-items: center; gap: 14px; padding: 12px 0; min-height: 360px; }
+.pmid .label { color: #c6d3ff; font-weight: 700; font-size: 14px; }
+#player .ring { width: 172px; height: 172px; }
+#player .ring .in { inset: 6px; background: #1b2668; box-shadow: none; }
+#player .ring .chord { font-size: 60px; }
+#player .verdict { background: #13304a; border: 0; color: #a8b8d8; min-width: 120px; }
+#player .verdict.p { background: #0f3b3a; color: #34d399; } #player .verdict.g { background: #13325e; color: #93c5fd; } #player .verdict.m { background: #3b1830; color: #fca5a5; }
+.fix { background: rgba(239,68,68,.12); color: #fecaca; border-radius: 12px; padding: 8px 12px; font-size: 13px; text-align: center; max-width: 100%; }
+.pmid .beats { position: static; transform: none; }
+#player .next div { width: 52px; height: 52px; background: #1b2668; border: 1px solid transparent; color: #c6d3ff; }
+#player .next div.cur { background: transparent; border: 2px solid #3b6cff; color: #fff; }
+.camline { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #8d9cc4; font-size: 13px; }
+.camline button { color: #8fb3ff; font-size: 13px; font-weight: 700; }
+.pctrl { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; }
+.pctrl button { background: #1b2668; color: #fff; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 14px; }
+.pctrl button.main { background: #3b6cff; }
+#player .stage { aspect-ratio: 16 / 9; border-radius: 14px; }
+#player .summary { background: #16205a; border-radius: 16px; padding: 18px; color: #fff; }
+#player .summary .big { color: #ffd54a; }
+#player .summary .muted { color: #a8b8d8; }
+
 /* 하단 탭 */
 .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .nav div { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -180,7 +233,7 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 <body>
 <div class="app">
   <header class="top">
-    <div class="logo" aria-hidden="true">코</div>
+    <div class="logo" aria-hidden="true">오</div>
     <h1 id="title">홈</h1>
     <button class="iconbtn" id="helpBtn" title="사용법" aria-label="사용법">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor"/></svg>
@@ -190,58 +243,32 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
   <main>
     <!-- ================= 홈 ================= -->
     <section id="tab-home">
-      <div class="hello">
-        <span class="pill">✦ 카메라 실시간 운지 피드백</span>
-        <h2>오늘도 즐거운 기타 한 곡!</h2>
-        <p class="muted" style="margin:2px 0 0">카메라로 손가락이 어느 줄, 어느 프렛에 있는지 보고 바로 고쳐 드려요.</p>
+      <div class="brand">
+        <div class="eyebrow">AI 악기 독학 코칭</div>
+        <h1>오락가락</h1>
       </div>
 
-      <div class="hero">
-        <div class="between">
-          <span class="pill dark">오늘의 연습</span>
-          <span class="tiny" id="streak" style="color:#ffb27a;font-weight:700"></span>
-        </div>
-        <div>
-          <div class="tiny" style="color:#a8b8d8">추천 학습 루틴</div>
-          <div class="big" id="heroTitle"></div>
-          <div class="pct" id="heroPct"></div>
-        </div>
-        <div>
-          <div class="segs" id="heroSegs"></div>
-          <div class="between tiny" style="color:#a8b8d8;margin-top:6px"><span>오늘 코드 성공</span><span id="heroCount"></span></div>
-        </div>
-        <button class="btn primary block" id="heroGo">▶ 이어서 연습하기</button>
-      </div>
+      <button class="hero" id="hero">
+        <span class="eb">오늘의 연습</span>
+        <span class="big2" id="heroTitle"></span>
+        <span class="segs" id="heroSegs"></span>
+        <span class="meta" id="heroMeta"></span>
+      </button>
 
-      <div class="between"><h2>학습 코스</h2></div>
       <button class="card course" data-go="code">
-        <div class="ic blue"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h11a2 2 0 0 1 2 2v1.5l4-2.5v10l-4-2.5V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg></div>
-        <div class="body">
-          <div class="row"><h3>코드 수업</h3><span class="pill" style="padding:1px 7px;font-size:11px">AI 피드백</span></div>
-          <span class="muted">카메라로 손가락 위치를 줄·프렛 단위로 확인해요</span>
-          <div class="row tiny">오늘 추천: <span class="chips" id="recChips"></span></div>
-        </div>
-        <span class="tiny">›</span>
+        <div class="ic blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg></div>
+        <div class="body"><h3>코드 수업</h3><span class="muted">카메라로 코드 파지법을 확인해요</span></div>
+        <span class="chev">›</span>
       </button>
       <button class="card course" data-go="play">
-        <div class="ic red"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M10 3v11.6A3.5 3.5 0 1 0 12 18V8h6V3h-8z"/></svg></div>
-        <div class="body">
-          <div class="row"><h3>연주해보자!</h3><span class="pill green" style="padding:1px 7px;font-size:11px">곡 연습</span></div>
-          <span class="muted">배운 코드로 곡의 코드 진행을 따라 잡아요</span>
-          <span class="tiny" id="lastSong"></span>
-        </div>
-        <span class="tiny">›</span>
+        <div class="ic orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div>
+        <div class="body"><h3>연주해보자!</h3><span class="muted">배운 코드로 노래를 연주해요</span></div>
+        <span class="chev">›</span>
       </button>
 
-      <div class="card" style="display:grid;gap:12px">
-        <div class="between"><div class="row"><h2>배운 코드</h2><span class="pill" id="learnedCount"></span></div><span class="tiny">80% 이상이면 습득</span></div>
-        <div class="learned" id="learned"></div>
-        <div class="tip" id="tip"></div>
-      </div>
-
-      <div class="card">
-        <div class="between"><h3>이번 주 누적 연습</h3><b style="color:var(--blue)" id="weekTotal"></b></div>
-        <div class="week" id="week"></div>
+      <div class="card" style="display:grid;gap:10px">
+        <div class="between"><h3>배운 코드</h3><span class="tiny">채운 칸: 습득 · 점선: 배울 코드</span></div>
+        <div class="lgrid" id="learned"></div>
       </div>
 
       <p class="tiny" style="text-align:center">기록은 이 브라우저에만 저장됩니다</p>
@@ -296,67 +323,52 @@ h3 { font-size: 15px; margin: 0; font-weight: 700; }
 
     <!-- ================= 연주해보자 ================= -->
     <section id="tab-play" hidden>
-      <div class="player">
-        <div class="between">
-          <div>
-            <select id="song" aria-label="곡 선택"></select>
-            <div class="sub" id="songSub"></div>
-          </div>
-          <span class="pts" id="pts">⚡ 0</span>
-        </div>
-        <div>
-          <div class="bars" id="bars"></div>
-          <div class="between sub" style="margin-top:6px"><span id="barNo">BAR 1/16</span><span id="combo" style="color:#4ade80;font-weight:700"></span></div>
-        </div>
-        <div style="text-align:center" class="sub">지금 잡을 코드</div>
-        <div class="ring">
-          <svg viewBox="0 0 210 210"><circle cx="105" cy="105" r="98" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/><circle id="ringArc" cx="105" cy="105" r="98" fill="none" stroke="#4b8bff" stroke-width="8" stroke-linecap="round" stroke-dasharray="615.75" stroke-dashoffset="615.75"/></svg>
-          <div class="in"><div><div class="chord" id="nowChord">G</div><div class="kind" id="nowKind">MAJOR</div></div></div>
-        </div>
-        <div class="verdict" id="verdict">시작을 눌러 주세요</div>
-        <div class="sub" style="text-align:center" id="playAcc"></div>
-        <div class="hintbar">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M3 12h3l2-6 4 12 2-6h7"/></svg>
-          <div style="flex:1"><b id="hintMain">손가락 위치를 확인하는 중</b><span class="tiny" id="hintSub"></span></div>
-        </div>
-        <div>
-          <div class="between sub" style="margin-bottom:8px"><span>다음 코드 순서</span><span id="nextInfo"></span></div>
-          <div class="next" id="nextList"></div>
-        </div>
-        <div class="stage" id="playStage">
-          <canvas></canvas>
-          <div class="empty" data-empty><div><b>카메라를 켜 주세요</b><button class="btn primary" data-camon style="margin-top:8px">카메라 켜기</button></div></div>
-          <div class="ov t"><span class="badge live" data-live hidden>실시간 지판 감지 중</span><button class="badge" data-calib hidden>⟷ 위치 맞추기</button></div>
-          <div class="center-msg" data-msg hidden></div>
-          <div class="beats" id="beats" hidden></div>
-        </div>
-        <div class="row">
-          <button class="btn primary" id="playBtn" style="flex:1">▶ 시작</button>
-          <button class="btn line" id="metroBtn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.25)" title="메트로놈">♩ 메트로놈 켬</button>
-        </div>
-      </div>
+      <p class="muted" style="margin:0">곡을 고르면 코드 진행을 따라 잡아요. 점선 코드는 아직 습득 전이니 코드 수업에서 먼저 연습하면 좋아요.</p>
+      <div id="songs" style="display:grid;gap:10px"></div>
 
       <div class="card" style="display:grid;gap:12px">
-        <div class="between"><h3>연주 방식</h3></div>
+        <h3>연주 방식</h3>
         <div class="seg" id="mode"><button data-mode="wait" class="on">맞출 때까지 기다리기</button><button data-mode="tempo">박자대로 진행</button></div>
-        <div class="between"><span class="muted">빠르기 (박자대로 진행)</span><div class="stepper"><button id="bpmDown" aria-label="느리게">−</button><output id="bpm">BPM 75</output><button id="bpmUp" aria-label="빠르게">+</button></div></div>
+        <div class="between"><span class="muted">빠르기 (박자대로 진행)</span><div class="stepper"><button id="bpmDown" aria-label="느리게">−</button><output id="bpm">곡 기본</output><button id="bpmUp" aria-label="빠르게">+</button></div></div>
+        <label class="between"><span class="muted">메트로놈 소리 (박자대로 진행)</span><input type="checkbox" id="metroChk" checked></label>
       </div>
 
-      <div class="card" style="display:grid;gap:10px">
-        <div class="row"><span class="pill">✦ AI 코치 팁</span></div>
-        <div id="coach" class="muted"></div>
-        <div class="row" style="background:var(--bg);border-radius:12px;padding:10px;gap:12px">
-          <svg id="playDiagram" width="62" height="78" viewBox="0 0 74 92"></svg>
-          <div style="flex:1"><b id="guideTitle" style="font-size:14px"></b><div class="muted" id="guideBody"></div></div>
+      <div id="player" hidden>
+        <div class="wrap">
+          <div class="ptop">
+            <button class="back" id="backBtn" aria-label="곡 목록으로">‹</button>
+            <div class="ptitle"><b id="songTitle"></b><span id="songSub"></span></div>
+            <span class="pts" id="pts">0점</span>
+          </div>
+          <div class="prog"><span id="progBar"></span></div>
+
+          <div class="pmid">
+            <div class="label">지금 잡을 코드</div>
+            <div class="ring">
+              <svg viewBox="0 0 210 210"><circle cx="105" cy="105" r="100" fill="none" stroke="#2a3a8a" stroke-width="9"/><circle id="ringArc" cx="105" cy="105" r="100" fill="none" stroke="#3b6cff" stroke-width="9" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="0"/></svg>
+              <div class="in"><div class="chord" id="nowChord">G</div></div>
+            </div>
+            <div class="verdict" id="verdict"></div>
+            <div class="beats" id="beats" hidden></div>
+            <div class="fix" id="fix" hidden></div>
+          </div>
+
+          <div class="stage" id="playStage" hidden>
+            <canvas></canvas>
+            <div class="empty" data-empty><div><b>카메라 준비 중</b></div></div>
+            <div class="ov t"><span class="badge live" data-live hidden>실시간 지판 감지 중</span><button class="badge" data-calib hidden>⟷ 위치 맞추기</button></div>
+            <div class="center-msg" data-msg hidden></div>
+          </div>
+
+          <div style="display:grid;gap:10px">
+            <div class="label" style="color:#c6d3ff;font-weight:700;font-size:13px">다음 코드</div>
+            <div class="next" id="nextList"></div>
+            <div class="camline"><span>📹 <span id="camStatus">카메라로 코드 인식 중…</span></span><button id="camToggle">화면 보기</button></div>
+            <div class="pctrl"><button id="retryBar">↺ 이 마디</button><button class="main" id="playBtn">❚❚ 일시정지</button><button id="skipBar">다음 ⏭</button></div>
+          </div>
+          <div class="summary" id="summary" hidden></div>
         </div>
       </div>
-
-      <div class="ctrl">
-        <button class="btn line" id="retryBar">↺ 이 마디 다시 연습</button>
-        <button class="btn primary" id="skipBar">다음 마디로 ⏭</button>
-      </div>
-
-      <div class="card summary" id="summary" hidden></div>
     </section>
   </main>
 </div>
@@ -471,7 +483,6 @@ function diagramSVG(svg, key) {
   svg.innerHTML = h;
   svg.style.color = 'var(--ink)';
 }
-const fingerGuide = (key) => C.CHORDS[key].notes.map((n) => `${C.FINGER_NAME[n.finger]}: ${n.barre ? '1프렛 바레' : `${n.string}번줄 ${n.fret}프렛`}`).join(' · ');
 
 // ---------- 탭 ----------
 const TITLES = { home: '홈', code: '코드 수업', play: '연주해보자' };
@@ -480,7 +491,10 @@ function go(tab) {
   for (const t of ['home', 'code', 'play']) $(`#tab-${t}`).hidden = t !== tab;
   $$('.nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
   $('#title').textContent = TITLES[tab];
+  $('.top').hidden = tab === 'home';            // 홈은 시안처럼 상단바 없이 '오락가락' 제목
+  if (tab !== 'play') closePlayer();
   if (tab === 'home') { stopCamera(); renderHome(); }
+  if (tab === 'play') renderSongs();
   else if (cam.running) attachStage();
   if (tab !== 'play') pausePlay();
   scrollTo(0, 0);
@@ -491,38 +505,22 @@ $$('[data-go]').forEach((b) => (b.onclick = () => go(b.dataset.go)));
 // ---------- 홈 ----------
 function chordOK(k) { return (stats.chords[k]?.best || 0) >= 80; }
 function renderHome() {
-  // 추천: 연습했지만 아직 80% 미만인 코드 → 안 해본 코드 순
+  // 추천: 연습했지만 아직 80% 미만인 코드 → 곡에 필요한 코드 중 안 해본 것 → 나머지
   const order = C.CHORD_ORDER;
-  const rec = order.find((k) => stats.chords[k] && !chordOK(k)) || order.find((k) => !stats.chords[k]) || order[0];
+  const rec = order.find((k) => stats.chords[k] && !chordOK(k)) || SONG_CHORDS.find((k) => !stats.chords[k]) || order.find((k) => !chordOK(k)) || 'A';
   const best = stats.chords[rec]?.best;
-  $('#heroTitle').innerHTML = `<em>${rec}</em>코드 ${best != null ? '정확도' : '시작하기'}`;
-  $('#heroPct').textContent = best != null ? `${best}%` : '';
+  $('#heroTitle').textContent = best != null ? `${rec}코드 정확도 ${best}%` : `${rec}코드 시작하기`;
   const okToday = day().ok.length, goal = 3;
   $('#heroSegs').innerHTML = Array.from({ length: goal }, (_, i) => `<i class="${i < okToday ? 'on' : ''}"></i>`).join('');
-  $('#heroCount').textContent = `${Math.min(okToday, goal)}/${goal} 완료`;
-  $('#heroGo').onclick = () => { setChord(rec); go('code'); };
-  // 연속 연습일
+  $('#hero').onclick = () => { setChord(rec); go('code'); };
+  // 연속 연습일 (하루 30초 이상 연습한 날)
   let streak = 0; const d = new Date();
   for (;;) { const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; if ((stats.days[k]?.sec || 0) >= 30) { streak++; d.setDate(d.getDate() - 1); } else if (streak === 0 && k === today()) d.setDate(d.getDate() - 1); else break; if (streak > 365) break; }
-  $('#streak').textContent = streak ? `🔥 ${streak}일 연속 연습 중!` : '';
-  const recs = order.filter((k) => !chordOK(k)).slice(0, 3);
-  $('#recChips').innerHTML = (recs.length ? recs : order.slice(0, 3)).map((k) => `<span class="chip">${k}</span>`).join('');
-  $('#lastSong').textContent = stats.lastSong ? `최근 연주: ${SONGS[stats.lastSong]?.title || ''}` : '작은별, 4코드 팝 진행 외';
-  const learned = order.filter(chordOK);
-  $('#learnedCount').textContent = `${learned.length}개 습득`;
-  $('#learned').innerHTML = order.map((k) => {
-    const c = stats.chords[k];
-    return `<button class="ltile ${chordOK(k) ? 'done' : c ? 'tried' : ''}" data-ch="${k}"><b>${k}</b><span>${c ? `${chordOK(k) ? '✓ ' : ''}${c.best}%` : '미연습'}</span></button>`;
-  }).join('');
+  $('#heroMeta').textContent = `${streak ? `${streak}일 연속 연습 중` : okToday || day().sec > 0 ? '오늘 연습 중' : '오늘 첫 연습을 시작해 볼까요?'} · 오늘 코드 성공 ${Math.min(okToday, goal)}/${goal}`;
+  // 배운 코드: 습득한 코드(채움) + 곡에 필요한 코드 중 아직인 것(점선)
+  const show = [...new Set([...order.filter(chordOK), ...SONG_CHORDS])];
+  $('#learned').innerHTML = show.map((k) => `<button class="${chordOK(k) ? 'done' : 'todo'}" data-ch="${k}" title="${stats.chords[k] ? `최고 ${stats.chords[k].best}%` : '아직 연습 전'}">${k}</button>`).join('');
   $$('#learned [data-ch]').forEach((b) => (b.onclick = () => { setChord(b.dataset.ch); go('code'); }));
-  $('#tip').innerHTML = `💡 <span>${stats.tip ? esc(stats.tip) : 'Tip: 코드 수업에서 처음 한 번 “지판 위치 맞추기”를 하면 줄·프렛 판정이 정확해져요.'}</span>`;
-  // 이번 주 (월~일)
-  const now = new Date(), dow = (now.getDay() + 6) % 7, mon = new Date(now); mon.setDate(now.getDate() - dow);
-  const mins = [];
-  for (let i = 0; i < 7; i++) { const x = new Date(mon); x.setDate(mon.getDate() + i); const k = `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; mins.push(Math.round((stats.days[k]?.sec || 0) / 60)); }
-  const max = Math.max(10, ...mins);
-  $('#weekTotal').textContent = `총 ${mins.reduce((a, b) => a + b, 0)}분`;
-  $('#week').innerHTML = '월화수목금토일'.split('').map((n, i) => `<div class="${i === dow ? 'today' : ''}" title="${mins[i]}분"><i style="height:${(mins[i] / max) * 100}%"></i><span>${i === dow ? '오늘' : n}</span></div>`).join('');
 }
 
 // ---------- 카메라 & 손 인식 ----------
@@ -567,6 +565,7 @@ async function startCamera() {
   } catch (e) {
     $('[data-empty]', st).hidden = false;
     setStageMsg(st, '카메라를 켤 수 없어요: ' + (e.message || e.name));
+    $('#camStatus').textContent = '카메라를 켤 수 없어요';
   }
 }
 function stopCamera() {
@@ -611,7 +610,7 @@ function loop(ts) {
     if (S.tab === 'play') onPlayFrame(ev, dt, !!lm);
     if (lm || S.tab === 'play' && play.running) { day().sec += dt; dirty = true; }
     const st = stageEl();
-    if (st) { draw($('canvas', st), hands, idx, ev); setStageMsg(st, follow.lost && !S.calib ? '지판을 놓쳤어요. “위치 맞추기”로 가이드를 다시 맞춰 주세요' : ''); }
+    if (st && !st.hidden) { draw($('canvas', st), hands, idx, ev); setStageMsg(st, follow.lost && !S.calib ? '지판을 놓쳤어요. “위치 맞추기”로 가이드를 다시 맞춰 주세요' : ''); }
   }
   requestAnimationFrame(loop);
 }
@@ -668,7 +667,7 @@ function draw(cv, hands, idx, ev) {
     ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
   }
   // 박자대로 진행: 마디 마지막 박에는 다음 코드 자리를 점선 동그라미로 미리 보여 준다
-  const preview = S.tab === 'play' && play.running && play.mode === 'tempo' && play.beat === 3 ? C.CHORDS[SONGS[play.song].bars[play.bar + 1]] : null;
+  const preview = S.tab === 'play' && play.running && play.mode === 'tempo' && play.beat === SONGS[play.song].beats - 1 ? C.CHORDS[SONGS[play.song].bars[play.bar + 1]] : null;
   const previewLabels = [];
   if (preview) for (const n of preview.notes) {
     const [tx, ty] = P(...C.targetPoint(n));
@@ -811,37 +810,85 @@ function onCodeFrame(ev, dt, hasHand) {
 }
 
 // ---------- 연주해보자 ----------
+// 코드 진행만 담는다(가사·악보 없음). beats: 한 마디 박 수
 const SONGS = {
-  twinkle: { title: '작은별 - 연습곡', sub: '앞부분 · 쉬움', bpm: 75, bars: 'G G C G C G D G G C G D C G D G'.split(' ') },
-  pop: { title: '4코드 팝 진행', sub: 'G-D-Em-C · 보통', bpm: 80, bars: 'G D Em C G D Em C G D Em C G D C G'.split(' ') },
-  ade: { title: 'A·D·E 기초 진행', sub: '쉬움', bpm: 70, bars: 'A A D D E E A A D D A A E E A A'.split(' ') },
-  minor: { title: 'Am·C·G·Em 진행', sub: '보통', bpm: 75, bars: 'Am C G Em Am C G Em Am C G Em Am C G Am'.split(' ') },
+  tomato: { title: '멋쟁이 토마토', sub: 'D·G·A 연습 · 다운 4번', level: '보통', beats: 4, bpm: 90,
+    credit: '작사·작곡 김영광 · 코드 진행만 사용',
+    bars: 'D A A D D A A D G G D D G D A D'.split(' ') },
+  nabi: { title: '나비야', sub: '1절 · 원곡 F·C7을 G·D로 쉽게 옮김', level: '쉬움', beats: 2, bpm: 84,
+    credit: '독일 민요',
+    bars: 'G D G G G D G G D D G G G D G G'.split(' ') },
+  twinkle: { title: '작은별', sub: '1절', level: '쉬움', beats: 2, bpm: 84,
+    credit: '프랑스 민요',
+    bars: 'G G C G C G D G G C G D G C G D G G C G C G D G'.split(' ') },
 };
+const SONG_CHORDS = [...new Set(Object.values(SONGS).flatMap((s) => s.bars))].sort((a, b) => C.CHORD_ORDER.indexOf(a) - C.CHORD_ORDER.indexOf(b));
 const play = {
-  rh: { hit: 0, near: 0, miss: 0 }, pending: [], beats: [null, null, null, null],
-  song: 'twinkle', bar: 0, running: false, mode: 'wait', bpm: 75, metro: true,
-  results: [], pts: 0, combo: 0, maxCombo: 0, t: 0, hold: 0, holdSum: 0, best: 0, accSum: 0, accN: 0,
+  rh: { hit: 0, near: 0, miss: 0 }, pending: [], beats: [],
+  song: 'tomato', bar: 0, running: false, mode: 'wait', bpmAdj: 0, metro: true, countdown: 0,
+  results: [], pts: 0, combo: 0, maxCombo: 0, t: 0, hold: 0, holdSum: 0, best: 0, accSum: 0, accN: 0, wrongFor: 0,
+  get bpm() { return Math.max(40, Math.min(160, SONGS[this.song].bpm + this.bpmAdj)); },
   current() { return SONGS[this.song].bars[Math.min(this.bar, SONGS[this.song].bars.length - 1)]; },
 };
-$('#song').innerHTML = Object.entries(SONGS).map(([k, s]) => `<option value="${k}">${esc(s.title)}</option>`).join('');
-$('#song').onchange = (e) => { play.song = e.target.value; play.bpm = SONGS[play.song].bpm; resetSong(); };
-$$('#mode button').forEach((b) => (b.onclick = () => { play.mode = b.dataset.mode; $$('#mode button').forEach((x) => x.classList.toggle('on', x === b)); resetBar(); renderPlay(); }));
-$('#bpmDown').onclick = () => { play.bpm = Math.max(40, play.bpm - 5); renderPlay(); };
-$('#bpmUp').onclick = () => { play.bpm = Math.min(140, play.bpm + 5); renderPlay(); };
-$('#metroBtn').onclick = () => { play.metro = !play.metro; $('#metroBtn').textContent = play.metro ? '♩ 메트로놈 켬' : '♩ 메트로놈 끔'; };
-$('#playBtn').onclick = async () => {
+
+function renderSongs() {
+  $('#songs').innerHTML = Object.entries(SONGS).map(([k, s]) => {
+    const need = [...new Set(s.bars)];
+    const missing = need.filter((c) => !chordOK(c));
+    return `<div class="card song">
+      <div class="between"><div><h3>${esc(s.title)}</h3><div class="tiny">${esc(s.sub)} · ${s.level} · ${s.beats}/4박 · BPM ${s.bpm}</div></div>
+        <button class="btn primary" data-song="${k}" style="padding:9px 14px">연주하기</button></div>
+      <div class="row tiny">필요한 코드 <span class="chips">${need.map((c) => `<span class="chip ${chordOK(c) ? 'ok' : 'no'}">${c}</span>`).join('')}</span></div>
+      <div class="tiny">${missing.length ? `${missing.join('·')} 코드를 코드 수업에서 먼저 연습하면 좋아요` : '필요한 코드를 모두 익혔어요!'} · ${esc(s.credit)}</div>
+    </div>`;
+  }).join('');
+  $$('#songs [data-song]').forEach((b) => (b.onclick = () => openPlayer(b.dataset.song)));
+  $('#bpm').textContent = play.bpmAdj ? `${play.bpmAdj > 0 ? '+' : ''}${play.bpmAdj}` : '곡 기본';
+}
+$$('#mode button').forEach((b) => (b.onclick = () => { play.mode = b.dataset.mode; $$('#mode button').forEach((x) => x.classList.toggle('on', x === b)); }));
+$('#bpmDown').onclick = () => { play.bpmAdj = Math.max(-40, play.bpmAdj - 5); renderSongs(); };
+$('#bpmUp').onclick = () => { play.bpmAdj = Math.min(40, play.bpmAdj + 5); renderSongs(); };
+$('#metroChk').onchange = (e) => { play.metro = e.target.checked; };
+
+async function openPlayer(key) {
+  play.song = key; resetSong();
+  $('#player').hidden = false; document.body.classList.add('playing');
+  $('#playStage').hidden = true; $('#camToggle').textContent = '화면 보기';
+  $('#camStatus').textContent = '카메라 준비 중…';
+  audio();
+  if (!cam.running) await startCamera(); else attachStage();
+  if (!cam.running) { renderPlay(); return; }
+  $('#camStatus').textContent = '카메라로 코드 인식 중…';
+  startPlay();
+}
+function closePlayer() {
+  if ($('#player').hidden) return;
+  pausePlay();
+  $('#player').hidden = true; document.body.classList.remove('playing');
+  stats.lastSong = play.song; dirty = true;
+  renderSongs();
+}
+function startPlay() {
   if (play.bar >= SONGS[play.song].bars.length) resetSong();
-  if (!cam.running) await startCamera();
-  if (!cam.running) return;
-  play.running = !play.running;
-  if (play.running) { $('#summary').hidden = true; audio(); }
+  play.running = true; $('#summary').hidden = true;
+  if (play.mode === 'tempo' && play.t === 0) play.countdown = 3;   // 박자대로: 3·2·1 뒤 시작
   renderPlay();
+}
+$('#backBtn').onclick = closePlayer;
+$('#camToggle').onclick = () => {
+  const st = $('#playStage'); st.hidden = !st.hidden;
+  $('#camToggle').textContent = st.hidden ? '화면 보기' : '화면 숨기기';
+  attachStage();
+};
+$('#playBtn').onclick = async () => {
+  if (!cam.running) { await startCamera(); if (!cam.running) return; }
+  if (play.running) pausePlay(); else startPlay();
 };
 $('#retryBar').onclick = () => { play.results[play.bar] = undefined; resetBar(); renderPlay(); };
 $('#skipBar').onclick = () => { if (play.bar < SONGS[play.song].bars.length) judgeBar(true); };
 function pausePlay() { if (play.running) { play.running = false; renderPlay(); } }
-function resetBar() { play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; play.beats = [null, null, null, null]; }
-function resetSong() { play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; play.rh = { hit: 0, near: 0, miss: 0 }; play.pending = []; resetBar(); $('#summary').hidden = true; renderPlay(); }
+function resetBar() { play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; play.beats = Array(SONGS[play.song].beats).fill(null); }
+function resetSong() { play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; play.rh = { hit: 0, near: 0, miss: 0 }; play.pending = []; play.lastBeat = null; play.countdown = 0; resetBar(); $('#summary').hidden = true; renderPlay(); }
 
 let actx = null;
 function audio() { try { actx ||= new AudioContext(); actx.resume(); } catch {} }
@@ -852,23 +899,27 @@ function click(accent) {
   o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.07);
 }
 
-// 판정: 맞출 때까지 기다리기 = 맞는 상태를 0.8초 유지하면 통과, 박자대로 = 마디가 끝날 때 가장 좋았던 점수로
+// 판정: 맞출 때까지 기다리기 = 맞는 상태를 0.8초 유지(또는 잡고 한 번 치기)하면 통과,
+//       박자대로 = 마디가 끝날 때 0.4초 이상 이어진 가장 좋은 점수로
 let lastEv = null, playUiT = 0;
 function onPlayFrame(ev, dt, hasHand) {
   lastEv = ev;
-  if (play.running && play.bar < SONGS[play.song].bars.length) {
+  const song = SONGS[play.song];
+  if (play.running && play.bar < song.bars.length) {
     const score = ev?.onNeck ? ev.score : 0;
-    if (ev?.onNeck) { play.accSum += score * dt; play.accN += dt; }
-    if (play.mode === 'wait') {
+    if (ev?.onNeck && !play.countdown) { play.accSum += score * dt; play.accN += dt; }
+    play.wrongFor = ev?.onNeck && !ev.ok ? play.wrongFor + dt : 0;
+    if (play.countdown > 0) {
+      play.countdown -= dt;
+      if (play.countdown <= 0) play.countdown = 0;
+    } else if (play.mode === 'wait') {
       if (ev?.ok) { play.hold += dt; play.holdSum += score * dt; } else { play.hold = 0; play.holdSum = 0; }
-      // 맞게 잡고 한 번 치면 바로 통과, 안 쳐도 0.8초 유지하면 통과
       if (play.hold >= 0.8 || (play.hold >= 0.25 && recentDown(0.4))) judgeBar(false, recentDown(0.4));
     } else {
-      const beatLen = 60 / play.bpm, barLen = beatLen * 4;
+      const beatLen = 60 / play.bpm, barLen = beatLen * song.beats;
       const beat = Math.floor(play.t / beatLen);
-      if (beat !== play.beat && beat < 4) { play.beat = beat; click(beat % 4 === 0); play.pending.push({ tb: performance.now() / 1000, bar: play.bar, k: beat }); }
+      if (beat !== play.beat && beat < song.beats) { play.beat = beat; click(beat === 0); play.pending.push({ tb: performance.now() / 1000, bar: play.bar, k: beat }); }
       play.t += dt;
-      // 0.4초 동안 이어진 점수의 최고값을 마디 점수로
       if (ev?.ok || score >= 60) { play.hold += dt; play.holdSum += score * dt; if (play.hold >= 0.4) play.best = Math.max(play.best, play.holdSum / play.hold); } else { play.hold = 0; play.holdSum = 0; }
       if (play.t >= barLen) judgeBar(false);
     }
@@ -889,11 +940,11 @@ function judgeBeats() {
     const g = Math.abs(d) <= 0.12 ? 'hit' : Math.abs(d) <= 0.25 ? 'near' : 'miss';
     play.rh[g]++;
     play.lastBeat = { g, d };
-    if (b.bar === play.bar) play.beats[b.k] = g; else if (b.bar === play.bar - 1) play.prevBeats = { ...(play.prevBeats || {}), [b.k]: g };
+    if (b.bar === play.bar) play.beats[b.k] = g;
   }
 }
 function rhythmText() {
-  if (play.mode !== 'tempo') return recentDown(1) ? '스트럼 확인' : '';
+  if (play.mode !== 'tempo') return '';
   const lb = play.lastBeat; if (!lb) return performance.now() / 1000 - strum.seenAt > 1.2 ? '오른손이 보이면 박자도 채점해요' : '';
   return lb.g === 'hit' ? '박자 정타' : lb.g === 'near' ? (lb.d < 0 ? '박자 조금 빠름' : '박자 조금 느림') : '박자 놓침';
 }
@@ -916,72 +967,52 @@ function finishSong() {
   const rn = play.rh.hit + play.rh.near + play.rh.miss, rAcc = rn ? Math.round((play.rh.hit + play.rh.near * 0.5) / rn * 100) : null;
   stats.lastSong = play.song; dirty = true;
   $('#summary').hidden = false;
-  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">⚡ ${play.pts}</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div><div class="muted">평균 운지 정확도 ${acc}%${rAcc != null ? ` · 박자 정확도 ${rAcc}% (정타 ${play.rh.hit} · 빠름/느림 ${play.rh.near} · 놓침 ${play.rh.miss})` : ''}</div><button class="btn primary" onclick="this.closest('.summary').hidden=true" style="margin-top:6px">닫기</button>`;
+  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">${play.pts.toLocaleString()}점</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div><div class="muted">평균 운지 정확도 ${acc}%${rAcc != null ? ` · 박자 정확도 ${rAcc}%` : ''}</div><div class="row" style="justify-content:center;margin-top:8px"><button class="btn primary" id="againBtn">↺ 다시 하기</button><button class="btn line" id="listBtn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)">곡 목록</button></div>`;
+  $('#againBtn').onclick = () => { resetSong(); startPlay(); };
+  $('#listBtn').onclick = closePlayer;
 }
 function renderPlay() {
-  const song = SONGS[play.song], n = song.bars.length, key = play.current(), ch = C.CHORDS[key];
-  $('#songSub').textContent = `${song.sub} · BPM ${play.bpm}`;
-  $('#bpm').textContent = `BPM ${play.bpm}`;
-  $('#pts').textContent = `⚡ ${play.pts.toLocaleString()}`;
-  $('#bars').innerHTML = song.bars.map((_, i) => `<i class="${play.results[i] || (i === play.bar ? 'now' : '')}"></i>`).join('');
-  $('#barNo').textContent = `BAR ${Math.min(play.bar + 1, n)}/${n}`;
-  $('#combo').textContent = play.combo >= 2 ? `Combo ×${play.combo} 🔥` : '';
+  const song = SONGS[play.song], n = song.bars.length, key = play.current();
+  $('#songTitle').textContent = song.title;
+  $('#songSub').textContent = `${song.sub} · ${song.level}${play.mode === 'tempo' ? ` · BPM ${play.bpm}` : ''}`;
+  $('#pts').textContent = `${play.pts.toLocaleString()}점`;
+  $('#progBar').style.width = `${(Math.min(play.bar, n) / n) * 100}%`;
   $('#nowChord').textContent = key;
-  $('#nowKind').textContent = /m$/.test(key) ? 'MINOR' : 'MAJOR';
-  // 링: 기다리기 모드는 유지 진행률, 박자 모드는 마디 진행률
-  const prog = play.mode === 'wait' ? Math.min(1, play.hold / 0.8) : Math.min(1, play.t / (240 / play.bpm));
-  $('#ringArc').style.strokeDashoffset = String(615.75 * (1 - prog));
-  $('#ringArc').style.stroke = lastEv?.ok ? '#4ade80' : '#4b8bff';
+  // 링: 기다리기 = 맞게 잡은 채 유지한 정도, 박자대로 = 마디가 지난 정도
+  const prog = play.mode === 'wait' ? Math.min(1, play.hold / 0.8) : Math.min(1, play.t / (song.beats * 60 / play.bpm));
+  $('#ringArc').style.strokeDashoffset = String(628.3 * (play.running && prog ? 1 - prog : 0));
+  $('#ringArc').style.stroke = lastEv?.ok ? '#34d399' : '#3b6cff';
   const v = $('#verdict');
   const fl = play.flash && performance.now() < play.flash.until ? play.flash.grade : null;
-  if (fl) { v.className = 'verdict ' + fl; v.textContent = { p: '✓ PERFECT!', g: 'GOOD', m: 'MISS' }[fl] + (play.flash.strummed ? ' · 스트럼 ✓' : ''); }
-  else if (play.bar >= n) { v.className = 'verdict'; v.textContent = '완주! 다시 하려면 시작'; }
-  else if (!play.running) { v.className = 'verdict'; v.textContent = play.bar ? '일시정지' : '시작을 눌러 주세요'; }
-  else if (!lastEv?.onNeck) { v.className = 'verdict'; v.textContent = '지판 위에 손을 올려 주세요'; }
-  else { v.className = 'verdict' + (lastEv.ok ? ' p' : ''); v.textContent = lastEv.ok ? '좋아요, 유지!' : '잡는 중…'; }
   const rt = rhythmText();
-  $('#playAcc').textContent = [lastEv?.onNeck ? `운지 정확도 ${lastEv.score}%` : '', rt].filter(Boolean).join(' · ');
-  const bt = $('#beats');
-  bt.hidden = !(cam.running && play.running);
-  if (!bt.hidden) bt.innerHTML = play.mode === 'tempo'
-    ? play.beats.map((g, k) => `<i class="${g || (k === play.beat ? 'now' : '')}">↓</i>`).join('')
-    : `<i class="${recentDown(0.4) ? 'hit' : 'now'}" style="width:auto;padding:0 10px;font-size:13px">↓ 잡고 한 번 치기</i>`;
+  if (fl) { v.className = 'verdict ' + fl; v.textContent = { p: 'PERFECT', g: 'GOOD', m: 'MISS' }[fl] + (play.combo >= 2 && fl !== 'm' ? ` · ${play.combo}콤보` : ''); }
+  else if (play.bar >= n) { v.className = 'verdict'; v.textContent = '완주!'; }
+  else if (play.countdown > 0) { v.className = 'verdict'; v.textContent = `${Math.ceil(play.countdown)}…`; }
+  else if (!play.running) { v.className = 'verdict'; v.textContent = cam.running ? '일시정지' : '카메라를 켜 주세요'; }
+  else if (!lastEv?.onNeck) { v.className = 'verdict'; v.textContent = '지판 위에 손을 올려 주세요'; }
+  else { v.className = 'verdict' + (lastEv.ok ? ' p' : ''); v.textContent = (lastEv.ok ? '좋아요, 유지!' : `운지 ${lastEv.score}%`) + (rt ? ` · ${rt}` : ''); }
+  // 틀린 채 1초가 지나면 가장 틀린 손가락 하나만 한 줄로 알려 준다
   const w = lastEv?.fingers?.reduce((a, b) => (b.score < a.score ? b : a));
-  $('#hintMain').textContent = w ? (w.status === 'good' ? '모든 손가락 위치가 좋아요' : w.label) : fingerGuide(key);
-  $('#hintSub').textContent = w && w.status !== 'good' ? w.msg : '';
-  const ahead = song.bars.slice(play.bar, play.bar + 5);
-  $('#nextList').innerHTML = ahead.map((k, i) => `<div class="${i ? '' : 'cur'}">${k}<small>${i ? `${i}마디 뒤` : '현재'}</small></div>`).join('');
-  $('#nextInfo').textContent = `${Math.min(play.bar + 1, n)}/${n} 마디`;
-  $('#playBtn').textContent = play.running ? '❚❚ 일시정지' : play.bar >= n ? '↺ 처음부터' : play.bar ? '▶ 계속' : '▶ 시작';
-  if (renderPlay.key !== key) {
-    renderPlay.key = key;
-    diagramSVG($('#playDiagram'), key);
-    $('#guideTitle').textContent = `${key} 코드 손가락 번호 가이드`;
-    $('#guideBody').textContent = fingerGuide(key);
-    $('#coach').textContent = coachTip(key);
-  }
-}
-function coachTip(key) {
-  const tips = {
-    G: 'G 코드는 중지로 6번줄(가장 굵은 줄)을 누를 때 손바닥이 넥 아래에 닿지 않게 손목을 살짝 앞으로 밀어 주세요.',
-    C: 'C 코드는 약지가 5번줄 3프렛을 누르면서 4번줄을 건드리기 쉬워요. 손가락을 세워 끝으로 눌러 주세요.',
-    D: 'D 코드는 세 손가락이 삼각형을 이뤄요. 6·5번줄은 치지 말고 4번줄부터 쳐 주세요.',
-    Em: 'Em 코드는 중지·약지 두 손가락만 2프렛에 나란히 놓으면 돼요. 가장 쉬운 코드부터 손에 익혀요.',
-    A: 'A 코드는 세 손가락이 같은 2프렛에 몰려 있어요. 약지가 1번줄에 닿지 않도록 손가락 끝을 세워 주세요.',
-    Am: 'Am 코드는 C 코드에서 약지만 3번줄 2프렛으로 옮기면 돼요.',
-    E: 'E 코드는 Am 모양을 그대로 한 줄씩 위(굵은 줄 쪽)로 옮긴 모양이에요.',
-    F: 'F 바레는 검지를 곧게 펴서 옆면으로 1프렛 전체를 눌러요. 처음엔 소리가 안 나도 정상이에요.',
-  };
-  return tips[key] || '';
+  const showFix = play.running && w && w.status !== 'good' && play.wrongFor > 1;
+  $('#fix').hidden = !showFix;
+  if (showFix) $('#fix').textContent = `${w.label} · ${w.msg}`;
+  const bt = $('#beats');
+  bt.hidden = !(cam.running && play.running && play.mode === 'tempo' && !play.countdown);
+  if (!bt.hidden) bt.innerHTML = play.beats.map((g, k) => `<i class="${g || (k === play.beat ? 'now' : '')}">↓</i>`).join('');
+  $('#nextList').innerHTML = song.bars.slice(play.bar, play.bar + 5).map((k, i) => `<div class="${i ? '' : 'cur'}">${k}</div>`).join('');
+  $('#playBtn').textContent = play.running ? '❚❚ 일시정지' : play.bar >= n ? '↺ 처음부터' : '▶ 계속';
+  if (follow.lost) $('#camStatus').textContent = '지판을 놓쳤어요 · 화면 보기에서 위치를 맞춰 주세요';
+  else if (cam.running) $('#camStatus').textContent = '카메라로 코드 인식 중…';
 }
 
 // ---------- 도움말 ----------
 $('#helpBtn').onclick = () => alert('사용법\n\n1. 코드 수업에서 카메라를 켜고 “지판 위치 맞추기”로 파란 가이드를 기타 지판(너트~5프렛)에 맞춥니다.\n2. 화면의 번호 동그라미(손가락 번호) 위에 손가락을 올리면 줄·프렛 단위로 판정합니다.\n3. 연주해보자에서 곡의 코드 진행을 따라 잡아 보세요.\n\n카메라 영상과 기록은 이 브라우저 밖으로 보내지 않습니다.');
 
-window.__app = { S, C, play, follow, strum, setCorners, video, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
+window.__app = { S, C, play, follow, strum, setCorners, video, SONGS, openPlayer, closePlayer, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
 setChord('A');
-renderPlay();
+renderSongs();
 renderHome();
+$('.top').hidden = true;
 </script>
 </body>
 </html>
