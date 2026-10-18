@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>조교 업무 대행 · 한 장 소개서</title>
+<style>
+:root{--fg:#1c2128;--muted:#5d6672;--line:#e1ded6;--accent:#0f6b5c;--soft:#dcefea;--bg:#fff;--font:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fg:#e9ebee;--muted:#9aa3ae;--line:#2d333a;--accent:#4fc3a9;--soft:#17312c;--bg:#121518;color-scheme:dark}}
+:root[data-theme="dark"]{--fg:#e9ebee;--muted:#9aa3ae;--line:#2d333a;--accent:#4fc3a9;--soft:#17312c;--bg:#121518;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.55;padding:24px 16px}
+.page{max-width:720px;margin:0 auto;display:grid;gap:14px}
+h1{font-size:1.6rem;margin:0;line-height:1.3}h2{font-size:1.02rem;margin:0 0 4px;color:var(--accent)}
+.lead{margin:0;color:var(--muted)}
+.box{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+ul,ol{margin:0;padding-left:1.2em}
+.price{background:var(--soft);border-color:var(--accent)}
+.price b.big{font-size:1.3rem}
+.contact{border-style:dashed;min-height:70px}
+.note{font-size:.78rem;color:var(--muted)}
+.noprint{text-align:center}
+.noprint button{font:inherit;padding:8px 14px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);font-weight:600;cursor:pointer}
+@media print{:root{--fg:#000;--muted:#444;--line:#bbb;--accent:#0f6b5c;--soft:#e8f4f1;--bg:#fff}body{padding:0}.noprint{display:none}@page{size:A4;margin:14mm}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>조교 선생님의 채점·오답 정리·숙제 만들기,<br>하루 안에 대신 해 드립니다</h1>
+    <p class="lead">한 반 시험 결과(틀린 문제)만 보내 주시면 학생마다 다른 맞춤 숙제와 정답지, 학부모님께 보낼 문구까지 만들어 드립니다.</p>
+  </header>
+  <div class="grid">
+    <section class="box"><h2>받으시는 것</h2>
+      <ul><li>학생별 약점 분석 (최대 3개)</li><li>학생별 맞춤 숙제 8문항 + 정답·해설</li><li>학부모 문자용 3문장 리포트</li><li>줄어든 조교 시간을 숫자로 정리</li></ul></section>
+    <section class="box"><h2>진행 방법</h2>
+      <ol><li>한 반(5~10명) 시험 결과 사진·표 보내기</li><li>24시간 안에 학생별 PDF + 문구 전달</li><li>원장님이 확인 후 배포 (빼실 문항은 바로 빼 드림)</li></ol></section>
+  </div>
+  <section class="box price"><h2>가격</h2>
+    <ul>
+      <li><b>처음 한 번 무료</b> (한 반)</li>
+      <li>첫 달 <b class="big">5만 원</b> · 조교 시간이 <b>주 2시간 이상</b> 안 줄면 <b>전액 환불</b></li>
+      <li>둘째 달부터 월 10만 원</li>
+    </ul></section>
+  <section class="box"><h2>안심하실 점</h2>
+    <ul><li>학생 이름 대신 <b>별명·번호</b>로만 받습니다. 받은 사진은 작업 후 지웁니다.</li><li>문항은 AI가 만들고 <b>사람이 모두 풀어 본 뒤</b>, 원장님 확인을 거쳐서만 나갑니다.</li></ul></section>
+  <section class="box"><h2>예시 보기</h2>
+    <p style="margin:0">quanter02.github.io/tutor &nbsp;·&nbsp; 무료 오답 분석기: quanter02.github.io/analyze</p></section>
+  <section class="box contact"><h2>연락처</h2><p class="note">(직접 적어 주세요)</p></section>
+  <p class="note">연습 문제는 새로 만든 것이며 기출이 아닙니다. 성적 향상을 보장하지 않습니다.</p>
+  <div class="noprint"><button type="button" onclick="window.print()">A4로 인쇄</button></div>
+</div>
+</body>
+</html>
