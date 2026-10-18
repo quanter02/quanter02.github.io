@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="학생별 시험 결과로 약점 분석, 맞춤 학습지, 학부모 리포트를 만들고 줄어든 조교 시간을 숫자로 보여 주는 체험판입니다.">
+<meta property="og:title" content="조교 반복 업무 도우미 · 체험판">
+<meta property="og:description" content="틀린 문제만 보내 주시면 학생별 맞춤 학습지와 학부모 리포트를 만들어 드립니다.">
+<title>조교 반복 업무 도우미 · 체험판</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--fg:#1c2128;--muted:#5d6672;--line:#e1ded6;--accent:#0f6b5c;--accent-soft:#dcefea;
+  --font:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;--num:ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121518;--card:#1b1f24;--fg:#e9ebee;--muted:#9aa3ae;--line:#2d333a;--accent:#4fc3a9;--accent-soft:#17312c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121518;--card:#1b1f24;--fg:#e9ebee;--muted:#9aa3ae;--line:#2d333a;--accent:#4fc3a9;--accent-soft:#17312c;color-scheme:dark}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;padding:24px 16px 56px;line-height:1.6}
+.wrap{max-width:820px;margin:0 auto;display:grid;gap:16px}
+h1{font-size:1.6rem;line-height:1.3;margin:6px 0}h2{font-size:1.08rem;margin:0 0 6px}
+.lead{color:var(--muted);margin:0}.note{font-size:.8rem;color:var(--muted)}
+.badge{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+input[type=number]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:90px}
+button,a.btn{font:inherit;padding:8px 12px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--card);cursor:pointer;font-weight:600;text-decoration:none;display:inline-block}
+button.g,a.g{background:none;color:var(--accent)}button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpis div{border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center;background:var(--card)}
+.kpis b{display:block;font-size:1.35rem;font-family:var(--num)}.kpis span{font-size:.75rem;color:var(--muted)}
+.steps{display:grid;gap:6px;margin:0;padding-left:1.2em}
+.stu{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;background:var(--card)}
+.stu h3{margin:0;font-size:1rem}.pill{font-size:.72rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.ok{border-color:var(--accent);color:var(--accent)}
+.res{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:.85rem}
+.weak{display:grid;gap:4px;font-size:.88rem}.weak b{color:var(--accent)}
+.q{border-top:1px solid var(--line);padding-top:6px;font-size:.9rem;display:grid;gap:2px}
+.q .o{color:var(--muted)}.q .a{color:var(--accent);font-size:.8rem}
+.q button{padding:2px 8px;justify-self:start;font-size:.78rem}
+.parent{font-size:.88rem;background:var(--accent-soft);border-radius:8px;padding:8px 10px}
+#print{display:none}
+@media print{body{background:#fff;color:#000;padding:0}.wrap{display:none}#print{display:block;color:#000;font-family:var(--font)}
+  #print h1{font-size:17pt}#print .pq{margin:10pt 0;page-break-inside:avoid}#print .key{page-break-before:always}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">체험판 · 학원 원장님·강사님용</span>
+    <h1>조교 반복 업무 도우미</h1>
+    <p class="lead">학생별 <b>틀린 문제</b>만 보내 주시면 <b>약점 분석 → 학생별 맞춤 학습지(정답지 포함) → 학부모 리포트</b>를 만들어 드립니다. 강사님이 확인한 학습지만 나가고, <b>줄어든 조교 시간을 숫자로</b> 보여 드립니다.</p>
+  </header>
+
+  <section class="card">
+    <h2>이 화면에서 해 보실 것 (3분)</h2>
+    <ol class="steps">
+      <li>아래 예시 학생 3명의 <b>약점 분석과 맞춤 문제</b>를 훑어보세요.</li>
+      <li>마음에 안 드는 문항은 <b>이 문항 빼기</b>로 지우고 <b>강사 확인 완료</b>를 누르세요.</li>
+      <li><b>인쇄</b>로 학습지·정답지 모양을, <b>학부모 리포트 복사</b>로 문구를 확인하세요.</li>
+      <li>위 숫자판에 <b>줄어든 조교 시간</b>이 쌓입니다.</li>
+    </ol>
+  </section>
+
+  <section class="kpis" aria-label="이번 주 절약">
+    <div><b id="k-sheets">0</b><span>확인 완료 학습지</span></div>
+    <div><b id="k-min">0</b><span>줄어든 조교 시간(분)</span></div>
+    <div><b id="k-won">0</b><span>환산 금액(원)</span></div>
+  </section>
+
+  <details class="card"><summary><b>기준 시간 바꾸기</b> (원장님 학원 실제 값으로)</summary>
+    <div class="row" style="margin-top:8px">
+      <label class="note">학습지 1장 직접 만들기(분) <input type="number" id="m-make" min="0"></label>
+      <label class="note">채점·오답 정리·학부모 연락(분) <input type="number" id="m-grade" min="0"></label>
+      <label class="note">강사 확인(분) <input type="number" id="m-review" min="0"></label>
+      <label class="note">조교 시급(원) <input type="number" id="wage" min="0"></label>
+    </div>
+    <p class="note">줄어든 시간 = (직접 만들기 + 채점·연락) − 강사 확인. 2026년 최저시급 10,320원, 학원 조교 공고 시급은 대체로 1만~1.5만 원대입니다.</p>
+  </details>
+
+  <div id="list" style="display:grid;gap:12px"></div>
+  <div class="row"><button class="g" type="button" id="reset">체험 처음부터 다시</button></div>
+
+  <section class="card" style="display:grid;gap:8px">
+    <h2>우리 반으로 해 보기 · 2주 무료</h2>
+    <ol class="steps">
+      <li>한 반(5~10명)의 <b>틀린 문제 번호와 고른 답</b>을 사진이나 글로 보내 주세요. 학생 이름 대신 <b>별명이나 번호</b>로 보내 주세요.</li>
+      <li>다음 날까지 학생별 <b>맞춤 학습지·정답지·학부모 리포트</b>를 보내 드립니다.</li>
+      <li>2주 뒤 <b>줄어든 조교 시간</b>을 숫자로 정리해 드립니다. 계속 쓰시면 월 10만 원입니다.</li>
+    </ol>
+    <div class="row"><a class="btn" id="apply" href="#">결과 보내기·문의하기</a></div>
+  </section>
+
+  <p class="note">문항은 AI가 만들고 강사 확인 후에만 배포합니다. AI 문항은 틀릴 수 있어 확인 단계를 없애지 않습니다. 이 체험판의 확인·삭제 기록은 이 브라우저에만 저장되고 어디로도 보내지 않습니다. 예시 학생은 가상 인물입니다.</p>
+</div>
+<div id="print"></div>
+<script>
+// 문의 링크는 정해지면 채움 (오픈채팅·구글 폼)
+const LINKS = {apply: ""};
+const SHEETS = [
+ {nick:"예시-중2 민", result:"단원평가 14/20. 틀린 문제: The book ___ by many students (reads 고름, 정답 is read) / She has lived here ___ 2020 (for 고름, 정답 since) / If it ___ tomorrow, we will stay home (will rain 고름, 정답 rains) / The movie was ___ (bored 고름, 정답 boring)",
+  weak:[["수동태","책이 '읽히는' 자리에 reads를 고름","주어가 동작을 '받으면' be + p.p."],["since / for","2020(시점) 앞에 for를 고름","시점 앞은 since, 기간(3 years) 앞은 for"],["시간·조건 부사절","If 절에 will rain을 씀","when·if 절은 미래라도 현재형"],["감정 분사","영화가 지루함을 '주는' 자리에 bored","감정을 주면 -ing, 느끼면 -ed"]],
+  qs:[["수동태","The windows ___ every Friday by the staff.",["clean","cleans","are cleaned","are cleaning"],2,"by the staff(행위자) → 창문은 닦이는 것 → are cleaned"],
+   ["수동태","This song ___ by many teenagers these days.",["loves","is loved","loving","is loving"],1,"노래는 사랑받는 것 → be + p.p. → is loved"],
+   ["since / for","I have known Jisu ___ we were in elementary school.",["since","for","during","when"],0,"뒤에 '시점'(초등학생이던 때) → since"],
+   ["since / for","They have waited for the bus ___ twenty minutes.",["since","ago","during","for"],3,"twenty minutes는 기간 → for"],
+   ["시간·조건 부사절","When she ___ home, I will call you.",["will get","got","getting","gets"],3,"when 절은 미래라도 현재형 → gets"],
+   ["시간·조건 부사절","If you ___ hard, you will pass the test.",["study","will study","studied","studying"],0,"if 절은 현재형 → study"],
+   ["감정 분사","The math class was so ___ that I almost fell asleep.",["bored","boring","bore","bores"],1,"수업이 지루함을 '주는' 쪽 → boring"],
+   ["감정 분사","I was ___ at the news about the school trip.",["exciting","excite","excited","excites"],2,"내가 신남을 '느끼는' 쪽 → excited"]],
+  parent:"민 학생은 이번 단원평가에서 수동태, since/for 구분, 시간·조건 부사절의 시제에서 반복 실수가 있었습니다. 이번 주 숙제는 이 세 가지와 감정 분사만 집중한 8문제로, 각 문제의 '단서 → 규칙'을 스스로 말해 보는 것이 목표입니다. 다음 주 수업 시작 5분 동안 같은 유형 4문제로 다시 확인하겠습니다."},
+ {nick:"예시-중3 서", result:"내신 대비 18/25. 틀린: 관계대명사 who/which 혼동 2문제(the house who → which), 주어·동사 수 일치 2문제(The list of items are → is, Each student have → has), 동명사/to부정사(enjoy to swim → swimming)",
+  weak:[["관계대명사","사물(house) 뒤에 who를 씀","사람 → who, 사물·동물 → which, 소유 → whose"],["주어·동사 수 일치","The list of items are","of 뒤 명사가 아니라 앞의 진짜 주어(list)에 맞춘다"],["동명사 목적어","enjoy to swim","enjoy·finish·mind 뒤는 -ing"]],
+  qs:[["관계대명사","This is the house ___ my grandfather built.",["who","which","where","what"],1,"선행사 house(사물) + 뒤에 목적어 빠짐 → which"],
+   ["관계대명사","I have a friend ___ speaks three languages.",["who","which","whose","what"],0,"선행사 friend(사람) + 주어 자리 → who"],
+   ["관계대명사","The dog ___ tail is short is mine.",["who","which","that","whose"],3,"'그 개의' 꼬리 → 소유 → whose"],
+   ["수 일치","The list of items ___ on the desk.",["are","is","be","were"],1,"진짜 주어는 The list(단수) → is"],
+   ["수 일치","Each student ___ a locker.",["have","are having","has","having"],2,"each + 단수 명사 → 단수 동사 has"],
+   ["수 일치","The students in my class ___ very kind.",["is","was","has been","are"],3,"진짜 주어 The students(복수) → are"],
+   ["동명사 목적어","We enjoyed ___ in the lake.",["to swim","swim","swimming","swam"],2,"enjoy 뒤는 동명사 → swimming"],
+   ["동명사 목적어","He finished ___ his homework before dinner.",["doing","to do","do","did"],0,"finish 뒤는 동명사 → doing"]],
+  parent:"서 학생은 관계대명사 선택(who/which/whose), 주어와 동사의 수 일치, enjoy·finish 뒤 동명사에서 실수가 반복되었습니다. 이번 주 숙제는 '진짜 주어 찾기'와 '선행사가 사람인지 사물인지 먼저 보기' 두 습관을 8문제로 연습하는 것입니다. 다음 내신 대비 수업에서 같은 유형으로 다시 확인하겠습니다."},
+ {nick:"예시-고1 준", result:"모의고사 어법 3문항 중 1개 정답. 틀린: 분사 수식(exciting/excited 구분), 대명사 수 일치(its/their), 병렬 구조(to read and writing → write)",
+  weak:[["분사 수식","excited/exciting, broken/breaking 구분","꾸밈 받는 명사가 하면 -ing, 당하면 p.p."],["대명사 수 일치","회사(단수)에 their를 씀","가리키는 명사가 단수면 its, 복수면 their"],["병렬 구조","to read and writing","and·but also 앞뒤는 같은 형태"]],
+  qs:[["분사 수식","The ___ fans cheered loudly after the goal.",["exciting","excited","excite","excitement"],1,"팬들이 신남을 느낌 → excited"],
+   ["분사 수식","Look at the ___ window; someone hit it with a ball.",["breaking","break","broken","breaks"],2,"창문은 깨짐을 당함 → broken"],
+   ["분사 수식","The man ___ next to Mina is my uncle.",["sitting","sat","is sitting","sits"],0,"이미 동사 is가 있음 + 남자가 앉아 있음 → sitting"],
+   ["대명사 수 일치","The company changed ___ logo last year.",["their","its","it's","them"],1,"The company(단수)의 → its (it's는 it is)"],
+   ["대명사 수 일치","The students forgot to bring ___ textbooks.",["its","his","their","theirs"],2,"The students(복수)의 → their"],
+   ["병렬 구조","She likes to read books and ___ letters.",["writing","wrote","writes","write"],3,"to read and (to) write → write"],
+   ["병렬 구조","The job requires patience, honesty, and ___.",["creative","creatively","create","creativity"],3,"명사 나열 patience, honesty → 명사 creativity"],
+   ["병렬 구조","He not only cleaned the room but also ___ the dishes.",["washed","washing","to wash","washes"],0,"cleaned와 같은 과거형 → washed"]],
+  parent:"준 학생은 분사의 능동·수동 구분, 대명사의 단수·복수, 병렬 구조에서 점수를 잃고 있습니다. 이번 주 숙제는 모의고사 어법 형식 8문제로, 문제마다 '꾸밈 받는 명사가 하는지 당하는지'와 'and 앞뒤 형태'를 표시하며 푸는 것이 목표입니다. 다음 모의고사 전에 어법 5문항으로 다시 확인하겠습니다."}];
+const $ = id => document.getElementById(id);
+const KEY = "tutor-demo-v1";
+const fresh = () => ({set:{make:20, grade:10, review:4, wage:10320}, stu: SHEETS.map(s => ({nick:s.nick, result:s.result, weak:s.weak, qs:s.qs.map(q => q.slice()), parent:s.parent, ok:false})), log:[]});
+let S = fresh();
+try{ const v = JSON.parse(localStorage.getItem(KEY) || "null"); if(v && Array.isArray(v.stu)) S = v; }catch(e){}
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+const ymd = x => `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
+const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
+const saved = () => Math.max(0, (+S.set.make||0) + (+S.set.grade||0) - (+S.set.review||0));
+function kpi(){ const n = S.log.length, m = n * saved();
+  $("k-sheets").textContent = n; $("k-min").textContent = m; $("k-won").textContent = Math.round(m/60*(+S.set.wage||0)).toLocaleString("ko-KR"); }
+function render(){
+  ["make","grade","review"].forEach(k => $("m-"+k).value = S.set[k]); $("wage").value = S.set.wage;
+  const box = $("list"); box.innerHTML = "";
+  S.stu.forEach(st => {
+    const c = el("section","stu");
+    const head = el("div","row"); head.style.justifyContent = "space-between";
+    head.appendChild(el("h3",null,st.nick)); head.appendChild(el("span","pill"+(st.ok?" ok":""), st.ok?"강사 확인 완료":"확인 필요")); c.appendChild(head);
+    c.appendChild(el("div","res","받은 결과: "+st.result));
+    const w = el("div","weak"); w.appendChild(el("b",null,"약점 분석"));
+    st.weak.forEach(x => w.appendChild(el("div",null,`· ${x[0]} — ${x[1]} → 규칙: ${x[2]}`))); c.appendChild(w);
+    st.qs.forEach((q, qi) => { const d = el("div","q");
+      d.appendChild(el("div",null,`${qi+1}. [${q[0]}] ${q[1]}`));
+      d.appendChild(el("div","o",q[2].map((t,j) => `${"ABCD"[j]}) ${t}`).join("   ")));
+      d.appendChild(el("div","a",`정답 ${"ABCD"[q[3]]} · ${q[4]}`));
+      if(!st.ok){ const del = el("button","g","이 문항 빼기"); del.type = "button"; del.onclick = () => { st.qs.splice(qi,1); save(); render(); }; d.appendChild(del); }
+      c.appendChild(d); });
+    c.appendChild(el("div","parent","학부모 리포트: "+st.parent));
+    const r = el("div","row");
+    const ok = el("button",null, st.ok?"확인 완료됨":"강사 확인 완료"); ok.type = "button"; ok.disabled = st.ok || !st.qs.length;
+    ok.onclick = () => { st.ok = true; S.log.push({day: ymd(new Date()), nick: st.nick}); save(); render(); }; r.appendChild(ok);
+    const pb = el("button","g","인쇄 (학습지 + 정답지)"); pb.type = "button"; pb.disabled = !st.ok; pb.onclick = () => printSheet(st); r.appendChild(pb);
+    const cp = el("button","g","학부모 리포트 복사"); cp.type = "button"; cp.disabled = !st.ok;
+    cp.onclick = () => { const done = () => { cp.textContent = "복사했어요"; };
+      if(navigator.clipboard) navigator.clipboard.writeText(st.parent).then(done).catch(() => window.prompt("복사해 주세요", st.parent)); else window.prompt("복사해 주세요", st.parent); };
+    r.appendChild(cp); c.appendChild(r);
+    if(!st.ok) c.appendChild(el("div","note","인쇄와 리포트 복사는 강사 확인 뒤에 열립니다."));
+    box.appendChild(c);
+  });
+  kpi();
+}
+function printSheet(st){
+  const p = $("print"); p.innerHTML = "";
+  p.appendChild(el("h1",null,`${st.nick} 맞춤 학습지 · ${ymd(new Date())}`));
+  p.appendChild(el("p",null,"오늘의 규칙: " + st.weak.map(x => x[2]).join(" / ")));
+  st.qs.forEach((q,i) => p.appendChild(el("div","pq",`${i+1}. ${q[1]}   ` + q[2].map((t,j) => `(${"ABCD"[j]}) ${t}`).join("  "))));
+  const k = el("div","key"); k.appendChild(el("h1",null,`정답지 · ${st.nick}`));
+  st.qs.forEach((q,i) => k.appendChild(el("div","pq",`${i+1}. ${"ABCD"[q[3]]} — ${q[4]}`))); p.appendChild(k);
+  window.print();
+}
+["make","grade","review"].forEach(k => $("m-"+k).onchange = () => { S.set[k] = +$("m-"+k).value || 0; save(); kpi(); });
+$("wage").onchange = () => { S.set.wage = +$("wage").value || 0; save(); kpi(); };
+$("reset").onclick = () => { if(confirm("체험 기록을 지우고 처음 상태로 돌릴까요?")){ S = fresh(); save(); render(); } };
+const a = $("apply"); if(LINKS.apply){ a.href = LINKS.apply; a.target = "_blank"; a.rel = "noopener"; } else a.onclick = e => { e.preventDefault(); alert("문의 창구를 곧 열어요. 이 링크를 보내 준 사람에게 연락해 주세요."); };
+render();
+</script>
+</body>
+</html>
