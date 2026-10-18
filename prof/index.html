@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="과제·퀴즈 결과로 학생별 약점 분석, 맞춤 연습문제, 학생 피드백, 반 전체 공통 오개념을 만들고 줄어든 조교 시간을 숫자로 보여 주는 대학 강의용 체험판입니다.">
+<meta property="og:title" content="강의 조교 도우미 · 대학 체험판">
+<meta property="og:description" content="과제·퀴즈 결과만 보내 주시면 학생별 맞춤 연습문제와 피드백, 반 전체 공통 오개념을 정리해 드립니다.">
+<title>강의 조교 도우미 · 대학 체험판</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--fg:#1c2128;--muted:#5d6672;--line:#e1ded6;--accent:#0f6b5c;--accent-soft:#dcefea;
+  --font:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;--num:ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121518;--card:#1b1f24;--fg:#e9ebee;--muted:#9aa3ae;--line:#2d333a;--accent:#4fc3a9;--accent-soft:#17312c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121518;--card:#1b1f24;--fg:#e9ebee;--muted:#9aa3ae;--line:#2d333a;--accent:#4fc3a9;--accent-soft:#17312c;color-scheme:dark}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;padding:24px 16px 56px;line-height:1.6}
+.wrap{max-width:820px;margin:0 auto;display:grid;gap:16px}
+h1{font-size:1.6rem;line-height:1.3;margin:6px 0}h2{font-size:1.08rem;margin:0 0 6px}
+.lead{color:var(--muted);margin:0}.note{font-size:.8rem;color:var(--muted)}
+.badge{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+input[type=number]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:90px}
+button,a.btn{font:inherit;padding:8px 12px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--card);cursor:pointer;font-weight:600;text-decoration:none;display:inline-block}
+button.g,a.g{background:none;color:var(--accent)}button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpis div{border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center;background:var(--card)}
+.kpis b{display:block;font-size:1.35rem;font-family:var(--num)}.kpis span{font-size:.75rem;color:var(--muted)}
+.steps{display:grid;gap:6px;margin:0;padding-left:1.2em}
+.stu{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;background:var(--card)}
+.stu h3{margin:0;font-size:1rem}.pill{font-size:.72rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.ok{border-color:var(--accent);color:var(--accent)}
+.res{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:.85rem}
+.weak{display:grid;gap:4px;font-size:.88rem}.weak b{color:var(--accent)}
+.q{border-top:1px solid var(--line);padding-top:6px;font-size:.9rem;display:grid;gap:2px}
+.q .o{color:var(--muted)}.q .a{color:var(--accent);font-size:.8rem}
+.q button{padding:2px 8px;justify-self:start;font-size:.78rem}
+pre.code{margin:2px 0;padding:6px 8px;border-radius:6px;background:var(--bg);font-family:var(--num);font-size:.8rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.class li{margin:2px 0}
+.parent{font-size:.88rem;background:var(--accent-soft);border-radius:8px;padding:8px 10px}
+#print{display:none}
+@media print{body{background:#fff;color:#000;padding:0}.wrap{display:none}#print{display:block;color:#000;font-family:var(--font)}
+  #print h1{font-size:17pt}#print .pq{margin:10pt 0;page-break-inside:avoid}#print .key{page-break-before:always}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">체험판 · 대학 교수님·대학원 조교용</span>
+    <h1>강의 조교 도우미</h1>
+    <p class="lead">과제·퀴즈의 <b>학생별 오답</b>만 보내 주시면 <b>반 전체 공통 오개념 → 학생별 약점 분석 → 맞춤 연습문제(정답·해설) → 학생 피드백</b>을 만들어 드립니다. 교수님이 확인한 것만 나가고, <b>줄어든 조교 시간을 숫자로</b> 보여 드립니다.</p>
+  </header>
+
+  <section class="card">
+    <h2>이 화면에서 해 보실 것 (3분)</h2>
+    <ol class="steps">
+      <li><b>반 전체 공통 오개념</b>과 다음 수업 보강 포인트를 보세요.</li>
+      <li>예시 학생 3명의 <b>약점 분석과 맞춤 연습문제</b>를 훑어보고, 마음에 안 드는 문항은 <b>이 문항 빼기</b>로 지우세요.</li>
+      <li><b>교수 확인 완료</b>를 누르면 <b>인쇄</b>와 <b>학생 피드백 복사</b>가 열리고, 위 숫자판에 줄어든 시간이 쌓입니다.</li>
+    </ol>
+  </section>
+
+  <section class="kpis" aria-label="절약">
+    <div><b id="k-sheets">0</b><span>확인 완료 학생</span></div>
+    <div><b id="k-min">0</b><span>줄어든 조교 시간(분)</span></div>
+    <div><b id="k-won">0</b><span>환산 금액(원)</span></div>
+  </section>
+
+  <details class="card"><summary><b>기준 시간 바꾸기</b> (실제 강의 값으로)</summary>
+    <div class="row" style="margin-top:8px">
+      <label class="note">학생별 연습문제 직접 만들기(분) <input type="number" id="m-make" min="0"></label>
+      <label class="note">오답 정리·피드백 작성(분) <input type="number" id="m-grade" min="0"></label>
+      <label class="note">교수 확인(분) <input type="number" id="m-review" min="0"></label>
+      <label class="note">조교 시급(원) <input type="number" id="wage" min="0"></label>
+    </div>
+    <p class="note">줄어든 시간 = (직접 만들기 + 피드백 작성) − 교수 확인. 학생 1명 기준이며, 수강생 수를 곱하면 한 번 과제에서 줄어드는 시간입니다.</p>
+  </details>
+
+  <section class="card class">
+    <h2>반 전체 공통 오개념 (예시 3명 기준)</h2>
+    <ul id="classwide"></ul>
+    <p class="note">실제로는 수강생 전체 결과를 모아 많이 틀린 순서로 보여 드립니다.</p>
+  </section>
+
+  <div id="list" style="display:grid;gap:12px"></div>
+  <div class="row"><button class="g" type="button" id="reset">체험 처음부터 다시</button></div>
+
+  <section class="card" style="display:grid;gap:8px">
+    <h2>우리 강의로 해 보기 · 무료 파일럿</h2>
+    <ol class="steps">
+      <li>지난 과제나 퀴즈 1회분의 <b>문항별 정오표</b>(또는 자동 채점 결과)를 보내 주세요. 이름·학번 대신 <b>번호(A01, A02…)</b>로 바꿔 주세요.</li>
+      <li>다음 날까지 <b>공통 오개념 요약 + 학생별 연습문제·피드백</b>을 보내 드립니다.</li>
+      <li>교수님이 확인하는 데 걸린 시간과, 조교가 직접 했을 때 걸리던 시간을 함께 적어 주세요.</li>
+    </ol>
+    <div class="row"><a class="btn" id="apply" href="#">결과 보내기·문의하기</a></div>
+  </section>
+
+  <p class="note">문항은 AI가 만들고 교수 확인 후에만 배포합니다. 학생 답안을 외부로 보내기 전에 학교의 AI·개인정보 규정을 확인해 주세요. 이 체험판의 확인·삭제 기록은 이 브라우저에만 저장되고 어디로도 보내지 않습니다. 예시 학생은 가상 인물입니다.</p>
+</div>
+<div id="print"></div>
+<script>
+// 문의 링크는 정해지면 채움
+const LINKS = {apply: ""};
+const COURSE = "자료구조 (Python) · 3주차 퀴즈";
+// q: [유형, 질문, 코드(없으면 ""), 보기 4개, 정답 번호, 해설]
+const SHEETS = [
+ {nick:"A01", result:"퀴즈 6/10. 틀린 문항: 재귀 합계 함수에서 종료 조건 누락(무한 재귀) / b = a.copy() 뒤 b[0] 수정이 a에 영향 없다고 답함 / 이중 반복문(j가 i부터 n까지)을 O(n)이라고 답함 / while i < n: i *= 2 를 O(n)이라고 답함",
+  weak:[["재귀 종료 조건","종료 조건 없는 재귀를 정상 종료로 봄","재귀는 '언제 멈추는가'(base case)부터 확인하고, 매 호출이 그쪽으로 다가가는지 본다"],["얕은 복사","copy() 뒤 안쪽 리스트도 따로 복사된다고 봄","copy()는 바깥 리스트만 새로 만든다. 안쪽 객체는 공유"],["시간 복잡도","반복 횟수가 줄어드는 반복을 O(n)으로 봄","반복 변수가 '더해지면' n, '곱해지면' log n. 중첩은 곱한다"]],
+  qs:[["재귀 종료 조건","f(4)의 결과는?","def f(n):\n    if n == 0:\n        return 0\n    return n + f(n - 1)",["4","24","무한 재귀","10"],3,"종료 조건 n == 0 → 4+3+2+1+0 = 10"],
+   ["재귀 종료 조건","g(5)를 호출하면?","def g(n):\n    if n == 0:\n        return 0\n    return g(n - 2)",["0을 반환","5를 반환","RecursionError","1을 반환"],2,"5 → 3 → 1 → -1 … 0을 건너뛰므로 멈추지 않음 → RecursionError"],
+   ["얕은 복사","출력 결과는?","a = [[1, 2], [3, 4]]\nb = a.copy()\nb[0].append(9)\nprint(a[0])",["[1, 2]","[1, 2, 9]","[9]","오류"],1,"copy()는 얕은 복사 → 안쪽 리스트 공유 → a[0]도 [1, 2, 9]"],
+   ["얕은 복사","출력 결과는?","a = [1, 2, 3]\nb = a\nb.append(4)\nprint(len(a))",["4","3","0","오류"],0,"b = a는 복사가 아니라 같은 리스트를 가리킴 → len(a) = 4"],
+   ["시간 복잡도","다음 코드의 시간 복잡도는?","for i in range(n):\n    for j in range(i, n):\n        total += 1",["O(n)","O(n log n)","O(n²)","O(2ⁿ)"],2,"n + (n-1) + … + 1 = n(n+1)/2 → O(n²)"],
+   ["시간 복잡도","다음 코드의 시간 복잡도는?","i = 1\nwhile i < n:\n    i *= 2",["O(n)","O(log n)","O(n²)","O(1)"],1,"i가 2배씩 커짐 → 약 log₂ n번 반복 → O(log n)"]],
+  feedback:"A01 학생, 이번 퀴즈에서는 재귀의 종료 조건, 리스트 복사, 반복문의 시간 복잡도에서 실수가 반복됐습니다. 연습문제 6개를 풀 때 '이 재귀는 언제 멈추는가', '이 변수는 더해지는가 곱해지는가'를 먼저 적어 보세요. 다음 퀴즈 전에 같은 유형 3문제로 다시 확인하겠습니다."},
+ {nick:"A02", result:"퀴즈 7/10. 틀린 문항: 스택에서 pop() 결과를 처음 넣은 값으로 답함 / range(1, len(a))가 첫 원소부터 돈다고 답함 / 같은 키에 두 번 대입하면 딕셔너리 길이가 2라고 답함",
+  weak:[["스택과 큐","스택 pop을 먼저 넣은 값으로 봄","스택은 마지막에 넣은 것이 먼저(LIFO), 큐는 먼저 넣은 것이 먼저(FIFO)"],["범위 경계(off-by-one)","range 시작·끝 포함 여부 혼동","range(a, b)는 a 포함, b 미포함. 개수는 b − a"],["해시(딕셔너리)","같은 키 재대입을 새 항목으로 봄","키는 하나뿐. 같은 키에 대입하면 값만 바뀐다"]],
+  qs:[["스택과 큐","출력 결과는?","s = []\ns.append(1)\ns.append(2)\ns.append(3)\nprint(s.pop())",["1","2","3","[1, 2]"],2,"리스트를 스택으로 쓰면 pop()은 마지막 값 → 3"],
+   ["스택과 큐","출력 결과는?","from collections import deque\nq = deque([1, 2, 3])\nq.append(4)\nprint(q.popleft())",["1","4","3","2"],0,"큐는 먼저 들어온 것이 먼저 나감 → 1"],
+   ["범위 경계(off-by-one)","출력되는 값은?","a = [10, 20, 30]\nfor i in range(1, len(a)):\n    print(a[i])",["10 20 30","20 30","10 20","IndexError"],1,"range(1, 3) → i = 1, 2 → 20, 30"],
+   ["범위 경계(off-by-one)","range(2, 10, 3)에 들어 있는 값의 개수는?","",["2","4","8","3"],3,"2, 5, 8 → 3개 (10은 미포함)"],
+   ["해시(딕셔너리)","출력 결과는?","d = {}\nd['a'] = 1\nd['a'] = 2\nprint(len(d), d['a'])",["2 2","1 1","1 2","2 1"],2,"같은 키는 하나 → 길이 1, 값은 마지막 대입 2"],
+   ["해시(딕셔너리)","해시 테이블에서 서로 다른 두 키가 같은 위치(버킷)로 가는 것을 무엇이라 하나?","",["오버플로","충돌(collision)","정렬","재귀"],1,"서로 다른 키의 해시 위치가 겹치는 것 → 충돌"]],
+  feedback:"A02 학생, 자료구조의 동작 순서(스택은 나중에 넣은 것이 먼저, 큐는 먼저 넣은 것이 먼저)와 range의 끝 값 미포함에서 실수가 있었습니다. 연습문제를 풀 때 값이 들어가고 나오는 순서를 직접 그려 보세요. 다음 실습 시작 때 짧게 다시 확인하겠습니다."},
+ {nick:"A03", result:"퀴즈 6/10. 틀린 문항: 연결 리스트 삽입에서 p.next = x를 먼저 실행 / 이진 탐색 반복 조건을 lo < hi로 써서 원소 하나 남았을 때 놓침 / 이진 탐색 비교 횟수를 n/2라고 답함 / 연결 리스트 k번째 접근을 O(1)이라고 답함",
+  weak:[["연결 리스트","포인터 갱신 순서가 뒤바뀜","새 노드가 먼저 뒤를 붙잡고(x.next = p.next), 그다음 앞이 새 노드를 가리킨다"],["이진 탐색","종료 조건과 비교 횟수 혼동","lo = mid + 1, hi = mid − 1로 줄이면 조건은 lo <= hi. 비교 횟수는 log₂ n"],["접근 시간","연결 리스트를 배열처럼 봄","배열은 인덱스로 O(1), 연결 리스트는 처음부터 따라가야 해서 O(n)"]],
+  qs:[["연결 리스트","노드 p 뒤에 새 노드 x를 넣는 올바른 순서는?","",["p.next = x; x.next = p.next","x.next = p.next; p.next = x","x.next = p; p.next = x","p.next = x.next; x.next = p"],1,"p.next를 먼저 바꾸면 원래 뒤 노드를 잃음 → x가 먼저 붙잡기"],
+   ["연결 리스트","head = head.next를 실행하면?","",["첫 노드가 리스트에서 빠진다","마지막 노드가 빠진다","리스트 전체가 지워진다","두 번째 노드가 빠진다"],0,"head가 두 번째 노드를 가리킴 → 첫 노드는 더 이상 연결되지 않음"],
+   ["이진 탐색","lo = mid + 1, hi = mid - 1로 범위를 줄일 때 올바른 반복 조건은?","lo, hi = 0, len(a) - 1\nwhile ____:\n    mid = (lo + hi) // 2\n    ...",["lo < hi","lo != hi","hi < lo","lo <= hi"],3,"lo == hi일 때도 원소가 하나 남아 있으므로 확인해야 함 → lo <= hi"],
+   ["이진 탐색","a = [1, 3, 5, 7, 9]에서 7을 찾을 때 처음 비교하는 값은?","",["1","5","7","9"],1,"mid = (0 + 4) // 2 = 2 → a[2] = 5"],
+   ["이진 탐색","정렬된 원소 1,000,000개에서 이진 탐색의 최대 비교 횟수는 대략?","",["약 1,000번","약 500,000번","약 20번","약 1,000,000번"],2,"log₂ 1,000,000 ≈ 20"],
+   ["접근 시간","단일 연결 리스트에서 k번째 원소에 접근하는 시간 복잡도는?","",["O(1)","O(log n)","O(n)","O(n²)"],2,"head부터 k번 따라가야 함 → 최악 O(n)"]],
+  feedback:"A03 학생, 연결 리스트의 포인터를 바꾸는 순서와 이진 탐색의 종료 조건에서 실수가 있었습니다. 연습문제를 풀 때 노드와 화살표를 그림으로 그리고, 원소가 1개 남은 경우를 꼭 따라가 보세요. 다음 과제 채점 때 같은 부분을 다시 보겠습니다."}];
+const CLASS = [["시간 복잡도·접근 시간","3명 중 2명","반복 변수가 곱해지면 log n, 연결 리스트 접근은 O(n) — 다음 수업 첫 5분에 표 하나로 정리"],
+ ["경계 조건 (재귀 종료, range 끝, lo <= hi)","3명 중 3명","'원소가 0개·1개일 때'를 손으로 따라가 보는 습관 — 예제 하나를 같이 추적"],
+ ["참조와 복사 (b = a, copy())","3명 중 1명","Python Tutor 같은 그림으로 참조를 보여 주면 효과적"]];
+const $ = id => document.getElementById(id);
+const KEY = "prof-demo-v1";
+const fresh = () => ({set:{make:15, grade:8, review:3, wage:15000}, stu: SHEETS.map(s => ({nick:s.nick, result:s.result, weak:s.weak, qs:s.qs.map(q => q.slice()), feedback:s.feedback, ok:false})), log:[]});
+let S = fresh();
+try{ const v = JSON.parse(localStorage.getItem(KEY) || "null"); if(v && Array.isArray(v.stu)) S = v; }catch(e){}
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+const ymd = x => `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
+const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
+const saved = () => Math.max(0, (+S.set.make||0) + (+S.set.grade||0) - (+S.set.review||0));
+function kpi(){ const n = S.log.length, m = n * saved();
+  $("k-sheets").textContent = n; $("k-min").textContent = m; $("k-won").textContent = Math.round(m/60*(+S.set.wage||0)).toLocaleString("ko-KR"); }
+function render(){
+  ["make","grade","review"].forEach(k => $("m-"+k).value = S.set[k]); $("wage").value = S.set.wage;
+  const cw = $("classwide"); cw.innerHTML = "";
+  CLASS.forEach(c => { const li = el("li"); li.appendChild(el("b",null,`${c[0]} (${c[1]})`)); li.appendChild(document.createTextNode(" → 보강: " + c[2])); cw.appendChild(li); });
+  const box = $("list"); box.innerHTML = "";
+  S.stu.forEach(st => {
+    const c = el("section","stu");
+    const head = el("div","row"); head.style.justifyContent = "space-between";
+    head.appendChild(el("h3",null,`학생 ${st.nick} · ${COURSE}`)); head.appendChild(el("span","pill"+(st.ok?" ok":""), st.ok?"교수 확인 완료":"확인 필요")); c.appendChild(head);
+    c.appendChild(el("div","res","받은 결과: "+st.result));
+    const w = el("div","weak"); w.appendChild(el("b",null,"약점 분석"));
+    st.weak.forEach(x => w.appendChild(el("div",null,`· ${x[0]} — ${x[1]} → 규칙: ${x[2]}`))); c.appendChild(w);
+    st.qs.forEach((q, qi) => { const d = el("div","q");
+      d.appendChild(el("div",null,`${qi+1}. [${q[0]}] ${q[1]}`));
+      if(q[2]) d.appendChild(el("pre","code",q[2]));
+      d.appendChild(el("div","o",q[3].map((t,j) => `${"ABCD"[j]}) ${t}`).join("   ")));
+      d.appendChild(el("div","a",`정답 ${"ABCD"[q[4]]} · ${q[5]}`));
+      if(!st.ok){ const del = el("button","g","이 문항 빼기"); del.type = "button"; del.onclick = () => { st.qs.splice(qi,1); save(); render(); }; d.appendChild(del); }
+      c.appendChild(d); });
+    c.appendChild(el("div","parent","학생 피드백: "+st.feedback));
+    const r = el("div","row");
+    const ok = el("button",null, st.ok?"확인 완료됨":"교수 확인 완료"); ok.type = "button"; ok.disabled = st.ok || !st.qs.length;
+    ok.onclick = () => { st.ok = true; S.log.push({day: ymd(new Date()), nick: st.nick}); save(); render(); }; r.appendChild(ok);
+    const pb = el("button","g","인쇄 (연습문제 + 정답)"); pb.type = "button"; pb.disabled = !st.ok; pb.onclick = () => printSheet(st); r.appendChild(pb);
+    const cp = el("button","g","학생 피드백 복사"); cp.type = "button"; cp.disabled = !st.ok;
+    cp.onclick = () => { const done = () => { cp.textContent = "복사했어요"; };
+      if(navigator.clipboard) navigator.clipboard.writeText(st.feedback).then(done).catch(() => window.prompt("복사해 주세요", st.feedback)); else window.prompt("복사해 주세요", st.feedback); };
+    r.appendChild(cp); c.appendChild(r);
+    if(!st.ok) c.appendChild(el("div","note","인쇄와 피드백 복사는 교수 확인 뒤에 열립니다."));
+    box.appendChild(c);
+  });
+  kpi();
+}
+function printSheet(st){
+  const p = $("print"); p.innerHTML = "";
+  p.appendChild(el("h1",null,`${COURSE} · 학생 ${st.nick} 맞춤 연습문제 · ${ymd(new Date())}`));
+  p.appendChild(el("p",null,"기억할 규칙: " + st.weak.map(x => x[2]).join(" / ")));
+  st.qs.forEach((q,i) => { const d = el("div","pq"); d.appendChild(el("div",null,`${i+1}. ${q[1]}`)); if(q[2]) d.appendChild(el("pre","code",q[2]));
+    d.appendChild(el("div",null,q[3].map((t,j) => `(${"ABCD"[j]}) ${t}`).join("   "))); p.appendChild(d); });
+  const k = el("div","key"); k.appendChild(el("h1",null,`정답 · 학생 ${st.nick}`));
+  st.qs.forEach((q,i) => k.appendChild(el("div","pq",`${i+1}. ${"ABCD"[q[4]]} — ${q[5]}`))); p.appendChild(k);
+  window.print();
+}
+["make","grade","review"].forEach(k => $("m-"+k).onchange = () => { S.set[k] = +$("m-"+k).value || 0; save(); kpi(); });
+$("wage").onchange = () => { S.set.wage = +$("wage").value || 0; save(); kpi(); };
+$("reset").onclick = () => { if(confirm("체험 기록을 지우고 처음 상태로 돌릴까요?")){ S = fresh(); save(); render(); } };
+const a = $("apply"); if(LINKS.apply){ a.href = LINKS.apply; a.target = "_blank"; a.rel = "noopener"; } else a.onclick = e => { e.preventDefault(); alert("문의 창구를 곧 열어요. 이 링크를 보내 준 사람에게 연락해 주세요."); };
+render();
+</script>
+</body>
+</html>
