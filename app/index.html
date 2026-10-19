@@ -267,7 +267,7 @@ const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e
 const ymd = x => `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
 const OPEN = new Set();
 // 서버 주소: Cloudflare Worker 배포 후 채우기 (예: https://tutor-app.<계정>.workers.dev)
-const API = "";
+const API = "https://tutor-app.jogyo-helper.workers.dev";
 const CAN_IMG = {maxCount: 4, mediaTypes: ["image/jpeg","image/png","image/webp","image/heic"]};
 let ctl = null, BUSY = false, PEND_DEL = null;
 if(!S.code) S.code = "";
