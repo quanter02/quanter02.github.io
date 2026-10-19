@@ -240,7 +240,7 @@ details.read ul{margin:6px 0 0;padding-left:1.1em;font-size:.85rem;color:var(--i
     </details>
   </main>
 
-  <p class="foot">조교 도우미 앱 v1 · <a href="privacy.html">개인정보 처리방침</a> · 문의 <span id="contact">quanter02.github.io</span>. AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기 단계로 넘어갑니다. 학생 기록은 이 휴대폰에만 저장됩니다. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않습니다.</p>
+  <p class="foot">조교 도우미 앱 v1.1 · <a href="privacy.html">개인정보 처리방침</a> · 문의 <span id="contact">quanter02.github.io</span>. AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기 단계로 넘어갑니다. 학생 기록은 이 휴대폰에만 저장됩니다. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않습니다.</p>
 </div>
 
 <div class="bar" id="bar">
@@ -545,7 +545,7 @@ async function gen(idx){
   if(!S.code){ sheetOpen(true); $("code").focus(); setMsg("학원 코드를 넣거나 무료 코드를 받아 주세요."); return; }
   const targets = idx.filter(i => S.stu[i] && hasInput(S.stu[i])); if(!targets.length){ setMsg("결과가 입력된 학생이 없어요."); return; }
   ctl = new AbortController(); BUSY = true; $("stop").hidden = false; $("prog").hidden = false; $("progi").style.width = "0";
-  let fail = 0, stopped = false;
+  let fail = 0, stopped = false, why = "";
   for(let n = 0; n < targets.length; n++){
     const st = S.stu[targets[n]]; st.busy = true; render(); setMsg(`${st.nick} 학습지 만드는 중… (${n+1}/${targets.length})`);
     try{
@@ -559,17 +559,17 @@ async function gen(idx){
     }catch(e){
       if(e && (e.code === "cancelled" || e.name === "AbortError")){ stopped = true; st.busy = false; break; }
       fail++;
-      if(e && e.code === "not_ready"){ setMsg("학습지 서버를 준비하고 있어요. 지금은 예시 학습지로 둘러봐 주세요."); st.busy = false; break; }
-      if(e && e.code === "quota"){ setMsg("무료 20장을 다 썼어요. 설정에서 구독 안내를 확인해 주세요."); st.busy = false; break; }
-      if(e && e.code === "no_code"){ setMsg("학원 코드를 찾지 못했어요. 설정에서 코드를 다시 확인해 주세요."); st.busy = false; break; }
-      if(!navigator.onLine){ setMsg("인터넷 연결이 끊겼어요. 연결된 뒤 다시 눌러 주세요."); st.busy = false; break; }
+      if(e && e.code === "not_ready"){ why = ("학습지 서버를 준비하고 있어요. 지금은 예시 학습지로 둘러봐 주세요."); st.busy = false; break; }
+      if(e && e.code === "quota"){ why = ("무료 20장을 다 썼어요. 설정에서 구독 안내를 확인해 주세요."); st.busy = false; break; }
+      if(e && e.code === "no_code"){ why = ("학원 코드를 찾지 못했어요. 설정에서 코드를 다시 확인해 주세요."); st.busy = false; break; }
+      if(!navigator.onLine){ why = ("인터넷 연결이 끊겼어요. 연결된 뒤 다시 눌러 주세요."); st.busy = false; break; }
     }
     st.busy = false; save(); $("progi").style.width = Math.round((n+1) / targets.length * 100) + "%";
   }
   BUSY = false; $("stop").hidden = true; $("prog").hidden = true;
   const made = targets.filter(i => S.stu[i].sheet && !S.stu[i].ok);
   if(made.length && !stopped && !fail){ S.cur = made[0]; S.step = 2; save(); render(); setMsg(`${made.length}명 학습지를 만들었어요. 하나씩 확인해 주세요.`); }
-  else { render(); setMsg(stopped ? "멈췄어요." : fail ? `${fail}명은 만들지 못했어요. 다시 눌러 주세요.` : "완료."); }
+  else { render(); setMsg(why ? why : stopped ? "멈췄어요." : fail ? `${fail}명은 만들지 못했어요. 다시 눌러 주세요.` : "완료."); }
 }
 
 function addStu(nick, result, subj){ nick = nick.trim().slice(0, 20); if(!nick || S.stu.some(s => s.nick === nick)) return false; S.stu.push({nick, result: (result || "").trim(), subj: subj || S.subj, sheet: null, ok: false}); return true; }
