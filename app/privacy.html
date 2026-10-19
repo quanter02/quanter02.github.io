@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>개인정보 처리방침 · 조교 도우미</title>
+<style>
+:root{--bg:#f5f7f9;--fg:#18202b;--muted:#556070;--rule:#dde2e8;--pen:#2a52be}
+@media (prefers-color-scheme:dark){:root{--bg:#11151b;--fg:#e8ecf1;--muted:#9ba6b4;--rule:#2c3440;--pen:#86a6f5;color-scheme:dark}}
+body{background:var(--bg);color:var(--fg);font-family:"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;line-height:1.7;margin:0;padding:24px max(16px,env(safe-area-inset-left,0px)) 48px}
+main{max-width:640px;margin:0 auto}
+h1{font-size:1.4rem}h2{font-size:1.05rem;margin-top:28px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}td,th{border-top:1px solid var(--rule);padding:8px 6px;text-align:left;vertical-align:top}
+.muted{color:var(--muted);font-size:.9rem}a{color:var(--pen)}
+</style>
+</head>
+<body>
+<main>
+<h1>조교 도우미 개인정보 처리방침</h1>
+<p class="muted">시행일 2026년 10월 19일</p>
+
+<p>조교 도우미(이하 "앱")는 학원 원장·강사가 학생 시험 결과로 맞춤 학습지를 만드는 도구입니다. 앱은 학생이 직접 쓰는 앱이 아니며, 학생은 실명 대신 별명으로만 입력하도록 안내합니다.</p>
+
+<h2>1. 어떤 정보를 어디에 두나요</h2>
+<table>
+<tr><th>정보</th><th>보관 위치</th><th>보관 기간</th></tr>
+<tr><td>학생 별명, 시험 결과 메모, 만든 학습지, 학부모 리포트</td><td>사용하는 기기(브라우저 저장소)에만</td><td>사용자가 지우거나 앱 데이터를 지울 때까지</td></tr>
+<tr><td>시험지 사진</td><td>저장하지 않음. 화면에 올린 동안만 메모리에 있음</td><td>화면을 닫으면 사라짐</td></tr>
+<tr><td>학원 코드, 학원 이름(선택), 만든 학습지 장수</td><td>앱 서버</td><td>서비스 이용 기간 동안</td></tr>
+<tr><td>날짜별 이용 숫자(코드 발급 수, 학습지 수, 오류 수)</td><td>앱 서버</td><td>통계 목적, 개인을 알아볼 수 없는 숫자만</td></tr>
+<tr><td>접속 IP</td><td>앱 서버</td><td>무료 코드 중복 발급을 막는 용도로 24시간</td></tr>
+</table>
+
+<h2>2. 학습지를 만들 때 보내는 정보</h2>
+<p>"학습지 만들기"를 누르면 그 학생의 별명, 과목, 결과 메모, 시험지 사진이 앱 서버를 거쳐 Anthropic의 Claude API로 전송됩니다. 앱 서버는 이 내용을 저장하거나 기록하지 않고 결과만 기기로 돌려줍니다. Anthropic의 처리는 <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic 개인정보 처리방침</a>과 상업용 약관을 따릅니다.</p>
+
+<h2>3. 입력하지 말아야 할 정보</h2>
+<p>학생 실명, 연락처, 주민등록번호, 학교·반 번호처럼 학생을 알아볼 수 있는 정보는 입력하지 마세요. 시험지 사진에 이름이 보이면 가리고 찍어 주세요.</p>
+
+<h2>4. 삭제</h2>
+<p>기기에 저장된 기록은 앱에서 학생을 삭제하거나 브라우저(앱) 데이터를 지우면 바로 사라집니다. 서버에 있는 학원 코드와 이용 숫자의 삭제는 아래 문의처로 요청하면 7일 안에 지웁니다.</p>
+
+<h2>5. 제3자 제공</h2>
+<p>위 2번의 Claude API 전송 외에는 어떤 정보도 다른 회사에 제공하거나 판매하지 않습니다. 광고와 추적 도구를 쓰지 않습니다.</p>
+
+<h2>6. 문의</h2>
+<p>운영자: 조교 도우미 개인 개발자 · 문의: <span id="contact">앱 안의 문의 안내를 확인해 주세요</span></p>
+<p><a href="./">← 앱으로 돌아가기</a></p>
+</main>
+</body>
+</html>
