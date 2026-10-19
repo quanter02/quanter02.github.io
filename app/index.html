@@ -559,6 +559,7 @@ async function gen(idx){
     }catch(e){
       if(e && (e.code === "cancelled" || e.name === "AbortError")){ stopped = true; st.busy = false; break; }
       fail++;
+      if(e && e.code === "not_ready"){ setMsg("학습지 서버를 준비하고 있어요. 지금은 예시 학습지로 둘러봐 주세요."); st.busy = false; break; }
       if(e && e.code === "quota"){ setMsg("무료 20장을 다 썼어요. 설정에서 구독 안내를 확인해 주세요."); st.busy = false; break; }
       if(e && e.code === "no_code"){ setMsg("학원 코드를 찾지 못했어요. 설정에서 코드를 다시 확인해 주세요."); st.busy = false; break; }
       if(!navigator.onLine){ setMsg("인터넷 연결이 끊겼어요. 연결된 뒤 다시 눌러 주세요."); st.busy = false; break; }
@@ -594,7 +595,7 @@ $("export").onclick = () => {
 render();
 let Q = null;
 function showQuota(){ const q = $("quota");
-  q.textContent = !API ? "체험판 · 서버 연결 전" : !S.code ? "코드 없음 · 예시만 볼 수 있어요" : Q ? `${S.code} · ${Q.quota - Q.used}장 남음 (${Q.used}/${Q.quota})` : S.code; }
+  q.textContent = !API ? "체험판 · 서버 연결 전" : !S.code ? "코드 없음 · 예시만 볼 수 있어요" : Q ? `${S.code} · ${Q.quota - Q.used}장 남음 (${Q.used}/${Q.quota})${Q.ready === false ? " · 학습지 서버 준비 중" : ""}` : S.code; }
 async function checkCode(c){
   if(!API){ showQuota(); return; }
   try{ const r = await fetch(API + "/code?c=" + encodeURIComponent(c)); const j = await r.json();
