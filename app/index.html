@@ -6,253 +6,279 @@
 <title>조교 도우미</title>
 <meta name="description" content="학생 시험 결과를 넣으면 약점 분석, 맞춤 학습지, 학부모 리포트까지 만드는 학원용 앱. 학원마다 학습지 20장 무료.">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#11151b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17171c" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="조교 도우미">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-html{padding-top:env(safe-area-inset-top,0px)}
-/* 레이아웃: 휴대폰 앱 한 칸(최대 560px). 위 앱 바, 아래 탭 바(결과 넣기 → 확인 → 보내기) + 그 위 주요 버튼. 파란 펜 = 정답, 빨간 펜 = 확인 필요 */
+/* 레이아웃: 휴대폰 한 칸(최대 520px). 회색 바탕 위 테두리 없는 흰 카드, 질문형 큰 제목, 아래 고정 큰 버튼 + 탭 바 */
 :root{
-  --paper:#f5f7f9; --sheet:#ffffff; --ink:#18202b; --ink-2:#556070; --rule:#dde2e8; --rule-2:#eef1f4;
-  --pen:#2a52be; --pen-soft:#e7edfb; --red:#c8402f; --red-soft:#fbece9; --ok:#1d7a4f; --ok-soft:#e5f3ec;
-  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif; --num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --r:10px;
+  --bg:#f2f4f6; --card:#ffffff; --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --line:#e5e8eb; --fill:#f2f4f6;
+  --blue:#3182f6; --blue-d:#1b64da; --blue-soft:#e8f3ff; --red:#f04452; --red-soft:#ffeeee; --green:#03b26c; --green-soft:#e5f8f0; --amber:#ff9f00; --amber-soft:#fff4e0;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+  --shadow:0 1px 2px rgb(0 0 0 / .04);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#11151b;--sheet:#1a2028;--ink:#e8ecf1;--ink-2:#9ba6b4;--rule:#2c3440;--rule-2:#222a34;--pen:#86a6f5;--pen-soft:#1d2a47;--red:#f0806f;--red-soft:#3a201c;--ok:#5fc796;--ok-soft:#173527;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#11151b;--sheet:#1a2028;--ink:#e8ecf1;--ink-2:#9ba6b4;--rule:#2c3440;--rule-2:#222a34;--pen:#86a6f5;--pen-soft:#1d2a47;--red:#f0806f;--red-soft:#3a201c;--ok:#5fc796;--ok-soft:#173527;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6;margin:0;padding-block:0 170px;-webkit-tap-highlight-color:transparent;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
-.wrap{max-width:560px;margin:0 auto;display:grid;gap:16px}
-h1,h2,h3{text-wrap:balance;margin:0}
-h1{font-size:1.15rem;font-weight:700}
-h2{font-size:1.05rem;font-weight:700}
-.muted{color:var(--ink-2)} .small{font-size:.82rem}
-.num{font-family:var(--num);font-variant-numeric:tabular-nums}
-button,.btn{font:inherit;font-weight:600;font-size:.92rem;border-radius:12px;padding:10px 16px;min-height:44px;border:1px solid var(--pen);background:var(--pen);color:var(--sheet);cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2}
-button.ghost,.btn.ghost{background:transparent;color:var(--pen);border-color:var(--rule)}
-button.ghost:hover,.btn.ghost:hover{border-color:var(--pen)}
-button.text{background:none;border:0;color:var(--ink-2);padding:6px 8px;font-weight:500;min-height:36px}
-button:active{transform:scale(.98)}
-button.text:hover{color:var(--ink)}
-button.danger{background:var(--red);border-color:var(--red)}
-button:disabled{opacity:.45;cursor:default}
-:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
-textarea,input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:10px 12px;width:100%;font-size:16px}
-textarea{resize:vertical;min-height:72px;font-size:.9rem}
-textarea:focus,input:focus,select:focus{border-color:var(--pen);outline:none}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.sp{flex:1}
+html{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+  padding-block:0 200px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:12px}
+.wrap .wrap{margin:0;max-width:none}
+h1,h2,h3,p{margin:0}
+h1,h2{text-wrap:balance}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* 버튼 */
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;-webkit-appearance:none}
+button:disabled{opacity:.4;cursor:default}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:15px;border-radius:12px;padding:0 16px;min-height:44px;transition:transform .08s,background .15s}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.soft{background:var(--blue-soft);color:var(--blue)}
+.btn.grey{background:var(--fill);color:var(--ink2)}
+.btn.red{background:var(--red);color:#fff}
+.btn.wide{width:100%}
+.btn.big{min-height:56px;font-size:17px;border-radius:16px}
+.link{color:var(--blue);font-weight:600;font-size:15px;padding:6px 2px}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink2)}
+.icon-btn:active{background:var(--fill)}
+.icon-btn svg{width:24px;height:24px}
+
+/* 입력 */
+input[type=text],input[type=number],textarea,select{font:inherit;font-size:16px;color:var(--ink);background:var(--fill);border:2px solid transparent;border-radius:12px;padding:12px 14px;width:100%;transition:border-color .15s,background .15s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);background:var(--card)}
+textarea{resize:vertical;min-height:120px;line-height:1.55}
+::placeholder{color:var(--ink3)}
 
 /* 상단 */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);padding-block:12px 10px;display:grid;gap:4px}
-.hello{font-size:.8rem;color:var(--ink-2)}
-.brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.saved{margin-left:auto;display:flex;align-items:baseline;gap:6px;font-size:.78rem;color:var(--ink-2);background:var(--ok-soft);border-radius:999px;padding:4px 10px}
-.saved b{font-family:var(--num);font-size:.95rem;color:var(--ok)}
-.icon{width:40px;height:40px;min-height:40px;padding:0;justify-content:center;border-radius:50%;background:var(--sheet);border:1px solid var(--rule);color:var(--ink)}
-.icon svg{width:20px;height:20px}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--rule);margin-top:10px}
-.tab{background:none;border:0;color:var(--ink-2);flex-direction:column;gap:2px;padding:8px 4px 2px;font-size:.74rem;font-weight:500;position:relative;border-radius:0;min-height:54px}
-.tab svg{width:24px;height:24px}
-.tab .c{position:absolute;top:4px;left:calc(50% + 6px);font-family:var(--num);font-size:.68rem;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--rule);color:var(--ink);padding:0 5px}
-.tab[aria-current="step"]{color:var(--pen);font-weight:700}
-.tab[aria-current="step"] .c{background:var(--pen);color:var(--sheet)}
-/* 패널 */
-.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .35);z-index:20}
-.sheet-modal{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--sheet);border-radius:20px 20px 0 0;padding-block:10px calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));max-width:560px;margin:0 auto;display:grid;gap:12px;box-shadow:0 -8px 30px rgb(0 0 0 / .18)}
-.grab{width:40px;height:4px;border-radius:2px;background:var(--rule);justify-self:center}
-.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:16px}
-.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.settings label{display:grid;gap:4px;font-size:.8rem;color:var(--ink-2)}
-.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding:2px 4px}
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;min-height:56px;margin-inline:-4px}
+.appbar .name{font-size:19px;font-weight:700;padding-left:4px}
+.appbar .sp{flex:1}
+.hero{display:grid;gap:6px;padding:8px 0 10px}
+.hero h1{font-size:26px;font-weight:700;line-height:1.35;letter-spacing:-.02em}
+.hero p{color:var(--ink2);font-size:15px}
+
+/* 카드 */
+.card{background:var(--card);border-radius:20px;padding:20px;box-shadow:var(--shadow);display:grid;gap:14px;min-width:0}
+.card.tight{padding:8px 0}
+.card-title{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-title .sp{flex:1}
+.sub{font-size:14px;color:var(--ink3)}
+.stat{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.stat b{font-size:30px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat .unit{font-size:18px;font-weight:600;margin-left:2px}
+
+/* 리스트 행 */
+.row-btn{display:flex;align-items:center;gap:14px;width:100%;padding:12px 20px;text-align:left;min-height:68px;transition:background .15s}
+.row-btn:active{background:var(--fill)}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:17px;flex:none;background:var(--blue-soft);color:var(--blue)}
+.avatar.ok{background:var(--green-soft);color:var(--green)} .avatar.warn{background:var(--red-soft);color:var(--red)} .avatar.idle{background:var(--fill);color:var(--ink3)}
+.avatar.add{background:var(--blue-soft);color:var(--blue);font-size:24px;font-weight:500}
+.row-main{flex:1;min-width:0;display:grid;gap:2px}
+.row-main b{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-main span{font-size:14px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{color:var(--ink3);flex:none}
+.st{font-weight:600} .st.ok{color:var(--green)} .st.warn{color:var(--red)} .st.pen{color:var(--blue)} .st.idle{color:var(--ink3)}
+.badge{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--fill);color:var(--ink3);flex:none}
+.notice{display:flex;align-items:center;gap:8px;justify-content:space-between;background:var(--card);border-radius:14px;padding:12px 16px;font-size:14px;color:var(--ink2)}
+
+/* 칩 */
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-inline:-20px;padding-inline:20px}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;min-height:38px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:500;font-size:.85rem}
-.chip[aria-pressed="true"]{border-color:var(--pen);background:var(--pen-soft);color:var(--pen);font-weight:700}
-.intro{display:grid;gap:4px}
-.example-note{font-size:.82rem;color:var(--ink-2);background:var(--rule-2);border-radius:8px;padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{flex:none;min-height:40px;padding:0 16px;border-radius:999px;background:var(--fill);color:var(--ink2);font-size:15px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--card)}
 
-/* 1단계: 학생 카드 */
-.stu-list{display:grid;gap:10px}
-.stu{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:12px 14px;display:grid;gap:10px}
-.stu-tap{display:grid;gap:2px;cursor:pointer;background:none;border:0;padding:0;color:inherit;text-align:left;min-height:0;font-weight:400;width:100%}
-.stu-tap:active{transform:none}
-.preview{font-size:.84rem;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chev{transition:transform .2s;color:var(--ink-2);flex:none}
-.stu.open .chev{transform:rotate(180deg)}
-.stu-head{display:flex;gap:8px;align-items:center;min-width:0}
-.stu-head h3{font-size:.98rem}
-.stu-head select{width:auto;padding:4px 8px;font-size:.8rem}
-.tag{font-size:.74rem;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--rule-2);color:var(--ink-2);white-space:nowrap}
-.tag.warn{background:var(--red-soft);color:var(--red)} .tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.pen{background:var(--pen-soft);color:var(--pen)} .tag.ex{border:1px dashed var(--rule);background:transparent}
-.photo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.82rem;color:var(--ink-2)}
-.photo label{cursor:pointer;border:1px dashed var(--rule);border-radius:8px;padding:6px 10px;color:var(--pen);font-weight:600}
-.photo label:hover{border-color:var(--pen)}
-.photo input{position:absolute;width:1px;height:1px;opacity:0}
-.confirm{display:flex;gap:6px;align-items:center;font-size:.82rem;color:var(--red)}
-.add{display:grid;grid-template-columns:1fr auto;gap:8px}
-details.bulk summary{cursor:pointer;color:var(--pen);font-weight:600;font-size:.88rem}
-details.bulk[open]{display:grid;gap:8px}
-.empty{text-align:center;padding:28px 16px;display:grid;gap:10px;justify-items:center;color:var(--ink-2)}
+/* 사진 */
+.photos{display:flex;gap:10px;flex-wrap:wrap}
+.ph-add{width:88px;height:88px;border-radius:16px;background:var(--fill);color:var(--ink3);display:grid;place-items:center;align-content:center;gap:2px;font-size:13px;font-weight:600;cursor:pointer}
+.ph-add svg{width:26px;height:26px}
+.ph-add input{position:absolute;width:1px;height:1px;opacity:0}
+.ph{width:88px;height:88px;border-radius:16px;object-fit:cover;background:var(--fill)}
 
-/* 하단 고정 바 */
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--sheet);border-top:1px solid var(--rule);padding-block:10px env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.bar-in{max-width:560px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.bar .msg{font-size:.82rem;color:var(--ink-2);flex:1 1 100%;min-width:0}
-#primary{flex:1}
-.bar-in>.tabs{flex-basis:100%}
-.prog{height:4px;background:var(--rule-2);border-radius:2px;overflow:hidden;flex-basis:100%}
-.prog i{display:block;height:100%;background:var(--pen);transition:width .3s}
-
-/* 2단계: 확인 */
-.review{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
-.side{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
-.side::-webkit-scrollbar{display:none}
-.side button{flex:none;width:auto}
-.who{background:var(--sheet);border:1px solid var(--rule);color:var(--ink);border-radius:999px;font-weight:500;padding:6px 8px 6px 14px}
-.who[aria-current="true"]{border-color:var(--pen);background:var(--pen-soft);color:var(--pen);font-weight:700}
-.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:16px;display:grid;gap:16px;min-width:0}
-.sheet-head{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
-.sheet-head h2{font-size:1.2rem}
-.callout{border-radius:8px;padding:10px 12px;font-size:.88rem;display:grid;gap:4px}
-.callout.warn{background:var(--red-soft);color:var(--ink)} .callout.warn b{color:var(--red)}
-.callout ul{margin:0;padding-left:1.1em}
-details.read summary{cursor:pointer;font-size:.85rem;color:var(--ink-2)}
-details.read ul{margin:6px 0 0;padding-left:1.1em;font-size:.85rem;color:var(--ink-2)}
-.weak{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
-.weak div{border:1px solid var(--rule);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
-.weak b{font-size:.92rem} .weak span{font-size:.82rem;color:var(--ink-2)}
-.qs{display:grid;gap:0;counter-reset:q}
-.q{border-top:1px solid var(--rule-2);padding:12px 0;display:grid;gap:8px}
-.q:first-child{border-top:0;padding-top:0}
+/* 확인 단계 */
+.seg{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-inline:-20px;padding-inline:20px}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:none;min-height:40px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--ink2);font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:var(--shadow)}
+.seg button[aria-current="true"]{background:var(--ink);color:var(--card)}
+.seg .dot{width:7px;height:7px;border-radius:50%;background:var(--ink3)}
+.seg .dot.ok{background:var(--green)} .seg .dot.warn{background:var(--red)} .seg .dot.pen{background:var(--blue)}
+.alert{background:var(--red-soft);border-radius:16px;padding:16px;display:grid;gap:6px;font-size:15px}
+.alert b{color:var(--red);font-size:15px}
+.alert ul{margin:0;padding-left:18px;color:var(--ink)}
+.weak-item{display:flex;gap:12px;align-items:flex-start}
+.weak-item .n{width:26px;height:26px;border-radius:8px;background:var(--blue-soft);color:var(--blue);font-weight:700;font-size:14px;display:grid;place-items:center;flex:none;margin-top:1px}
+.weak-item div{display:grid;gap:2px;min-width:0}
+.weak-item b{font-size:16px} .weak-item span{font-size:14px;color:var(--ink2)}
+.q{display:grid;gap:10px;padding:16px 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:4px}
 .q-top{display:flex;gap:10px;align-items:flex-start}
-.q-n{font-family:var(--num);font-weight:600;color:var(--ink-2);min-width:1.6em}
-.q-stem{flex:1;min-width:0;font-weight:500}
-.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding-left:calc(1.6em + 10px)}
-.opt{font-size:.9rem;border:1px solid var(--rule-2);border-radius:10px;padding:8px 10px;display:flex;gap:6px;align-items:baseline;min-width:0;overflow-wrap:anywhere}
-.opt .L{font-family:var(--num);color:var(--ink-2);font-size:.8rem}
-.opt.ans{border-color:var(--pen);color:var(--pen);font-weight:600}
-.opt.ans .L{width:1.4em;height:1.4em;display:inline-grid;place-items:center;border:1.5px solid var(--pen);border-radius:50%;color:var(--pen)}
-.exp{padding-left:calc(1.6em + 10px);font-size:.82rem;color:var(--ink-2)}
-.parent textarea{min-height:90px}
-.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--rule);padding-top:14px}
+.q-n{font-weight:700;color:var(--blue);flex:none;min-width:22px}
+.q-stem{flex:1;min-width:0;font-weight:500;font-size:16px;overflow-wrap:anywhere}
+.q-x{font-size:13px;color:var(--ink3);font-weight:600;padding:2px 4px;flex:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{background:var(--fill);border-radius:12px;padding:10px 12px;font-size:15px;display:flex;gap:8px;align-items:center;min-width:0;overflow-wrap:anywhere}
+.opt .L{font-size:13px;font-weight:700;color:var(--ink3);flex:none}
+.opt.ans{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.opt.ans .L{color:var(--blue)}
+.opt.ans::after{content:"";margin-left:auto;flex:none;width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.exp{font-size:14px;color:var(--ink2);background:transparent;padding-left:32px}
+details.more summary{cursor:pointer;color:var(--ink3);font-size:14px;font-weight:600;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:" ›"}
+details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14px}
 
-/* 3단계: 보내기 */
-.send{display:grid;gap:10px}
-.send-row{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.send-row>div:first-child{grid-column:1/-1}
-.send-row>button:first-of-type{grid-column:1/-1}
-.send-row .sp{display:none}
-.send-row h3{font-size:.98rem}
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.summary div{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:12px;display:grid;gap:2px}
-.summary b{font-family:var(--num);font-size:1.4rem;font-variant-numeric:tabular-nums}
-.summary span{font-size:.78rem;color:var(--ink-2)}
-@media (max-width:420px){.summary b{font-size:1.1rem}}
-.fallback{width:100%;min-height:160px;font-family:var(--num);font-size:.8rem}
-.foot{font-size:.78rem;color:var(--ink-2)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-.sheet-modal{max-height:85vh;overflow-y:auto}
-.codebox{display:grid;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:14px}
-.quota{font-size:.82rem;border-radius:999px;padding:4px 10px;background:var(--pen-soft);color:var(--pen);font-weight:600;justify-self:start}
-.foot a{color:var(--ink-2)}
+/* 보내기 */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats3 div{display:grid;gap:2px}
+.stats3 b{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stats3 span{font-size:13px;color:var(--ink3)}
+.send-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.send-actions .btn:first-child{grid-column:1/-1}
+.fallback{min-height:160px;font-size:13px}
+
+/* 학생 편집 화면 */
+.page-head{display:flex;align-items:center;gap:4px;min-height:56px;margin-inline:-8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg)}
+.page-head h2{font-size:18px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.confirm{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--red-soft);border-radius:14px;padding:10px 12px 10px 16px;font-size:15px;color:var(--red);font-weight:600}
+
+/* 바텀 시트 */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .4);z-index:20;animation:fade .2s}
+.sheet-modal{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--card);border-radius:24px 24px 0 0;max-width:520px;margin:0 auto;max-height:88vh;overflow-y:auto;display:grid;gap:16px;
+  padding-block:8px calc(24px + env(safe-area-inset-bottom,0px));padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));animation:up .25s cubic-bezier(.2,.8,.2,1)}
+.grab{width:36px;height:5px;border-radius:3px;background:var(--line);justify-self:center;margin-bottom:4px}
+.sheet-modal h2{font-size:20px;font-weight:700}
+.field{display:grid;gap:6px}
+.field label{font-size:14px;color:var(--ink2);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quota{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;border-radius:10px;padding:8px 12px;background:var(--blue-soft);color:var(--blue);justify-self:start}
+.divider{height:1px;background:var(--line);margin:4px 0}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+/* 아래 고정 */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:linear-gradient(to top,var(--bg) 70%,transparent);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.bar-in{max-width:520px;margin:0 auto;display:grid;gap:8px;padding-top:16px}
+.msg{justify-self:center;font-size:14px;font-weight:500;color:var(--ink);background:var(--card);box-shadow:0 2px 10px rgb(0 0 0 / .08);border-radius:999px;padding:8px 16px;text-align:center;max-width:100%}
+.msg:empty{display:none}
+.cta{display:flex;gap:8px}
+.cta #primary{flex:1}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--blue);transition:width .3s}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-radius:20px 20px 0 0;margin-inline:-20px;padding:6px 8px 4px;box-shadow:0 -1px 0 var(--line)}
+.tab{display:grid;justify-items:center;gap:2px;padding:6px 4px;font-size:12px;font-weight:600;color:var(--ink3);position:relative;min-height:52px}
+.tab svg{width:26px;height:26px}
+.tab[aria-current="step"]{color:var(--ink)}
+.tab .c{position:absolute;top:2px;left:calc(50% + 8px);min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;line-height:18px;padding:0 5px;text-align:center}
+.foot{font-size:12px;color:var(--ink3);line-height:1.6;padding:8px 4px}
+.foot a{color:var(--ink3)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <h1>조교 도우미</h1>
-      <div class="saved" title="이번 주 강사 확인을 마친 학습지 기준">이번 주 <b id="k-min" class="num">0분</b> 아낌</div>
-      <button class="icon" type="button" id="gear" aria-label="절약 시간 기준 설정" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
-    </div>
-    <div class="hello" id="hello"></div>
+  <header class="appbar">
+    <span class="name">조교 도우미</span><span class="sp"></span>
+    <button class="icon-btn" type="button" id="gear" aria-label="학원 코드와 설정" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
 
-  <div class="scrim" id="scrim" hidden></div>
-  <section class="sheet-modal" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="set-h">
-    <div class="grab"></div>
-    <div class="row"><h2 id="set-h">학원 코드</h2><span class="sp"></span><button class="text" type="button" id="setclose">닫기</button></div>
-    <div class="codebox">
-      <span class="quota" id="quota">코드 없음 · 예시만 볼 수 있어요</span>
-      <div class="add"><input type="text" id="code" placeholder="학원 코드 (예: T-3F9A2C)" autocapitalize="characters" autocomplete="off"><button type="button" id="codego">확인</button></div>
-      <div class="add"><input type="text" id="acad" placeholder="학원 이름 (선택)" maxlength="30"><button type="button" class="ghost" id="trial">무료 코드 받기</button></div>
-      <span class="small muted">학원마다 학습지 20장까지 무료예요. 다 쓰면 원장님 이름으로 월 구독을 신청할 수 있어요.</span>
-    </div>
-    <h2>절약 시간 기준</h2>
-    <span class="small muted">학원 실제 값으로 바꾸세요</span>
-    <div class="settings">
-      <label for="m-make">학습지 1장 직접 만들기 (분)<input type="number" id="m-make" min="0"></label>
-      <label for="m-grade">채점·오답 정리·리포트 (분)<input type="number" id="m-grade" min="0"></label>
-      <label for="m-review">강사 확인 (분)<input type="number" id="m-review" min="0"></label>
-      <label for="wage">조교 시급 (원)<input type="number" id="wage" min="0"></label>
-    </div>
-    <p class="small muted" style="margin:0">학습지 1장당 아낀 시간 = 직접 만들기 + 채점·리포트 − 강사 확인. 2026년 최저시급은 10,320원입니다.</p>
-  </section>
-
-  <!-- 1단계 -->
-  <main id="s1" class="stu-list">
-    <div class="intro">
-      <h2>시험 결과 넣기</h2>
-      <p class="muted small" style="margin:0">틀린 문제, 강사 메모, 채점된 시험지 사진 중 있는 것만 넣으세요. 메모가 대충이어도 괜찮아요. 학생은 별명으로만 적어요.</p>
-    </div>
-    <div class="panel" style="display:grid;gap:12px">
-      <div class="small muted">새 학생 과목</div>
-      <div class="chips" id="subjchips" role="group" aria-label="과목"></div>
-      <div class="add"><input type="text" id="nick" placeholder="학생 별명 (예: 중2-민)" maxlength="20"><button type="button" id="add">학생 추가</button></div>
-      <details class="bulk"><summary>여러 명을 한 번에 붙여 넣기</summary>
-        <p class="small muted" style="margin:0">한 줄에 한 명씩 <b>별명: 메모</b> 형식으로 적어 주세요. 단톡방이나 메모장에서 그대로 복사해도 됩니다.</p>
-        <textarea id="bulk" placeholder="중2-민: 단평 14/20, 수동태 2개 틀림, since/for 헷갈림&#10;중3-서: 관계대명사 who/which 혼동, 수일치 2개"></textarea>
-        <div class="row"><button type="button" class="ghost" id="bulkgo">학생으로 나누기</button><span class="small muted" id="bulkmsg"></span></div>
-      </details>
-    </div>
-    <div id="list" class="stu-list"></div>
+  <!-- 1단계: 학생 목록 -->
+  <main id="s1" class="wrap" style="gap:12px">
+    <div class="hero"><h1 id="h1-1">오늘 누구의<br>학습지를 만들까요?</h1><p>시험 결과만 넣으면 약점에 맞춘 8문제를 만들어요.</p></div>
+    <section class="card" aria-label="이번 주">
+      <div class="stat"><div><div class="sub">이번 주 아낀 조교 시간</div><b id="k-min">0</b><span class="unit">분</span></div><span class="badge" id="k-week">학습지 0장</span></div>
+    </section>
+    <div id="exnote"></div>
+    <section class="card tight" id="list" aria-label="학생"></section>
   </main>
 
-  <!-- 2단계 -->
-  <main id="s2" hidden>
-    <div class="review">
-      <nav class="side" id="side" aria-label="학생"></nav>
-      <article class="sheet" id="sheet"></article>
-    </div>
+  <!-- 학생 편집 화면 -->
+  <main id="page" class="wrap" hidden style="gap:12px"></main>
+
+  <!-- 2단계: 확인 -->
+  <main id="s2" class="wrap" hidden style="gap:12px">
+    <div class="hero"><h1 id="h1-2">학습지를 확인해 주세요</h1><p id="p-2">정답과 문제를 보고 확인 완료를 눌러 주세요.</p></div>
+    <nav class="seg" id="side" aria-label="학생"></nav>
+    <div id="sheet" class="wrap" style="gap:12px"></div>
   </main>
 
-  <!-- 3단계 -->
-  <main id="s3" hidden class="send">
-    <div class="summary">
-      <div><b id="k-sheets">0</b><span>이번 주 확인한 학습지</span></div>
-      <div><b id="k-min2">0</b><span>아낀 조교 시간 (분)</span></div>
-      <div><b id="k-won">0</b><span>환산 금액 (원)</span></div>
-    </div>
-    <div class="row"><h2>확인 끝난 학습지</h2><span class="sp"></span><button type="button" class="ghost" id="saveall">전체 학습지 인쇄</button></div>
-    <p class="small muted" style="margin:0">새 창에서 열리는 학습지를 인쇄하면 1쪽은 학생용 학습지, 2쪽은 정답지로 나옵니다.</p>
-    <div id="sendlist" class="send"></div>
+  <!-- 3단계: 보내기 -->
+  <main id="s3" class="wrap" hidden style="gap:12px">
+    <div class="hero"><h1>학습지와 리포트를<br>보내 주세요</h1><p>인쇄하면 1쪽은 학습지, 2쪽은 정답지예요.</p></div>
+    <section class="card">
+      <div class="sub">이번 주</div>
+      <div class="stats3">
+        <div><b id="k-sheets">0</b><span>확인한 학습지</span></div>
+        <div><b id="k-min2">0</b><span>아낀 시간(분)</span></div>
+        <div><b id="k-won">0</b><span>환산 금액(원)</span></div>
+      </div>
+    </section>
+    <div id="sendlist" class="wrap" style="gap:12px"></div>
     <div id="fbox"></div>
-    <details class="read"><summary>검수용: 만든 문항 전체 복사</summary>
-      <div class="row" style="margin-top:8px"><button type="button" class="ghost" id="export">문항 전체 복사</button><span class="small muted">Claude에게 붙여 넣으면 정답을 다시 검수합니다.</span></div>
-    </details>
+    <section class="card"><details class="more"><summary>검수용: 만든 문항 전체 복사</summary>
+      <div style="display:grid;gap:8px;margin-top:10px"><button type="button" class="btn grey" id="export">문항 전체 복사</button><span class="sub">Claude에게 붙여 넣으면 정답을 다시 검수해요.</span></div>
+    </details></section>
   </main>
 
-  <p class="foot">조교 도우미 앱 v1.1 · <a href="privacy.html">개인정보 처리방침</a> · 문의 <span id="contact">quanter02.github.io</span>. AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기 단계로 넘어갑니다. 학생 기록은 이 휴대폰에만 저장됩니다. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않습니다.</p>
+  <p class="foot">조교 도우미 앱 v2 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
 </div>
+
+<!-- 설정 시트 -->
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet-modal" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="set-h">
+  <div class="grab"></div>
+  <div style="display:flex;align-items:center"><h2 id="set-h" style="flex:1">학원 코드</h2><button class="link" type="button" id="setclose">닫기</button></div>
+  <span class="quota" id="quota">코드 없음</span>
+  <div class="field"><label for="code">학원 코드</label><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" id="code" placeholder="T-3F9A2C" autocapitalize="characters" autocomplete="off"><button type="button" class="btn blue" id="codego">확인</button></div></div>
+  <div class="field"><label for="acad">처음이면 무료 코드 받기</label><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" id="acad" placeholder="학원 이름 (선택)" maxlength="30"><button type="button" class="btn soft" id="trial">받기</button></div>
+    <span class="sub">학원마다 학습지 20장까지 무료예요.</span></div>
+  <div class="divider"></div>
+  <h2>절약 시간 기준</h2>
+  <div class="grid2">
+    <div class="field"><label for="m-make">학습지 만들기(분)</label><input type="number" id="m-make" min="0" inputmode="numeric"></div>
+    <div class="field"><label for="m-grade">채점·리포트(분)</label><input type="number" id="m-grade" min="0" inputmode="numeric"></div>
+    <div class="field"><label for="m-review">강사 확인(분)</label><input type="number" id="m-review" min="0" inputmode="numeric"></div>
+    <div class="field"><label for="wage">조교 시급(원)</label><input type="number" id="wage" min="0" inputmode="numeric"></div>
+  </div>
+  <span class="sub">학습지 1장당 아낀 시간 = 만들기 + 채점·리포트 − 강사 확인</span>
+</section>
+
+<!-- 학생 추가 시트 -->
+<div class="scrim" id="scrim2" hidden></div>
+<section class="sheet-modal" id="addsheet" hidden role="dialog" aria-modal="true" aria-labelledby="add-h">
+  <div class="grab"></div>
+  <div style="display:flex;align-items:center"><h2 id="add-h" style="flex:1">학생 추가</h2><button class="link" type="button" id="addclose">닫기</button></div>
+  <div class="field"><label>과목</label><div class="chips" id="subjchips" role="group" aria-label="과목"></div></div>
+  <div class="field"><label for="nick">학생 별명</label><input type="text" id="nick" placeholder="예: 중2-민" maxlength="20" autocomplete="off"><span class="sub">실명 대신 별명으로 적어 주세요.</span></div>
+  <button type="button" class="btn blue big wide" id="add">추가하고 결과 넣기</button>
+  <details class="more"><summary>여러 명을 한 번에 붙여 넣기</summary>
+    <div style="display:grid;gap:8px;margin-top:10px">
+      <span class="sub">한 줄에 한 명씩 <b>별명: 메모</b> 형식으로 적어 주세요.</span>
+      <textarea id="bulk" placeholder="중2-민: 단평 14/20, 수동태 2개 틀림&#10;중3-서: 관계대명사 who/which 혼동"></textarea>
+      <button type="button" class="btn grey" id="bulkgo">학생으로 나누기</button><span class="sub" id="bulkmsg"></span>
+    </div>
+  </details>
+  <div class="divider"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="sub" style="align-self:center">예시로 체험:</span><button type="button" class="btn grey" id="demo1">이 과목 예시</button><button type="button" class="btn grey" id="demo2">지저분한 메모 예시</button></div>
+</section>
 
 <div class="bar" id="bar">
   <div class="bar-in">
-    <span class="msg" id="msg" role="status" aria-live="polite"></span>
-    <button type="button" class="ghost" id="stop" hidden>멈춤</button>
-    <button type="button" id="primary">학습지 만들기</button>
     <div class="prog" id="prog" hidden><i id="progi" style="width:0"></i></div>
-    <nav class="tabs" aria-label="단계">
-      <button class="tab" type="button" data-step="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span>결과 넣기</span><span class="c" id="c1">0</span></button>
-      <button class="tab" type="button" data-step="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg><span>확인</span><span class="c" id="c2">0</span></button>
-      <button class="tab" type="button" data-step="3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg><span>보내기</span><span class="c" id="c3">0</span></button>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    <div class="cta"><button type="button" class="btn grey big" id="stop" hidden>멈춤</button><button type="button" class="btn blue big" id="primary">학습지 만들기</button></div>
+    <nav class="tabs" id="tabs" aria-label="단계">
+      <button class="tab" type="button" data-step="1"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2h7.6L20 7.4V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm2 9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9zm0 4a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2H9z" opacity=".9"/></svg><span>학생</span><span class="c" id="c1">0</span></button>
+      <button class="tab" type="button" data-step="2"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm4.3 6.8a1 1 0 0 0-1.4 0l-4 4-1.8-1.8a1 1 0 1 0-1.4 1.4l2.5 2.5a1 1 0 0 0 1.4 0l4.7-4.7a1 1 0 0 0 0-1.4z" opacity=".9"/></svg><span>확인</span><span class="c" id="c2">0</span></button>
+      <button class="tab" type="button" data-step="3"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 2.3a1 1 0 0 1 .2 1.1l-7 18a1 1 0 0 1-1.8.1L9.6 14.4 2.5 10.9a1 1 0 0 1 .1-1.8l18-7a1 1 0 0 1 1.1.2z" opacity=".9"/></svg><span>보내기</span><span class="c" id="c3">0</span></button>
     </nav>
   </div>
 </div>
@@ -265,7 +291,6 @@ let S = {subj:"naesin", set:{make:20, grade:10, review:4, wage:10320}, stu:[], l
 try{ const v = JSON.parse(localStorage.getItem(KEY) || "null"); if(v && v.stu) S = Object.assign(S, v); }catch(e){}
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
 const ymd = x => `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
-const OPEN = new Set();
 // 서버 주소: Cloudflare Worker 배포 후 채우기 (예: https://tutor-app.<계정>.workers.dev)
 const API = "https://tutor-app.jogyo-helper.workers.dev";
 const CAN_IMG = {maxCount: 4, mediaTypes: ["image/jpeg","image/png","image/webp","image/heic"]};
@@ -335,7 +360,7 @@ function setMsg(t){ $("msg").textContent = t || ""; }
 function kpi(){
   const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7)); const ws = ymd(d);
   const n = S.log.filter(x => x.day >= ws).length, m = n * saved();
-  $("k-min").textContent = m + "분"; $("k-min2").textContent = m; $("k-sheets").textContent = n;
+  $("k-min").textContent = m; $("k-week").textContent = `학습지 ${n}장`; $("k-min2").textContent = m; $("k-sheets").textContent = n;
   $("k-won").textContent = Math.round(m / 60 * (+S.set.wage || 0)).toLocaleString("ko-KR");
 }
 function counts(){
@@ -343,97 +368,175 @@ function counts(){
   $("c2").textContent = S.stu.filter(s => s.sheet && !s.ok).length;
   $("c3").textContent = S.stu.filter(s => s.ok).length;
 }
-function go(n){ S.step = n; save(); render(); window.scrollTo({top:0}); }
+function go(n){ S.step = n; PAGE = null; PEND_DEL = null; save(); render(); window.scrollTo({top:0}); }
+
+let PAGE = null; // 편집 중인 학생 번호 (null이면 목록)
+const SVG_CHEV = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+const SVG_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const SVG_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+const SVG_CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+const initial = n => (n.replace(/^(예시|지저분)-/, "").replace(/^[중고]\d\s*-?\s*/, "").trim()[0] || n[0] || "?");
+const tone = st => st.ok ? "ok" : st.sheet && st.sheet.unclear && st.sheet.unclear.length ? "warn" : st.sheet || st.busy ? "pen" : hasInput(st) ? "pen" : "idle";
+const btn = (cls, text, fn) => { const b = el("button", "btn " + cls, text); b.type = "button"; if(fn) b.onclick = fn; return b; };
 
 function render(){
   ["make","grade","review"].forEach(k => $("m-" + k).value = S.set[k]); $("wage").value = S.set.wage;
   counts(); kpi();
-  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-current", +b.dataset.step === S.step ? "step" : "false"));
-  $("hello").textContent = ["", "1단계 · 학생별 결과를 넣으면 학습지를 만들어요", "2단계 · 강사가 문항을 보고 확인해요", "3단계 · 학습지와 학부모 리포트를 보내요"][S.step];
-  document.querySelectorAll(".tab .c").forEach(c => c.hidden = c.textContent === "0");
-  [1,2,3].forEach(n => $("s" + n).hidden = n !== S.step);
-  if(S.step === 1) r1(); else if(S.step === 2) r2(); else r3();
+  if(PAGE != null && !S.stu[PAGE]) PAGE = null;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-current", +b.dataset.step === S.step && PAGE == null ? "step" : "false"));
+  document.querySelectorAll(".tab .c").forEach(c => c.hidden = c.textContent === "0" || c.id === "c1");
+  [1,2,3].forEach(n => $("s" + n).hidden = PAGE != null || n !== S.step);
+  $("page").hidden = PAGE == null; $("tabs").hidden = PAGE != null;
+  document.querySelector(".appbar").hidden = PAGE != null;
+  if(PAGE != null) rp(); else if(S.step === 1) r1(); else if(S.step === 2) r2(); else r3();
   bar();
 }
 
 function bar(){
   const p = $("primary"); p.hidden = false; p.disabled = BUSY;
-  if(S.step === 1){
+  if(PAGE != null){
+    const st = S.stu[PAGE];
+    p.textContent = st.sheet ? "다시 만들기" : "이 학생 학습지 만들기"; p.disabled = BUSY || !hasInput(st);
+    p.onclick = () => gen([PAGE]);
+    if(!BUSY) setMsg(hasInput(st) ? "" : "시험 결과나 사진을 넣으면 만들 수 있어요.");
+  } else if(S.step === 1){
     const n = S.stu.filter(s => hasInput(s) && !s.sheet).length, m = S.stu.filter(hasInput).length;
-    p.textContent = n ? `학습지 만들기 · ${n}명` : m ? `다시 만들기 · ${m}명` : "학습지 만들기";
+    p.textContent = n ? `${n}명 학습지 만들기` : m ? `${m}명 다시 만들기` : "학습지 만들기";
     p.disabled = BUSY || !m;
     p.onclick = () => gen(S.stu.map((s, i) => i).filter(i => hasInput(S.stu[i]) && (n ? !S.stu[i].sheet : true)));
-    if(!BUSY && !$("msg").textContent) setMsg(!API ? "체험판이에요. 서버 연결 전이라 예시 학습지만 볼 수 있어요." : S.code ? "학생 1명당 30초~1분 걸려요." : "학습지를 만들려면 오른쪽 위 설정에서 무료 코드를 받아 주세요.");
+    if(!BUSY && !$("msg").textContent) setMsg(!API ? "체험판이라 예시 학습지만 볼 수 있어요." : S.code ? "" : "오른쪽 위 설정에서 무료 코드를 받아 주세요.");
   } else if(S.step === 2){
-    const left = S.stu.filter(s => s.sheet && !s.ok).length;
-    p.textContent = left ? `확인 대기 ${left}장` : "보내기로 →"; p.disabled = BUSY || !!left;
-    p.onclick = () => go(3);
-    if(!BUSY) setMsg(left ? "문항을 보고 '확인 완료'를 누르면 보내기 단계로 넘어갑니다." : S.stu.some(s => s.ok) ? "모두 확인했어요." : "");
+    const list = S.stu.map((s, i) => [s, i]).filter(([s]) => s.sheet), st = S.stu[S.cur];
+    if(!list.length){ p.textContent = "학생 목록으로"; p.onclick = () => go(1); if(!BUSY) setMsg(""); return; }
+    if(st && st.sheet && !st.ok){
+      const done = list.filter(([s]) => s.ok).length;
+      p.textContent = `확인 완료 (${done + 1}/${list.length})`; p.disabled = BUSY || !st.sheet.qs.length;
+      p.onclick = () => { st.ok = true; S.log.push({day: ymd(new Date()), nick: st.nick}); const rest = list.filter(([s, i]) => !s.ok && i !== S.cur);
+        if(rest.length){ S.cur = rest[0][1]; save(); render(); window.scrollTo({top:0}); setMsg(`${st.nick} 확인 완료. 다음 학생이에요.`); } else { save(); go(3); setMsg("모두 확인했어요."); } };
+      if(!BUSY && !$("msg").textContent) setMsg("");
+    } else { p.textContent = "보내기로 이동"; p.onclick = () => go(3); }
   } else {
-    p.hidden = true; if(!BUSY) setMsg(S.stu.some(s => s.ok) ? "학습지 파일과 학부모 리포트를 보내 주세요." : "");
+    const ok = S.stu.filter(s => s.ok);
+    p.textContent = ok.length > 1 ? `${ok.length}명 학습지 한 번에 인쇄` : "학습지 인쇄"; p.disabled = BUSY || !ok.length;
+    p.onclick = () => saveFile(ok, p);
   }
 }
 
 function r1(){
-  const chips = $("subjchips"); chips.innerHTML = "";
-  Object.entries(SUBJ).forEach(([k, v]) => { const b = el("button", "chip", v.name); b.type = "button"; b.setAttribute("aria-pressed", S.subj === k); b.onclick = () => { S.subj = k; save(); r1(); }; chips.appendChild(b); });
+  const ex = $("exnote"); ex.innerHTML = "";
+  if(S.stu.some(s => s.ex)){ const n = el("div", "notice"); n.append(el("span", "", "예시 학생이 들어 있어요"));
+    n.appendChild(Object.assign(el("button", "link", "예시 지우기"), {type: "button", onclick: () => { S.stu = S.stu.filter(s => !s.ex); S.cur = null; save(); render(); }})); ex.appendChild(n); }
   const box = $("list"); box.innerHTML = "";
-  if(S.stu.some(s => s.ex)){
-    const n = el("div", "example-note"); n.append(el("span", "", "지금 보이는 학생은 예시입니다."));
-    const b = el("button", "text", "예시 지우고 시작하기"); b.type = "button"; b.style.color = "var(--pen)";
-    b.onclick = () => { S.stu = S.stu.filter(s => !s.ex); S.cur = null; save(); render(); }; n.appendChild(b); box.appendChild(n);
-  }
-  if(!S.stu.length){
-    const e = el("div", "panel empty");
-    e.append(el("b", "", "아직 학생이 없어요"), el("span", "small", "위에서 별명을 넣어 추가하거나, 예시로 먼저 체험해 보세요."));
-    const r = el("div", "row");
-    const a = el("button", "ghost", "이 과목 예시 학생"); a.type = "button"; a.onclick = loadDemo;
-    const b = el("button", "ghost", "지저분한 메모 예시"); b.type = "button"; b.onclick = loadMessy;
-    r.append(a, b); e.appendChild(r); box.appendChild(e); return;
-  }
   S.stu.forEach((st, si) => {
-    const open = OPEN.has(st.nick) || PEND_DEL === si;
-    const c = el("section", "stu" + (open ? " open" : ""));
-    const tap = el("button", "stu-tap"); tap.type = "button"; tap.setAttribute("aria-expanded", open);
-    const th = el("div", "stu-head"); th.appendChild(el("h3", "", st.nick)); if(st.ex) th.appendChild(el("span", "tag ex", "예시"));
-    const [t0, c0] = status(st); th.append(el("span", "tag " + c0, t0), el("span", "sp"));
-    const chev = el("span", "chev"); chev.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'; th.appendChild(chev);
-    tap.append(th, el("div", "preview", sname(st) + " · " + (st.result || ((PHOTOS[st.nick] || []).length ? "시험지 사진만 있음" : "결과를 넣어 주세요"))));
-    tap.onclick = () => { OPEN.has(st.nick) ? OPEN.delete(st.nick) : OPEN.add(st.nick); r1(); };
-    c.appendChild(tap);
-    if(!open){ if(st.sheet){ const b = el("button", "ghost", st.ok ? "확인한 학습지 보기" : "만든 학습지 확인하기 →"); b.type = "button"; b.onclick = () => { S.cur = si; go(2); }; c.appendChild(b); } box.appendChild(c); return; }
-    const h = el("div", "stu-head"); h.style.flexWrap = "wrap";
-    const sel = el("select"); sel.id = "subj-" + si; sel.setAttribute("aria-label", `${st.nick} 과목`);
-    Object.entries(SUBJ).forEach(([k, v]) => { const o = el("option", "", v.name); o.value = k; sel.appendChild(o); });
-    sel.value = st.subj || S.subj; sel.onchange = () => { st.subj = sel.value; st.sheet = null; st.ok = false; save(); render(); };
-    sel.style.width = "auto"; h.appendChild(sel);
-    h.appendChild(el("span", "sp"));
-    if(PEND_DEL === si){
-      const cf = el("span", "confirm", "지울까요?");
-      const y = el("button", "danger", "삭제"); y.type = "button"; y.style.padding = "4px 10px"; y.onclick = () => { delete PHOTOS[st.nick]; S.stu.splice(si, 1); PEND_DEL = null; save(); render(); };
-      const n = el("button", "text", "취소"); n.type = "button"; n.onclick = () => { PEND_DEL = null; r1(); };
-      cf.append(y, n); h.appendChild(cf);
-    } else { const d = el("button", "text", "삭제"); d.type = "button"; d.onclick = () => { PEND_DEL = si; r1(); }; h.appendChild(d); }
-    c.appendChild(h);
-    const ta = el("textarea"); ta.id = "res-" + si; ta.placeholder = "예: 단평 14/20, 3번 수동태 reads 고름(정답 is read), since/for 헷갈림"; ta.value = st.result || ""; ta.setAttribute("aria-label", `${st.nick} 결과`);
-    ta.onchange = () => { st.result = ta.value.trim(); st.sheet = null; st.ok = false; st.ex = false; save(); render(); };
-    c.appendChild(ta);
-    const ph = el("div", "photo");
-    const lb = el("label"); lb.htmlFor = "ph-" + si; lb.textContent = (PHOTOS[st.nick] || []).length ? "사진 바꾸기" : "+ 시험지 사진";
-    const fi = el("input"); fi.type = "file"; fi.id = "ph-" + si; fi.multiple = true; fi.accept = CAN_IMG ? CAN_IMG.mediaTypes.join(",") : "image/*";
-    fi.onchange = () => onPhoto(st, fi);
-    const n = (PHOTOS[st.nick] || []).length;
-    ph.append(lb, fi, el("span", "", n ? `✓ ${n}장 올림 · 이 화면에만 있고 저장하지 않아요` : "채점 표시가 보이게 찍은 사진 (선택)"));
-    if(n){ const x = el("button", "text", "사진 빼기"); x.type = "button"; x.onclick = () => { delete PHOTOS[st.nick]; st.photoN = 0; st.sheet = null; st.ok = false; save(); render(); }; ph.appendChild(x); }
-    c.appendChild(ph);
-    if(st.sheet){ const r = el("div", "row"); const b = el("button", "ghost", st.ok ? "확인한 학습지 보기" : "만든 학습지 확인하기 →"); b.type = "button"; b.onclick = () => { S.cur = si; go(2); }; r.appendChild(b); c.appendChild(r); }
-    box.appendChild(c);
+    const r = el("button", "row-btn"); r.type = "button";
+    const t = tone(st), [label] = status(st);
+    r.append(el("span", "avatar " + t, initial(st.nick)));
+    const m = el("span", "row-main"); m.appendChild(el("b", "", st.nick));
+    const sub = el("span"); const s1 = el("span", "st " + t, label); sub.append(s1, document.createTextNode(" · " + sname(st))); m.appendChild(sub); r.appendChild(m);
+    if(st.ex) r.appendChild(el("span", "badge", "예시"));
+    const c = el("span", "chev"); c.innerHTML = SVG_CHEV; r.appendChild(c);
+    r.onclick = () => { PAGE = si; PEND_DEL = null; render(); window.scrollTo({top:0}); };
+    box.appendChild(r);
   });
-  const more = el("div", "row small muted"); more.append(el("span", "", "예시 더 넣기:"));
-  const a = el("button", "text", "이 과목 예시 학생"); a.type = "button"; a.onclick = loadDemo;
-  const b = el("button", "text", "지저분한 메모 예시"); b.type = "button"; b.onclick = loadMessy;
-  more.append(a, b); box.appendChild(more);
+  const add = el("button", "row-btn"); add.type = "button"; add.append(el("span", "avatar add", "+"), Object.assign(el("span", "row-main"), {innerHTML: '<b style="color:var(--blue)">학생 추가</b>'}));
+  add.onclick = () => addOpen(true); box.appendChild(add);
 }
+
+function rp(){
+  const st = S.stu[PAGE], si = PAGE, pg = $("page"); pg.innerHTML = "";
+  const hd = el("div", "page-head");
+  const back = el("button", "icon-btn"); back.type = "button"; back.setAttribute("aria-label", "뒤로"); back.innerHTML = SVG_BACK; back.onclick = () => { PAGE = null; PEND_DEL = null; render(); };
+  const del = el("button", "icon-btn"); del.type = "button"; del.setAttribute("aria-label", "학생 삭제"); del.innerHTML = SVG_TRASH; del.onclick = () => { PEND_DEL = si; rp(); };
+  hd.append(back, el("h2", "", st.nick), del); pg.appendChild(hd);
+  if(PEND_DEL === si){ const c = el("div", "confirm"); c.append(el("span", "", `${st.nick} 학생을 지울까요?`));
+    const r = el("div"); r.style.cssText = "display:flex;gap:6px"; r.append(btn("grey", "취소", () => { PEND_DEL = null; rp(); }), btn("red", "삭제", () => { delete PHOTOS[st.nick]; S.stu.splice(si, 1); PAGE = null; PEND_DEL = null; save(); render(); }));
+    c.appendChild(r); pg.appendChild(c); }
+
+  const c1 = el("section", "card"); c1.appendChild(el("div", "card-title", "과목"));
+  const chips = el("div", "chips"); Object.entries(SUBJ).forEach(([k, v]) => { const b = el("button", "chip", v.name); b.type = "button"; b.setAttribute("aria-pressed", (st.subj || S.subj) === k);
+    b.onclick = () => { if((st.subj || S.subj) === k) return; st.subj = k; st.sheet = null; st.ok = false; save(); render(); }; chips.appendChild(b); });
+  c1.appendChild(chips); pg.appendChild(c1);
+
+  const c2 = el("section", "card"); const tt = el("div", "card-title"); const lab = el("label", "", "시험 결과"); lab.htmlFor = "res"; tt.appendChild(lab); c2.appendChild(tt);
+  const ta = el("textarea"); ta.id = "res"; ta.placeholder = "틀린 문제, 고른 답, 점수, 강사 메모를 자유롭게 적어 주세요.\n예: 단평 14/20, 3번 수동태 reads 고름(정답 is read)"; ta.value = st.result || "";
+  ta.oninput = () => { st.result = ta.value.trim(); bar(); }; ta.onchange = () => { st.result = ta.value.trim(); st.sheet = null; st.ok = false; st.ex = false; save(); render(); };
+  c2.append(ta, el("span", "sub", "메모가 대충이어도 괜찮아요. 모르는 부분은 '확인 필요'로 따로 알려 드려요.")); pg.appendChild(c2);
+
+  const c3 = el("section", "card"); const t3 = el("div", "card-title"); t3.append(el("span", "", "시험지 사진"), el("span", "sp"), el("span", "sub", "선택 · 최대 4장")); c3.appendChild(t3);
+  const ph = el("div", "photos"); const fs = PHOTOS[st.nick] || [];
+  fs.forEach(f => { const im = el("img", "ph"); im.alt = "시험지 사진"; im.src = URL.createObjectURL(f); im.onload = () => URL.revokeObjectURL(im.src); ph.appendChild(im); });
+  const lb = el("label", "ph-add"); lb.innerHTML = SVG_CAM; lb.appendChild(el("span", "", fs.length ? "다시 고르기" : "사진 추가"));
+  const fi = el("input"); fi.type = "file"; fi.multiple = true; fi.accept = "image/*"; fi.onchange = () => onPhoto(st, fi); lb.appendChild(fi); ph.appendChild(lb);
+  c3.appendChild(ph);
+  if(fs.length){ const x = el("button", "link", "사진 빼기"); x.type = "button"; x.style.justifySelf = "start"; x.onclick = () => { delete PHOTOS[st.nick]; st.photoN = 0; st.sheet = null; st.ok = false; save(); render(); }; c3.appendChild(x); }
+  c3.appendChild(el("span", "sub", "채점 표시가 보이게 찍어 주세요. 사진은 저장하지 않아요.")); pg.appendChild(c3);
+
+  if(st.sheet){ const c4 = el("section", "card"); c4.append(el("div", "card-title", st.ok ? "확인한 학습지가 있어요" : "만든 학습지가 있어요"),
+    btn("soft wide", "학습지 보기", () => { S.cur = si; PAGE = null; go(2); })); pg.appendChild(c4); }
+}
+
+function r2(){
+  const list = S.stu.map((s, i) => [s, i]).filter(([s]) => s.sheet);
+  const side = $("side"), sh = $("sheet"); side.innerHTML = ""; sh.innerHTML = "";
+  if(!list.length){ $("h1-2").textContent = "아직 만든 학습지가 없어요"; $("p-2").textContent = "학생 탭에서 결과를 넣고 학습지를 만들어 주세요."; return; }
+  if(S.cur == null || !S.stu[S.cur] || !S.stu[S.cur].sheet) S.cur = (list.find(([s]) => !s.ok) || list[0])[1];
+  const left = list.filter(([s]) => !s.ok).length;
+  $("h1-2").textContent = left ? `학습지 ${left}장을\n확인해 주세요` : "모두 확인했어요"; $("h1-2").style.whiteSpace = "pre-line";
+  $("p-2").textContent = left ? "정답과 문제를 보고 아래 버튼을 눌러 주세요." : "보내기 탭에서 인쇄하고 리포트를 보내 주세요.";
+  list.forEach(([s, i]) => { const b = el("button"); b.type = "button"; b.setAttribute("aria-current", i === S.cur);
+    b.append(el("span", "dot " + tone(s)), el("span", "", s.nick)); b.onclick = () => { S.cur = i; save(); r2(); bar(); }; side.appendChild(b); });
+  const st = S.stu[S.cur], sd = st.sheet;
+
+  const head = el("section", "card"); const ht = el("div", "card-title"); ht.append(el("span", "", `${st.nick} 맞춤 학습지`), el("span", "sp"));
+  const [lt] = status(st); ht.appendChild(el("span", "st " + tone(st), lt)); head.appendChild(ht);
+  head.appendChild(el("span", "sub", `${sname(st)} · ${sd.qs.length}문항${st.photoN ? ` · 사진 ${st.photoN}장 읽음` : ""}${st.ex ? " · 예시" : ""}`));
+  if(sd.read && sd.read.length){ const d = el("details", "more"); d.appendChild(el("summary", "", `Claude가 읽은 결과 ${sd.read.length}줄 보기`)); const u = el("ul"); sd.read.forEach(x => u.appendChild(el("li", "", x))); d.appendChild(u); head.appendChild(d); }
+  sh.appendChild(head);
+
+  if(sd.unclear && sd.unclear.length){ const c = el("section", "alert"); c.appendChild(el("b", "", "먼저 확인해 주세요")); const u = el("ul"); sd.unclear.forEach(x => u.appendChild(el("li", "", x))); c.appendChild(u); sh.appendChild(c); }
+
+  const wk = el("section", "card"); wk.appendChild(el("div", "card-title", "찾은 약점"));
+  if(sd.weak.length) sd.weak.forEach((x, k) => { const d = el("div", "weak-item"); const t = el("div"); t.append(el("b", "", x.type), el("span", "", x.rule)); d.append(el("span", "n", k + 1), t); wk.appendChild(d); });
+  else wk.appendChild(el("span", "sub", "근거가 부족해 약점을 정하지 않았어요. 아래는 단원 전체를 보는 진단용 기본 문제예요."));
+  sh.appendChild(wk);
+
+  const qc = el("section", "card"); const qt = el("div", "card-title"); qt.append(el("span", "", `문제 ${sd.qs.length}개`), el("span", "sp"));
+  if(!st.ok){ const re = el("button", "link", "다시 만들기"); re.type = "button"; re.disabled = BUSY || !hasInput(st); re.onclick = () => gen([S.cur]); qt.appendChild(re); }
+  qc.appendChild(qt);
+  sd.qs.forEach((q, qi) => {
+    const d = el("div", "q"); const top = el("div", "q-top"); top.append(el("span", "q-n", qi + 1), el("span", "q-stem", q.stem));
+    if(!st.ok){ const x = el("button", "q-x", "빼기"); x.type = "button"; x.onclick = () => { sd.qs.splice(qi, 1); save(); r2(); bar(); }; top.appendChild(x); }
+    d.appendChild(top);
+    const os = el("div", "opts"); q.options.forEach((o, j) => { const e = el("div", "opt" + (j === q.answer ? " ans" : "")); e.append(el("span", "L", "ABCD"[j]), el("span", "", o)); os.appendChild(e); }); d.appendChild(os);
+    d.appendChild(el("div", "exp", q.explain)); qc.appendChild(d);
+  });
+  sh.appendChild(qc);
+
+  const pc = el("section", "card"); const pl = el("label", "card-title", "학부모 리포트"); pl.htmlFor = "parent-" + S.cur;
+  const pt = el("textarea"); pt.id = "parent-" + S.cur; pt.value = sd.parent; pt.oninput = () => { sd.parent = pt.value; save(); };
+  pc.append(pl, pt, el("span", "sub", "보내기 전에 고쳐 써도 돼요.")); sh.appendChild(pc);
+
+  if(st.ok){ const u = btn("grey wide", "확인 취소하고 고치기", () => { st.ok = false; const k = S.log.map(x => x.nick).lastIndexOf(st.nick); if(k >= 0) S.log.splice(k, 1); save(); render(); }); sh.appendChild(u); }
+}
+
+function r3(){
+  const box = $("sendlist"); box.innerHTML = ""; $("fbox").innerHTML = "";
+  const ok = S.stu.filter(s => s.ok);
+  if(!ok.length){ const e = el("section", "card"); e.append(el("div", "card-title", "아직 확인한 학습지가 없어요"), el("span", "sub", "확인 탭에서 문제를 보고 확인 완료를 누르면 여기에 나와요."), btn("soft wide", "확인하러 가기", () => go(2))); box.appendChild(e); return; }
+  ok.forEach(st => {
+    const c = el("section", "card"); const h = el("div", "card-title"); h.style.gap = "12px";
+    h.append(el("span", "avatar ok", initial(st.nick))); const m = el("span", "row-main"); m.append(el("b", "", st.nick), el("span", "", `${sname(st)} · ${st.sheet.qs.length}문항`)); h.appendChild(m); c.appendChild(h);
+    const a = el("div", "send-actions");
+    const f = btn("blue", "학습지 열어서 인쇄"); f.onclick = () => saveFile([st], f);
+    const cp = btn("grey", "학습지 복사"); cp.onclick = () => copy(sheetText(st), cp, "학습지 복사");
+    const pr = btn("grey", "리포트 복사"); pr.onclick = () => copy(st.sheet.parent, pr, "리포트 복사");
+    a.append(f, cp, pr); c.appendChild(a); box.appendChild(c);
+  });
+}
+
+const addOpen = on => { $("addsheet").hidden = $("scrim2").hidden = !on; if(on){ rchips(); setTimeout(() => $("nick").focus(), 50); } };
+function rchips(){ const chips = $("subjchips"); chips.innerHTML = "";
+  Object.entries(SUBJ).forEach(([k, v]) => { const b = el("button", "chip", v.name); b.type = "button"; b.setAttribute("aria-pressed", S.subj === k); b.onclick = () => { S.subj = k; save(); rchips(); }; chips.appendChild(b); }); }
 
 function onPhoto(st, fi){
   const fs = [...fi.files].filter(f => f.type.startsWith("image/")).slice(0, CAN_IMG.maxCount); if(!fs.length) return;
@@ -444,63 +547,6 @@ function shrink(file){ return new Promise((ok, no) => { const u = URL.createObje
   im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
     c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok({type: "image/jpeg", data: c.toDataURL("image/jpeg", 0.85).split(",")[1]}); };
   im.onerror = () => { URL.revokeObjectURL(u); no({code: "bad_image"}); }; im.src = u; }); }
-
-function r2(){
-  const list = S.stu.map((s, i) => [s, i]).filter(([s]) => s.sheet);
-  const side = $("side"), sh = $("sheet"); side.innerHTML = ""; sh.innerHTML = "";
-  if(!list.length){
-    sh.append(el("h2", "", "아직 만든 학습지가 없어요"), el("p", "muted", "1단계에서 결과를 넣고 '학습지 만들기'를 눌러 주세요."));
-    const b = el("button", "ghost", "← 결과 넣기로"); b.type = "button"; b.onclick = () => go(1); sh.appendChild(b); side.hidden = true; return;
-  }
-  side.hidden = false;
-  if(S.cur == null || !S.stu[S.cur] || !S.stu[S.cur].sheet) S.cur = (list.find(([s]) => !s.ok) || list[0])[1];
-  list.forEach(([s, i]) => { const b = el("button", "who"); b.type = "button"; b.setAttribute("aria-current", i === S.cur);
-    const [t, cls] = status(s); b.append(el("span", "", s.nick), el("span", "tag " + cls, t)); b.onclick = () => { S.cur = i; save(); r2(); bar(); }; side.appendChild(b); });
-  const st = S.stu[S.cur], sd = st.sheet;
-  const hd = el("div", "sheet-head"); const t = el("div"); t.append(el("h2", "", `${st.nick} 맞춤 학습지`), el("div", "small muted", `${sname(st)} · ${sd.qs.length}문항${st.photoN ? ` · 사진 ${st.photoN}장 읽음` : ""}`));
-  hd.append(t, el("span", "sp")); if(st.ex) hd.appendChild(el("span", "tag ex", "예시"));
-  const [tt, tc] = status(st); hd.appendChild(el("span", "tag " + tc, tt)); sh.appendChild(hd);
-
-  if(sd.unclear && sd.unclear.length){ const c = el("div", "callout warn"); c.appendChild(el("b", "", "먼저 확인해 주세요")); const u = el("ul"); sd.unclear.forEach(x => u.appendChild(el("li", "", x))); c.appendChild(u); sh.appendChild(c); }
-  if(sd.read && sd.read.length){ const d = el("details", "read"); d.appendChild(el("summary", "", `Claude가 읽은 결과 ${sd.read.length}줄 · 원본과 같은지 확인`)); const u = el("ul"); sd.read.forEach(x => u.appendChild(el("li", "", x))); d.appendChild(u); sh.appendChild(d); }
-
-  const ws = el("div"); ws.style.cssText = "display:grid;gap:8px"; ws.appendChild(el("div", "small muted", "찾은 약점"));
-  const w = el("div", "weak");
-  if(sd.weak.length) sd.weak.forEach(x => { const d = el("div"); d.append(el("b", "", x.type), el("span", "", "규칙: " + x.rule)); if(x.evidence) d.appendChild(el("span", "", "근거: " + x.evidence)); w.appendChild(d); });
-  else { const d = el("div"); d.append(el("b", "", "근거가 부족해 정하지 않았어요"), el("span", "", "아래 문항은 단원 전체를 보는 진단용 기본 문제입니다.")); w.appendChild(d); }
-  ws.appendChild(w); sh.appendChild(ws);
-
-  const qs = el("div", "qs");
-  sd.qs.forEach((q, qi) => {
-    const d = el("div", "q");
-    const top = el("div", "q-top"); top.append(el("span", "q-n", qi + 1 + "."), el("span", "q-stem", q.stem));
-    const x = el("button", "text", "빼기"); x.type = "button"; x.title = "이 문항 빼기"; x.disabled = st.ok;
-    x.onclick = () => { sd.qs.splice(qi, 1); save(); r2(); }; top.appendChild(x); d.appendChild(top);
-    const os = el("div", "opts"); q.options.forEach((o, j) => { const e = el("div", "opt" + (j === q.answer ? " ans" : "")); e.append(el("span", "L", "ABCD"[j]), el("span", "", o)); os.appendChild(e); }); d.appendChild(os);
-    d.appendChild(el("div", "exp", (q.type ? `[${q.type}] ` : "") + q.explain)); qs.appendChild(d);
-  });
-  sh.appendChild(qs);
-
-  const pr = el("div", "parent"); pr.style.cssText = "display:grid;gap:6px";
-  const pl = el("label", "small muted", "학부모 리포트 · 고쳐 써도 됩니다"); pl.htmlFor = "parent-" + S.cur;
-  const pt = el("textarea"); pt.id = "parent-" + S.cur; pt.value = sd.parent; pt.oninput = () => { sd.parent = pt.value; save(); };
-  pr.append(pl, pt); sh.appendChild(pr);
-
-  const ac = el("div", "actions");
-  const nextIdx = () => { const rest = list.filter(([s, i]) => !s.ok && i !== S.cur); return rest.length ? rest[0][1] : null; };
-  if(!st.ok){
-    const ok = el("button", "", "확인 완료"); ok.type = "button"; ok.disabled = !sd.qs.length;
-    ok.onclick = () => { st.ok = true; S.log.push({day: ymd(new Date()), nick: st.nick}); const n = nextIdx(); if(n != null){ S.cur = n; save(); render(); setMsg(`${st.nick} 확인 완료. 다음 학생입니다.`); } else { save(); go(3); } };
-    ac.appendChild(ok);
-    const re = el("button", "ghost", "다시 만들기"); re.type = "button"; re.disabled = BUSY || !hasInput(st); re.onclick = () => gen([S.cur]); ac.appendChild(re);
-  } else {
-    const un = el("button", "ghost", "확인 취소하고 고치기"); un.type = "button";
-    un.onclick = () => { st.ok = false; const k = S.log.map(x => x.nick).lastIndexOf(st.nick); if(k >= 0) S.log.splice(k, 1); save(); render(); }; ac.appendChild(un);
-  }
-  ac.appendChild(el("span", "sp"));
-  ac.appendChild(el("span", "small muted", `${list.filter(([s]) => s.ok).length} / ${list.length}명 확인`));
-  sh.appendChild(ac);
-}
 
 function sheetText(st){ const sd = st.sheet;
   return `${st.nick} 맞춤 학습지 (${ymd(new Date())})\n오늘의 규칙: ${sd.weak.map(w => w.rule).join(" / ") || "단원 기본 문제"}\n\n` + sd.qs.map((q, i) => `${i+1}. ${q.stem}\n   ${q.options.map((o, j) => `(${"ABCD"[j]}) ${o}`).join("   ")}`).join("\n\n")
@@ -514,7 +560,7 @@ function sheetHTML(sts){
 }
 async function copy(text, btn, label){
   try{ await navigator.clipboard.writeText(text); btn.textContent = "복사했어요"; setTimeout(() => btn.textContent = label, 1600); }
-  catch(e){ const f = $("fbox"); f.innerHTML = ""; const ta = el("textarea", "fallback"); ta.id = "fallback"; ta.readOnly = true; ta.value = text; f.append(el("p", "small muted", "자동 복사가 막힌 화면이에요. 아래 내용을 전체 선택해서 복사해 주세요."), ta); ta.focus(); ta.select(); }
+  catch(e){ const f = $("fbox"); f.innerHTML = ""; if(S.step !== 3) go(3); const ta = el("textarea", "fallback"); ta.id = "fallback"; ta.readOnly = true; ta.value = text; f.append(el("p", "small muted", "자동 복사가 막힌 화면이에요. 아래 내용을 전체 선택해서 복사해 주세요."), ta); ta.focus(); ta.select(); }
 }
 async function saveFile(sts, btn){
   const name = sts.length === 1 ? `${sts[0].nick}_학습지_${ymd(new Date())}.html` : `맞춤학습지_${sts.length}명_${ymd(new Date())}.html`;
@@ -524,22 +570,6 @@ async function saveFile(sts, btn){
   else setMsg("새 창에서 학습지를 열었어요. 인쇄 버튼을 눌러 주세요.");
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
-function r3(){
-  const box = $("sendlist"); box.innerHTML = ""; $("fbox").innerHTML = "";
-  const ok = S.stu.filter(s => s.ok);
-  $("saveall").disabled = !ok.length; $("saveall").onclick = () => saveFile(ok, $("saveall"));
-  if(!ok.length){ const e = el("div", "panel empty"); e.append(el("b", "", "아직 확인 끝난 학습지가 없어요"), el("span", "small", "2단계에서 문항을 보고 '확인 완료'를 누르면 여기에 나옵니다."));
-    const b = el("button", "ghost", "← 학습지 확인으로"); b.type = "button"; b.onclick = () => go(2); e.appendChild(b); box.appendChild(e); return; }
-  ok.forEach(st => {
-    const r = el("div", "send-row"); const t = el("div"); t.append(el("h3", "", st.nick), el("div", "small muted", `${sname(st)} · ${st.sheet.qs.length}문항`));
-    r.append(t, el("span", "sp"));
-    const f = el("button", "", "학습지 열어서 인쇄"); f.type = "button"; f.onclick = () => saveFile([st], f);
-    const c = el("button", "ghost", "학습지 복사"); c.type = "button"; c.onclick = () => copy(sheetText(st), c, "학습지 복사");
-    const p = el("button", "ghost", "학부모 리포트 복사"); p.type = "button"; p.onclick = () => copy(st.sheet.parent, p, "학부모 리포트 복사");
-    r.append(f, c, p); box.appendChild(r);
-  });
-}
-
 async function gen(idx){
   if(!API){ setMsg("체험판이에요. 서버 연결 전이라 예시 학습지만 볼 수 있어요."); return; }
   if(!S.code){ sheetOpen(true); $("code").focus(); setMsg("학원 코드를 넣거나 무료 코드를 받아 주세요."); return; }
@@ -568,7 +598,7 @@ async function gen(idx){
   }
   BUSY = false; $("stop").hidden = true; $("prog").hidden = true;
   const made = targets.filter(i => S.stu[i].sheet && !S.stu[i].ok);
-  if(made.length && !stopped && !fail){ S.cur = made[0]; S.step = 2; save(); render(); setMsg(`${made.length}명 학습지를 만들었어요. 하나씩 확인해 주세요.`); }
+  if(made.length && !stopped && !fail){ S.cur = made[0]; S.step = 2; PAGE = null; save(); render(); setMsg(`${made.length}명 학습지를 만들었어요. 하나씩 확인해 주세요.`); }
   else { render(); setMsg(why ? why : stopped ? "멈췄어요." : fail ? `${fail}명은 만들지 못했어요. 다시 눌러 주세요.` : "완료."); }
 }
 
@@ -576,15 +606,19 @@ function addStu(nick, result, subj){ nick = nick.trim().slice(0, 20); if(!nick |
 function loadDemo(){ (DEMO[S.subj] || DEMO.naesin).forEach(([n, r]) => { if(addStu(n, r, S.subj)) S.stu[S.stu.length-1].ex = true; }); save(); render(); }
 function loadMessy(){ MESSY.forEach(([n, sj, r]) => { if(addStu(n, r, sj)) S.stu[S.stu.length-1].ex = true; }); save(); render(); }
 
-$("add").onclick = () => { const v = $("nick").value; if(!v.trim()){ $("nick").focus(); return; } if(!addStu(v, "", S.subj)){ setMsg("같은 별명이 이미 있어요."); return; } OPEN.add(v.trim().slice(0, 20)); $("nick").value = ""; save(); render(); const ta = $("res-" + (S.stu.length - 1)); if(ta) ta.focus(); };
+$("add").onclick = () => { const v = $("nick").value; if(!v.trim()){ $("nick").focus(); return; } if(!addStu(v, "", S.subj)){ $("nick").setCustomValidity("같은 별명이 이미 있어요."); $("nick").reportValidity(); $("nick").setCustomValidity(""); return; }
+  $("nick").value = ""; addOpen(false); PAGE = S.stu.length - 1; save(); render(); window.scrollTo({top:0}); const ta = $("res"); if(ta) ta.focus(); };
+$("addclose").onclick = $("scrim2").onclick = () => addOpen(false);
+$("demo1").onclick = () => { loadDemo(); addOpen(false); };
+$("demo2").onclick = () => { loadMessy(); addOpen(false); };
 $("nick").onkeydown = e => { if(e.key === "Enter"){ e.preventDefault(); $("add").click(); } };
 $("bulkgo").onclick = () => { let n = 0, skip = 0;
   $("bulk").value.split("\n").map(l => l.trim()).filter(Boolean).forEach(l => { const m = l.match(/^([^:：]{1,20})[:：]\s*(.+)$/); if(m && addStu(m[1], m[2], S.subj)) n++; else skip++; });
-  save(); render(); $("bulkmsg").textContent = n ? `${n}명 추가했어요.` + (skip ? ` ${skip}줄은 '별명: 메모' 형식이 아니거나 이미 있는 별명이라 건너뛰었어요.` : "") : "'별명: 메모' 형식의 줄을 찾지 못했어요."; if(n) $("bulk").value = ""; };
+  save(); render(); $("bulkmsg").textContent = n ? `${n}명 추가했어요.` + (skip ? ` ${skip}줄은 '별명: 메모' 형식이 아니거나 이미 있는 별명이라 건너뛰었어요.` : "") : "'별명: 메모' 형식의 줄을 찾지 못했어요."; if(n){ $("bulk").value = ""; setTimeout(() => addOpen(false), 600); } };
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => go(+b.dataset.step));
-const sheetOpen = on => { $("settings").hidden = $("scrim").hidden = !on; $("gear").setAttribute("aria-expanded", on); if(on) $("m-make").focus(); };
+const sheetOpen = on => { $("settings").hidden = $("scrim").hidden = !on; $("gear").setAttribute("aria-expanded", on); if(on) setTimeout(() => (S.code ? $("m-make") : $("code")).focus(), 50); };
 $("gear").onclick = () => sheetOpen(true); $("scrim").onclick = $("setclose").onclick = () => sheetOpen(false);
-document.addEventListener("keydown", e => { if(e.key === "Escape" && !$("settings").hidden) sheetOpen(false); });
+document.addEventListener("keydown", e => { if(e.key !== "Escape") return; if(!$("settings").hidden) sheetOpen(false); else if(!$("addsheet").hidden) addOpen(false); else if(PAGE != null){ PAGE = null; render(); } });
 ["make","grade","review"].forEach(k => $("m-" + k).onchange = () => { S.set[k] = +$("m-" + k).value || 0; save(); kpi(); });
 $("wage").onchange = () => { S.set.wage = +$("wage").value || 0; save(); kpi(); };
 $("stop").onclick = () => ctl && ctl.abort();
