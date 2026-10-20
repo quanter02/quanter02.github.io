@@ -62,12 +62,13 @@ td.n{font-family:var(--num);text-align:right}
   <section class="card" style="display:grid;gap:8px">
     <h2>1. 성적표 붙여 넣기</h2>
     <div class="row"><span class="note">예시로 먼저 보기:</span>
+      <button class="g" type="button" id="ex-soc">고등 통합사회 (5지선다·단원)</button>
       <button class="g" type="button" id="ex-en">중고등 영어 (고른 답 번호)</button>
       <button class="g" type="button" id="ex-cs">대학 자료구조 (O/X)</button></div>
     <textarea id="src" spellcheck="false" placeholder="엑셀에서 표를 그대로 복사해 붙여 넣으세요.&#10;학생	1번	2번	3번&#10;유형	수동태	시제	관계사      ← (선택) 문항 유형&#10;정답	3	2	1           ← (선택) 정답이 있으면 고른 답 번호를 넣어도 됩니다&#10;S01	3	1	1&#10;S02	O	X	O           ← 정답 줄이 없으면 O/X, 1/0"></textarea>
     <details><summary class="note">형식 자세히</summary>
       <ul class="note">
-        <li>첫 줄: 학생 칸 + 문항 이름. 둘째 줄부터 학생 한 명씩. 탭(엑셀 복사)이나 쉼표로 나뉜 표 모두 됩니다.</li>
+        <li>첫 줄: 학생 칸 + 문항 이름. 앞에 <b>학번·번호·이름</b> 칸이 여러 개 있어도 됩니다. 둘째 줄부터 학생 한 명씩. 탭(엑셀 복사)이나 쉼표로 나뉜 표 모두 됩니다.</li>
         <li><b>유형</b>으로 시작하는 줄이 있으면 문항 유형으로 씁니다. 없으면 아래 표에서 직접 적을 수 있습니다.</li>
         <li><b>정답</b>으로 시작하는 줄이 있으면 고른 답과 비교하고, 오답 선택지 분포도 보여 줍니다. ①②③④도 됩니다.</li>
         <li>정답 줄이 없으면 O·○·1·정답은 맞음, X·×·0·오답은 틀림으로 봅니다. 빈칸은 무응답(틀림)입니다.</li>
@@ -94,6 +95,7 @@ td.n{font-family:var(--num);text-align:right}
       <h2>3. 문항별 분석</h2>
       <div class="tbl"><table id="t-q"></table></div>
       <p class="note" id="q-note"></p>
+      <div class="row"><button class="g" type="button" id="copy-q">문항 분석표 복사 (엑셀·한글에 붙여 넣기)</button><span class="note" id="copy-msg"></span></div>
     </section>
 
     <section class="card">
@@ -101,7 +103,7 @@ td.n{font-family:var(--num);text-align:right}
       <div id="stus"></div>
     </section>
 
-    <section class="card cta" style="display:grid;gap:8px">
+    <section class="card cta" id="cta" style="display:grid;gap:8px">
       <h2>이 약점으로 학생별 맞춤 문제까지 받기</h2>
       <p style="margin:0">위 결과의 학생별 약점 유형으로 <b>학생마다 다른 연습문제(정답·해설 포함)</b>를 만들어 드립니다. 선생님이 확인한 문항만 나갑니다. 지금은 <b>무료 파일럿</b>으로 받고 있습니다.</p>
       <p class="note" style="margin:0">신청하실 때는 이 화면의 결과를 직접 보내 주셔야 합니다(이 페이지는 데이터를 보내지 않습니다). 학생 이름은 번호로 바꿔 보내 주세요.</p>
@@ -118,7 +120,7 @@ td.n{font-family:var(--num);text-align:right}
 const GC_CODE = "";
 // 맞춤 문제 신청 링크 (오픈채팅·구글 폼). 비어 있으면 안내만 띄움.
 const LINKS = {apply: "https://open.kakao.com/o/spOlfgTi"};
-const EX = {en: "학생\t1번\t2번\t3번\t4번\t5번\t6번\t7번\t8번\t9번\t10번\n유형\t수동태\t수동태\t시제\t시제\t관계사\t관계사\t수 일치\t수 일치\t동명사/to부정사\t분사\n정답\t3\t2\t1\t4\t2\t2\t3\t1\t4\t3\nS01\t3\t1\t1\t1\t2\t2\t3\t1\t4\t2\nS02\t1\t2\t2\t4\t2\t2\t3\t2\t4\t3\nS03\t1\t2\t2\t2\t2\t1\t3\t1\t4\t3\nS04\t1\t2\t2\t4\t4\t2\t1\t1\t4\t2\nS05\t3\t2\t1\t4\t2\t3\t3\t2\t4\t3\nS06\t3\t2\t2\t4\t2\t2\t4\t1\t4\t3\nS07\t1\t2\t1\t4\t2\t2\t3\t1\t4\t3\nS08\t3\t4\t2\t2\t2\t2\t3\t1\t1\t3\nS09\t3\t2\t1\t4\t2\t1\t4\t1\t4\t2\nS10\t3\t2\t3\t2\t2\t4\t3\t1\t4\t4\nS11\t3\t1\t1\t2\t2\t2\t3\t1\t4\t3\nS12\t3\t2\t3\t4\t2\t2\t3\t3\t4\t3", cs: "학생\tQ1\tQ2\tQ3\tQ4\tQ5\tQ6\tQ7\tQ8\n유형\t재귀\t재귀\t복사/참조\t시간 복잡도\t시간 복잡도\t스택/큐\t이진 탐색\t연결 리스트\nA01\tO\tO\tO\tX\tX\tX\tX\tX\nA02\tO\tO\tX\tX\tX\tO\tO\tO\nA03\tX\tX\tO\tO\tX\tO\tO\tO\nA04\tX\tX\tO\tX\tX\tO\tO\tX\nA05\tO\tX\tX\tX\tX\tO\tX\tX\nA06\tO\tO\tO\tX\tO\tO\tO\tX\nA07\tO\tX\tX\tO\tX\tO\tX\tO\nA08\tX\tO\tO\tX\tO\tO\tX\tX\nA09\tX\tX\tX\tO\tX\tO\tO\tX\nA10\tX\tX\tX\tO\tX\tO\tO\tX"};
+const EX = {soc: "학생\t1번\t2번\t3번\t4번\t5번\t6번\t7번\t8번\t9번\t10번\t11번\t12번\t13번\t14번\t15번\t16번\t17번\t18번\t19번\t20번\n단원\t통합적 관점\t통합적 관점\t통합적 관점\t통합적 관점\t인간·사회·환경과 행복\t인간·사회·환경과 행복\t인간·사회·환경과 행복\t인간·사회·환경과 행복\t인간·사회·환경과 행복\t자연환경과 인간\t자연환경과 인간\t자연환경과 인간\t자연환경과 인간\t자연환경과 인간\t자연환경과 인간\t문화와 다양성\t문화와 다양성\t문화와 다양성\t문화와 다양성\t문화와 다양성\n정답\t3\t2\t4\t1\t1\t5\t1\t3\t5\t1\t5\t2\t1\t1\t4\t4\t1\t2\t1\t5\n1번\t3\t2\t4\t1\t3\t5\t1\t3\t5\t3\t3\t5\t1\t1\t4\t4\t2\t2\t4\t5\n2번\t3\t2\t1\t1\t4\t5\t1\t3\t5\t1\t5\t2\t1\t1\t5\t5\t1\t2\t1\t5\n3번\t3\t2\t4\t1\t5\t4\t1\t3\t5\t1\t3\t2\t1\t2\t4\t4\t2\t3\t3\t3\n4번\t3\t2\t4\t3\t1\t5\t1\t2\t5\t1\t3\t2\t1\t1\t4\t2\t1\t2\t4\t5\n5번\t3\t2\t1\t1\t1\t5\t1\t3\t5\t3\t5\t2\t1\t1\t4\t4\t1\t2\t1\t5\n6번\t3\t2\t4\t1\t1\t5\t1\t2\t1\t1\t5\t2\t3\t3\t4\t4\t1\t2\t4\t5\n7번\t3\t2\t4\t3\t2\t5\t2\t4\t5\t3\t5\t5\t1\t2\t4\t2\t2\t2\t1\t5\n8번\t3\t2\t4\t1\t1\t5\t1\t2\t5\t1\t5\t3\t1\t1\t4\t4\t4\t2\t1\t5\n9번\t3\t2\t4\t1\t1\t5\t1\t3\t5\t1\t5\t2\t5\t1\t4\t5\t1\t2\t1\t5\n10번\t2\t2\t1\t1\t1\t5\t1\t1\t1\t1\t5\t5\t3\t1\t3\t2\t1\t5\t4\t5\n11번\t1\t2\t5\t1\t1\t4\t1\t3\t5\t1\t5\t2\t1\t2\t1\t4\t2\t3\t2\t5\n12번\t5\t2\t4\t1\t2\t5\t1\t3\t5\t3\t5\t2\t1\t1\t4\t4\t2\t2\t1\t5\n13번\t3\t1\t4\t1\t1\t5\t1\t3\t5\t3\t3\t5\t1\t2\t4\t4\t1\t2\t1\t4\n14번\t3\t2\t4\t5\t1\t5\t1\t3\t5\t3\t5\t4\t2\t1\t4\t4\t2\t1\t1\t1\n15번\t3\t2\t4\t3\t1\t5\t1\t1\t3\t1\t5\t5\t1\t1\t3\t4\t5\t2\t1\t1\n16번\t3\t2\t4\t1\t1\t5\t1\t3\t5\t3\t5\t5\t5\t2\t3\t4\t2\t3\t1\t5\n17번\t3\t2\t4\t1\t3\t5\t1\t2\t1\t3\t5\t5\t1\t2\t1\t3\t1\t2\t4\t1\n18번\t5\t2\t4\t1\t1\t5\t1\t3\t5\t3\t5\t1\t1\t5\t3\t4\t1\t2\t1\t1\n19번\t5\t2\t4\t1\t1\t5\t1\t3\t2\t1\t3\t2\t3\t3\t3\t4\t1\t2\t4\t5\n20번\t3\t2\t4\t1\t1\t5\t1\t3\t5\t1\t5\t2\t1\t1\t1\t4\t2\t1\t1\t2\n21번\t3\t2\t4\t1\t1\t5\t1\t3\t5\t1\t5\t5\t5\t2\t5\t4\t1\t2\t1\t5\n22번\t4\t3\t4\t1\t1\t4\t1\t3\t1\t3\t5\t2\t5\t2\t5\t2\t1\t2\t1\t1\n23번\t3\t5\t1\t1\t2\t4\t2\t2\t3\t3\t3\t5\t3\t4\t4\t4\t5\t2\t1\t4\n24번\t5\t2\t4\t1\t1\t5\t1\t3\t1\t5\t5\t2\t4\t2\t4\t4\t2\t5\t1\t5\n25번\t3\t2\t1\t1\t1\t5\t2\t3\t5\t3\t5\t2\t3\t4\t4\t2\t2\t3\t5\t1\n26번\t3\t2\t4\t1\t1\t5\t1\t3\t5\t1\t5\t2\t2\t1\t4\t4\t1\t2\t4\t5\n27번\t3\t2\t4\t1\t5\t5\t3\t3\t5\t1\t2\t2\t1\t2\t4\t4\t2\t4\t1\t1\n28번\t3\t2\t4\t1\t2\t5\t1\t3\t5\t1\t3\t2\t1\t1\t3\t2\t5\t2\t1\t1\n29번\t3\t2\t4\t1\t1\t5\t1\t2\t5\t1\t1\t2\t1\t2\t4\t4\t1\t3\t4\t5\n30번\t1\t2\t4\t1\t1\t5\t2\t2\t1\t1\t1\t2\t2\t2\t3\t4\t2\t3\t1\t5", en: "학생\t1번\t2번\t3번\t4번\t5번\t6번\t7번\t8번\t9번\t10번\n유형\t수동태\t수동태\t시제\t시제\t관계사\t관계사\t수 일치\t수 일치\t동명사/to부정사\t분사\n정답\t3\t2\t1\t4\t2\t2\t3\t1\t4\t3\nS01\t3\t1\t1\t1\t2\t2\t3\t1\t4\t2\nS02\t1\t2\t2\t4\t2\t2\t3\t2\t4\t3\nS03\t1\t2\t2\t2\t2\t1\t3\t1\t4\t3\nS04\t1\t2\t2\t4\t4\t2\t1\t1\t4\t2\nS05\t3\t2\t1\t4\t2\t3\t3\t2\t4\t3\nS06\t3\t2\t2\t4\t2\t2\t4\t1\t4\t3\nS07\t1\t2\t1\t4\t2\t2\t3\t1\t4\t3\nS08\t3\t4\t2\t2\t2\t2\t3\t1\t1\t3\nS09\t3\t2\t1\t4\t2\t1\t4\t1\t4\t2\nS10\t3\t2\t3\t2\t2\t4\t3\t1\t4\t4\nS11\t3\t1\t1\t2\t2\t2\t3\t1\t4\t3\nS12\t3\t2\t3\t4\t2\t2\t3\t3\t4\t3", cs: "학생\tQ1\tQ2\tQ3\tQ4\tQ5\tQ6\tQ7\tQ8\n유형\t재귀\t재귀\t복사/참조\t시간 복잡도\t시간 복잡도\t스택/큐\t이진 탐색\t연결 리스트\nA01\tO\tO\tO\tX\tX\tX\tX\tX\nA02\tO\tO\tX\tX\tX\tO\tO\tO\nA03\tX\tX\tO\tO\tX\tO\tO\tO\nA04\tX\tX\tO\tX\tX\tO\tO\tX\nA05\tO\tX\tX\tX\tX\tO\tX\tX\nA06\tO\tO\tO\tX\tO\tO\tO\tX\nA07\tO\tX\tX\tO\tX\tO\tX\tO\nA08\tX\tO\tO\tX\tO\tO\tX\tX\nA09\tX\tX\tX\tO\tX\tO\tO\tX\nA10\tX\tX\tX\tO\tX\tO\tO\tX"};
 
 function track(name){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true}); }catch(e){} }
 if(GC_CODE){ const s = document.createElement("script"); s.async = true; s.src = "https://gc.zgo.at/count.js"; s.dataset.goatcounter = `https://${GC_CODE}.goatcounter.com/count`; document.head.appendChild(s); }
@@ -136,14 +138,17 @@ function parse(text){
   if(lines.length < 2) throw "표가 너무 짧습니다. 첫 줄(문항 이름)과 학생 줄이 필요합니다.";
   const sep = lines[0].includes("\t") ? "\t" : ",";
   const cells = lines.map(l => l.split(sep));
-  const qs = cells[0].slice(1).map((s, i) => s.trim() || `${i+1}번`);
+  const ID = /^(학번|번호|이름|성명|반|학생|출석번호)$/;
+  let lead = 1; while(lead < cells[0].length - 1 && ID.test(cells[0][lead].trim())) lead++;
+  const qs = cells[0].slice(lead).map((s, i) => s.trim() || `${i+1}번`);
   if(!qs.length) throw "첫 줄에 문항 이름이 없습니다.";
   let tags = qs.map(() => ""), key = null; const stu = [];
   for(const r of cells.slice(1)){
-    const head = r[0].trim();
-    const vals = qs.map((_, i) => r[i+1] == null ? "" : r[i+1]);
-    if(/^(유형|태그|단원)$/.test(head)) tags = vals.map(v => String(v).trim());
-    else if(/^(정답|답|key)$/i.test(head)) key = vals.map(norm);
+    const ids = r.slice(0, lead).map(x => String(x || "").trim()).filter(Boolean);
+    const head = ids.join(" ");
+    const vals = qs.map((_, i) => r[i+lead] == null ? "" : r[i+lead]);
+    if(ids.some(x => /^(유형|태그|단원)$/.test(x))) tags = vals.map(v => String(v).trim());
+    else if(ids.some(x => /^(정답|답|key)$/i.test(x))) key = vals.map(norm);
     else stu.push({name: head || `학생${stu.length+1}`, raw: vals.map(norm)});
   }
   if(!stu.length) throw "학생 줄이 없습니다.";
@@ -251,8 +256,24 @@ $("run").onclick = () => {
   try{ D = parse($("src").value); render(); track("analyze-done"); $("out").scrollIntoView({behavior: "smooth", block: "start"}); }
   catch(e){ $("err").textContent = typeof e === "string" ? e : "표를 읽지 못했습니다. 형식을 확인해 주세요."; $("out").hidden = true; }
 };
+$("ex-soc").onclick = () => { $("src").value = EX.soc; $("run").click(); track("example-soc"); };
 $("ex-en").onclick = () => { $("src").value = EX.en; $("run").click(); track("example-en"); };
 $("ex-cs").onclick = () => { $("src").value = EX.cs; $("run").click(); track("example-cs"); };
+$("copy-q").onclick = async () => {
+  if(!D) return; const R = analyze();
+  const head = ["문항","단원·유형","정답률(%)", ...(D.key ? ["정답","많이 고른 오답","그 오답 선택 수"] : []), "변별도"];
+  const rows = R.Q.map(x => [x.q, x.tag, pct(x.p), ...(D.key ? [D.key[x.i], x.wrong ? x.wrong.v : "-", x.wrong ? x.wrong.c : 0] : []), x.disc == null ? "-" : x.disc.toFixed(2)]);
+  const tsv = [head, ...rows].map(r => r.join("\t")).join("\n");
+  try{ await navigator.clipboard.writeText(tsv); $("copy-msg").textContent = "복사했어요. 엑셀이나 한글 표에 붙여 넣으세요."; track("copy-q"); }
+  catch(e){ window.prompt("복사해 주세요", tsv); }
+};
+// 학교 선생님용 링크(?t=school): 학원 신청 안내 대신 의견 받기
+if(new URLSearchParams(location.search).get("t") === "school"){
+  const c = $("cta"); c.querySelector("h2").textContent = "써 보신 의견을 들려주세요";
+  c.querySelectorAll("p")[0].textContent = "지금 시험 끝나고 문항 분석을 어떻게 하시는지, 써 보니 불편했던 점 하나만 알려 주시면 바로 고칩니다.";
+  c.querySelectorAll("p")[1].textContent = "성적표는 이 페이지 밖으로 나가지 않습니다. 학생 이름 대신 번호를 써 주세요.";
+  $("apply").textContent = "의견 보내기 (카카오톡)"; const last = c.querySelectorAll("p")[2]; if(last) last.hidden = true;
+}
 $("print-btn").onclick = () => { if(D){ printSummary(); track("print"); } };
 const a = $("apply");
 if(LINKS.apply){ a.href = LINKS.apply; a.target = "_blank"; a.rel = "noopener"; a.addEventListener("click", () => track("apply-click")); }
