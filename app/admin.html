@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>조교 도우미 관리</title>
+<meta name="description" content="관리자 전용">
+<meta name="theme-color" content="#f2f4f6">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#f2f4f6; --card:#ffffff; --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --line:#e5e8eb; --fill:#f2f4f6;
+  --blue:#3182f6; --blue-d:#1b64da; --blue-soft:#e8f3ff; --red:#f04452; --red-soft:#ffeeee; --green:#03b26c; --green-soft:#e5f8f0; --amber:#ff9f00; --amber-soft:#fff4e0;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;padding:24px 16px 120px;word-break:keep-all}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:12px}
+h1,h2,p{margin:0}
+h1{font-size:26px;line-height:1.35;font-weight:700;text-wrap:balance}
+h2{font-size:18px;font-weight:700}
+.sub{color:var(--ink3);font-size:14px}
+.lead{color:var(--ink2);font-size:15px;margin-top:6px}
+.card{background:var(--card);border-radius:20px;padding:20px;display:grid;gap:12px;min-width:0}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+.field{display:grid;gap:6px}
+.field label{font-size:14px;font-weight:600;color:var(--ink2)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--fill);border:0;border-radius:12px;padding:12px 14px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:14px;padding:12px 14px;cursor:pointer;text-decoration:none;text-align:center;display:inline-block}
+.btn.blue{background:var(--blue);color:#fff}.btn.soft{background:var(--blue-soft);color:var(--blue)}.btn.grey{background:var(--fill);color:var(--ink2)}
+.btn.big{font-size:17px;padding:16px}.wide{width:100%}
+.dock{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
+.dock .btn{max-width:520px;display:block;margin:0 auto}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600}
+.foot{font-size:12px;color:var(--ink3);text-align:center}.foot a{color:var(--ink3)}
+table{border-collapse:collapse;width:100%;font-size:14px;color:var(--ink)}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--ink3);font-weight:600;font-size:12px}tr{cursor:pointer}td.red{color:var(--red);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">관리자 전용</span>
+    <h1 style="margin-top:8px">결제한 학원에 코드를 줄까요?</h1>
+    <p class="lead">관리 비밀번호(ADMIN_TOKEN)는 이 기기 화면을 닫으면 지워져요. 어디에도 저장하지 않아요.</p>
+  </header>
+  <section class="card">
+    <div class="field"><label for="tok">관리 비밀번호</label><input id="tok" type="password" autocomplete="off" placeholder="wrangler secret으로 넣은 ADMIN_TOKEN"></div>
+    <button class="btn grey wide" type="button" id="load">학원 목록 불러오기</button>
+    <p class="sub" id="state"></p>
+  </section>
+
+  <section class="card">
+    <h2>결제 반영</h2>
+    <div class="field"><label for="plan">요금</label><select id="plan"><option value="200">강사 · 한 달 200장</option><option value="400">학원 · 한 달 400장</option><option value="100">추가 100장</option><option value="20">무료 체험 20장</option></select></div>
+    <div class="grid2">
+      <div class="field"><label for="code">코드 (비우면 새로 만들기)</label><input id="code" type="text" maxlength="20" autocapitalize="characters" placeholder="예: T-3F9A2C"></div>
+      <div class="field"><label for="name">학원 이름</label><input id="name" type="text" maxlength="30" placeholder="예: 바른수학"></div>
+    </div>
+    <div class="field"><label for="until">다음 결제일</label><input id="until" type="date"></div>
+    <button class="btn blue wide" type="button" id="apply">장수 더하기</button>
+    <textarea id="out" rows="4" readonly placeholder="반영하면 학원에 보낼 안내 문구가 여기 나와요."></textarea>
+    <button class="btn soft wide" type="button" id="copy" disabled>안내 문구 복사</button>
+  </section>
+
+  <section class="card">
+    <h2>학원 목록</h2>
+    <div id="list" class="sub">목록을 불러오면 여기 보여요.</div>
+  </section>
+  <p class="foot">조교 도우미 관리 v1 · 검색 노출 안 함</p>
+</div>
+<script>
+const API = "https://tutor-app.jogyo-helper.workers.dev";
+const $ = id => document.getElementById(id);
+let codes = [];
+const tok = () => $("tok").value.trim();
+try{ $("tok").value = sessionStorage.getItem("adm") || ""; }catch(e){}
+$("tok").addEventListener("change", () => { try{ sessionStorage.setItem("adm", tok()); }catch(e){} });
+const nextMonth = () => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d.toISOString().slice(0, 10); };
+$("until").value = nextMonth();
+
+async function call(path, body){
+  const r = await fetch(API + path, {method: body ? "POST" : "GET", headers: Object.assign({authorization: "Bearer " + tok()}, body ? {"content-type": "application/json"} : {}), body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json().catch(() => ({}));
+  if(r.status === 403) throw new Error("관리 비밀번호가 맞지 않아요.");
+  if(!r.ok) throw new Error(j.error === "bad_code" ? "코드는 영문 대문자·숫자·하이픈 4~20자예요." : "서버 오류예요. 잠시 뒤 다시 해 주세요.");
+  return j;
+}
+function render(){
+  const box = $("list"); box.innerHTML = "";
+  if(!codes.length){ box.textContent = "아직 코드가 없어요."; return; }
+  const t = document.createElement("table"); t.innerHTML = "<tr><th>코드</th><th>학원</th><th>사용</th><th>최근</th></tr>";
+  codes.slice().sort((a, b) => String(b.last || "").localeCompare(String(a.last || ""))).forEach(c => {
+    const tr = document.createElement("tr");
+    [c.code, c.name || "", `${c.used || 0}/${c.quota || 0}`, c.last || "-"].forEach((v, i) => { const td = document.createElement("td"); td.textContent = v; if(i === 2 && (c.used || 0) >= (c.quota || 0)) td.className = "red"; tr.appendChild(td); });
+    tr.onclick = () => { $("code").value = c.code; $("name").value = String(c.name || "").split(" · ")[0]; $("code").scrollIntoView({behavior: "smooth", block: "center"}); };
+    t.appendChild(tr);
+  });
+  box.appendChild(t);
+}
+async function load(){
+  $("state").textContent = "불러오는 중이에요…";
+  try{ const j = await call("/admin/stats"); codes = j.codes || []; const today = (j.days || [])[0] || {}; $("state").textContent = `학원 ${codes.length}곳 · 오늘 만든 학습지 ${today.sheets || today.results || 0}장`; render(); }
+  catch(e){ $("state").textContent = e.message; }
+}
+function newCode(){ const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = "P-"; const r = crypto.getRandomValues(new Uint8Array(6)); r.forEach(x => s += a[x % a.length]); return s; }
+$("load").onclick = load;
+$("apply").onclick = async () => {
+  const add = +$("plan").value; const code = ($("code").value.trim().toUpperCase()) || newCode(); const acad = $("name").value.trim();
+  if(!tok()){ $("state").textContent = "관리 비밀번호를 먼저 넣어 주세요."; return; }
+  if(!codes.length) await load();
+  const old = codes.find(c => c.code === code);
+  // 한 달 요금: 남은 장수는 넘기지 않고 (쓴 장수 + 이번 달 장수). 추가 100장: 지금 한도에 더하기
+  const quota = !old ? add : ($("plan").value === "100" ? Math.max(old.quota || 0, old.used || 0) + add : (old.used || 0) + add);
+  const name = [acad || (old && String(old.name || "").split(" · ")[0]) || code, $("plan").selectedOptions[0].textContent.split(" · ")[0], "~" + $("until").value].join(" · ");
+  try{
+    const j = await call("/admin/code", {code, name, quota});
+    $("code").value = j.code;
+    $("out").value = `결제 확인했어요. 감사합니다!\n학원 코드: ${j.code}\n이번 달 쓸 수 있는 학습지: ${j.quota - (j.used || 0)}장 (다음 결제일 ${$("until").value})\n앱 설정(톱니) → 학원 코드에 넣어 주세요: https://quanter02.github.io/app/`;
+    $("copy").disabled = false; const done = old ? `${j.code}: 한도 ${old.quota} → ${j.quota}` : `${j.code}: 새로 만들었어요 (한도 ${j.quota})`;
+    await load(); $("state").textContent = "반영했어요 · " + done;
+  }catch(e){ $("state").textContent = e.message; }
+};
+$("copy").onclick = async () => { try{ await navigator.clipboard.writeText($("out").value); $("copy").textContent = "복사했어요"; setTimeout(() => $("copy").textContent = "안내 문구 복사", 1500); }catch(e){ $("out").select(); } };
+</script>
+</body>
+</html>

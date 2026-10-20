@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>요금 안내</title>
+<meta name="description" content="조교 도우미 요금: 무료 체험 20장, 강사 월 3만 원, 학원 월 5만 원. 자동결제 없음, 첫 달 반값(선착순 5곳).">
+<meta name="theme-color" content="#f2f4f6">
+<link rel="canonical" href="https://quanter02.github.io/plans/">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#f2f4f6; --card:#ffffff; --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --line:#e5e8eb; --fill:#f2f4f6;
+  --blue:#3182f6; --blue-d:#1b64da; --blue-soft:#e8f3ff; --red:#f04452; --red-soft:#ffeeee; --green:#03b26c; --green-soft:#e5f8f0; --amber:#ff9f00; --amber-soft:#fff4e0;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;padding:24px 16px 120px;word-break:keep-all}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:12px}
+h1,h2,p{margin:0}
+h1{font-size:26px;line-height:1.35;font-weight:700;text-wrap:balance}
+h2{font-size:18px;font-weight:700}
+.sub{color:var(--ink3);font-size:14px}
+.lead{color:var(--ink2);font-size:15px;margin-top:6px}
+.card{background:var(--card);border-radius:20px;padding:20px;display:grid;gap:12px;min-width:0}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+.field{display:grid;gap:6px}
+.field label{font-size:14px;font-weight:600;color:var(--ink2)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--fill);border:0;border-radius:12px;padding:12px 14px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:14px;padding:12px 14px;cursor:pointer;text-decoration:none;text-align:center;display:inline-block}
+.btn.blue{background:var(--blue);color:#fff}.btn.soft{background:var(--blue-soft);color:var(--blue)}.btn.grey{background:var(--fill);color:var(--ink2)}
+.btn.big{font-size:17px;padding:16px}.wide{width:100%}
+.dock{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
+.dock .btn{max-width:520px;display:block;margin:0 auto}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600}
+.foot{font-size:12px;color:var(--ink3);text-align:center}.foot a{color:var(--ink3)}
+.plan ul{margin:0;padding-left:18px;color:var(--ink2);font-size:15px;display:grid;gap:4px}
+.ph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.price{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}.price s{font-size:14px;color:var(--ink3);font-weight:500;margin-right:4px}.price small{font-size:13px;color:var(--ink3);font-weight:500}
+.plan.best{outline:2px solid var(--blue)}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--ink2);font-size:15px}
+details summary{font-weight:600;cursor:pointer;padding:6px 0}details p{padding:0 0 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">자동결제 없음 · 언제든 그만두기</span>
+    <h1 style="margin-top:8px">우리 학원에 맞는 요금은?</h1>
+    <p class="lead">먼저 무료로 써 보고, 괜찮을 때만 결제하세요. 결제는 한 달씩이에요.</p>
+  </header>
+
+  <section class="plan card" data-plan="무료 체험">
+    <div class="ph"><h2>무료 체험</h2><span class="price">0원</span></div>
+    <ul><li>맞춤 학습지 20장 (학원당 1번)</li><li>오답 분석기 · 제출률 진단 · 안내 문구 24개는 계속 무료</li></ul>
+    <a class="btn grey wide" href="../app/">앱에서 바로 시작하기</a>
+  </section>
+
+  <section class="plan card" data-plan="강사">
+    <div class="ph"><h2>강사</h2><span class="price"><s>30,000원</s> 15,000원<small> / 첫 달</small></span></div>
+    <ul><li>맞춤 학습지 <b>한 달 200장</b> (학생 30명 × 주 1~2장)</li><li>학생별 약점 분석 · 학부모 리포트</li><li>둘째 달부터 월 30,000원</li></ul>
+    <button class="btn soft wide pick" type="button">강사 요금 신청하기</button>
+  </section>
+
+  <section class="plan card best" data-plan="학원">
+    <div class="ph"><h2>학원 <span class="badge">추천</span></h2><span class="price"><s>50,000원</s> 25,000원<small> / 첫 달</small></span></div>
+    <ul><li>맞춤 학습지 <b>한 달 400장</b>, 강사 여러 명이 같은 코드로</li><li>학생별 약점 분석 · 학부모 리포트</li><li>매달 사용 요약(쓴 장수 · 아낀 시간)을 카톡으로 보내 드려요</li><li>둘째 달부터 월 50,000원</li></ul>
+    <button class="btn blue wide pick" type="button">학원 요금 신청하기</button>
+  </section>
+
+  <section class="plan card" data-plan="조교 대행">
+    <div class="ph"><h2>조교 대행</h2><span class="price">상담 후 결정</span></div>
+    <ul><li>시험지만 보내 주시면 채점 · 학습지 · 리포트까지 저희가 만들어 드려요</li><li>한 반 2주 무료 샘플부터</li></ul>
+    <button class="btn grey wide pick" type="button">대행 상담 신청하기</button>
+  </section>
+
+  <section class="card" id="apply" hidden>
+    <h2>신청 메시지 만들기</h2>
+    <p class="sub">아래를 채우고 복사해서 카카오톡 문의방에 붙여 넣어 주세요. 학생 이름은 적지 마세요.</p>
+    <div class="field"><label for="a-plan">요금</label><select id="a-plan"><option>강사</option><option>학원</option><option>조교 대행</option></select></div>
+    <div class="grid2">
+      <div class="field"><label for="a-acad">학원 이름</label><input id="a-acad" type="text" maxlength="30" placeholder="예: 바른수학"></div>
+      <div class="field"><label for="a-subj">과목</label><input id="a-subj" type="text" maxlength="20" placeholder="예: 중등 영어"></div>
+      <div class="field"><label for="a-n">학생 수</label><input id="a-n" type="number" inputmode="numeric" min="1" placeholder="예: 40"></div>
+      <div class="field"><label for="a-code">쓰던 코드(있으면)</label><input id="a-code" type="text" maxlength="20" placeholder="예: T-3F9A2C" autocapitalize="characters"></div>
+    </div>
+    <textarea id="a-msg" rows="7" readonly></textarea>
+    <button class="btn blue wide" type="button" id="a-copy">복사하고 카카오톡 열기</button>
+  </section>
+
+  <section class="card">
+    <h2>결제와 환불</h2>
+    <ol class="steps">
+      <li>카카오톡 문의방에 신청 메시지를 보내요.</li>
+      <li>결제 방법(계좌이체 · 카카오페이 송금)을 채팅으로 안내해 드려요.</li>
+      <li>결제를 확인하면 <b>하루 안에</b> 학원 코드를 보내 드려요. 쓰던 코드가 있으면 그대로 장수만 늘려요.</li>
+    </ol>
+    <p class="sub">자동결제가 없어서 다음 달에 따로 결제하지 않으면 그대로 끝나요. 결제 후 7일 안에 학습지를 10장 미만으로 썼다면 전액 환불해 드려요. 남은 장수는 다음 달로 넘어가지 않아요.</p>
+  </section>
+
+  <section class="card">
+    <h2>자주 묻는 것</h2>
+    <details><summary>학생 개인정보는 어디에 저장되나요?</summary><p class="sub">학생 기록은 선생님 기기에만 저장돼요. 학습지를 만들 때만 메모를 서버를 거쳐 AI로 보내고, 서버는 내용을 저장하지 않아요. 실명 대신 별명을 써 주세요.</p></details>
+    <details><summary>AI가 만든 문제가 틀리면요?</summary><p class="sub">강사가 정답을 확인한 학습지만 보내기로 넘어가요. 지금까지 시험한 136문항에서 정답 오류는 0개였어요.</p></details>
+    <details><summary>장수가 모자라면요?</summary><p class="sub">문의방에 말씀해 주시면 같은 비율(100장당 강사 15,000원 · 학원 12,500원)로 추가해 드려요.</p></details>
+  </section>
+  <p class="foot">첫 달 반값은 처음 신청하는 5곳까지예요 · <a href="../app/privacy.html">개인정보 처리방침</a> · <a href="../app/">조교 도우미</a></p>
+</div>
+<div class="dock"><a class="btn blue big wide" href="https://open.kakao.com/o/spOlfgTi" target="_blank" rel="noopener" id="kakao">카카오톡으로 문의하기</a></div>
+<script>
+const KAKAO = "https://open.kakao.com/o/spOlfgTi";
+const $ = id => document.getElementById(id);
+function toast(t){ const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1600); }
+function msg(){
+  const v = id => $(id).value.trim();
+  const lines = [`[${v("a-plan")}] 요금 신청합니다.`, `학원: ${v("a-acad") || "-"}`, `과목: ${v("a-subj") || "-"}`, `학생 수: ${v("a-n") || "-"}명`];
+  if(v("a-code")) lines.push(`쓰던 코드: ${v("a-code").toUpperCase()}`);
+  lines.push("(조교 도우미 요금 페이지에서 보냄)");
+  $("a-msg").value = lines.join("\n");
+}
+document.querySelectorAll(".pick").forEach(b => b.onclick = () => {
+  $("a-plan").value = b.closest(".plan").dataset.plan; $("apply").hidden = false; msg();
+  $("apply").scrollIntoView({behavior: "smooth", block: "start"});
+});
+["a-plan","a-acad","a-subj","a-n","a-code"].forEach(id => $(id).addEventListener("input", msg));
+$("a-copy").onclick = async () => {
+  try{ await navigator.clipboard.writeText($("a-msg").value); toast("복사했어요. 문의방에 붙여 넣어 주세요."); }catch(e){ $("a-msg").select(); toast("글을 길게 눌러 복사해 주세요."); }
+  setTimeout(() => window.open(KAKAO, "_blank", "noopener"), 600);
+};
+</script>
+</body>
+</html>
