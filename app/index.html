@@ -228,7 +228,7 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
     </details></section>
   </main>
 
-  <p class="foot">조교 도우미 앱 v2 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
+  <p class="foot">조교 도우미 앱 v2.1 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
 </div>
 
 <!-- 설정 시트 -->
@@ -240,6 +240,7 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
   <div class="field"><label for="code">학원 코드</label><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" id="code" placeholder="T-3F9A2C" autocapitalize="characters" autocomplete="off"><button type="button" class="btn blue" id="codego">확인</button></div></div>
   <div class="field"><label for="acad">처음이면 무료 코드 받기</label><div class="grid2" style="grid-template-columns:1fr auto"><input type="text" id="acad" placeholder="학원 이름 (선택)" maxlength="30"><button type="button" class="btn soft" id="trial">받기</button></div>
     <span class="sub">학원마다 학습지 20장까지 무료예요.</span></div>
+  <a class="btn soft wide" href="https://open.kakao.com/o/spOlfgTi" target="_blank" rel="noopener">한 반 무료 샘플 신청 · 문의 (카카오톡)</a>
   <div class="divider"></div>
   <h2>절약 시간 기준</h2>
   <div class="grid2">
@@ -589,8 +590,8 @@ async function gen(idx){
     }catch(e){
       if(e && (e.code === "cancelled" || e.name === "AbortError")){ stopped = true; st.busy = false; break; }
       fail++;
-      if(e && e.code === "not_ready"){ why = ("학습지 서버를 준비하고 있어요. 지금은 예시 학습지로 둘러봐 주세요."); st.busy = false; break; }
-      if(e && e.code === "quota"){ why = ("무료 20장을 다 썼어요. 설정에서 구독 안내를 확인해 주세요."); st.busy = false; break; }
+      if(e && e.code === "not_ready"){ why = ("학습지 서버를 준비하고 있어요. 지금은 설정에서 카카오톡으로 무료 샘플을 신청해 주세요."); st.busy = false; break; }
+      if(e && e.code === "quota"){ why = ("무료 20장을 다 썼어요. 설정에서 카카오톡으로 문의해 주세요."); st.busy = false; break; }
       if(e && e.code === "no_code"){ why = ("학원 코드를 찾지 못했어요. 설정에서 코드를 다시 확인해 주세요."); st.busy = false; break; }
       if(!navigator.onLine){ why = ("인터넷 연결이 끊겼어요. 연결된 뒤 다시 눌러 주세요."); st.busy = false; break; }
     }
