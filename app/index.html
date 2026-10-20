@@ -260,7 +260,7 @@ input.a-tag{width:auto;flex:1;min-width:0;max-width:160px;padding:6px 10px;font-
     </details></section>
   </main>
 
-  <p class="foot">조교 도우미 앱 v2.2 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
+  <p class="foot">조교 도우미 앱 v2.3 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
 </div>
 
 <!-- 설정 시트 -->
@@ -667,7 +667,7 @@ function r0(){
 
   const st = el("section", "card tight"); const sh = el("div", "card-title"); sh.style.padding = "8px 20px 4px"; sh.textContent = "학생별 약점과 피드백"; st.appendChild(sh);
   AR.S.slice().sort((a, b) => a.score - b.score).forEach(s => { const d = el("details", "a-stu"); const sm = el("summary", "row-btn");
-    sm.append(el("span", "avatar " + (s.weak.length ? (s.score / total < .5 ? "warn" : "pen") : "ok"), String(s.score)));
+    sm.append(el("span", "avatar " + (s.weak.length ? (s.score / total < .5 ? "warn" : "pen") : "ok"), initial(s.name)));
     const m = el("span", "row-main"); m.append(el("b", "", `${s.name} · ${s.score}/${total}`), el("span", "", s.weak.length ? s.weak.map(x => `${x.tag} ${x.c}/${x.n}`).join(" · ") : "틀린 문항 없음")); sm.appendChild(m);
     const ch = el("span", "chev"); ch.innerHTML = SVG_CHEV; sm.appendChild(ch); d.appendChild(sm);
     const body = el("div", "a-body"); const fb = aFeedback(s, total, multi); body.appendChild(el("p", "", fb));
