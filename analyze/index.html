@@ -60,6 +60,11 @@ details summary{cursor:pointer;padding:4px 0}
 .sum li{background:var(--fill);border-radius:14px;padding:12px 14px;font-size:15px}.sum li b{color:var(--accent)}
 td.n.lo{color:var(--warn)}
 #print-one{justify-self:start}
+.hidechk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink2)}.hidechk input{width:18px;height:18px;accent-color:var(--accent)}
+.trust ul{margin:6px 0 0;padding-left:18px;display:grid;gap:6px;font-size:14px;color:var(--ink2)}
+.keys select{font:inherit;font-size:13px;padding:6px;border:0;border-radius:8px;background:var(--card);color:var(--fg);min-width:0;width:100%}
+.keys.sel{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.keys.sel label{text-align:left}
 .sum li.w{background:var(--warn-soft)}.sum li.w b{color:var(--warn)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .kpis div{background:var(--card);border-radius:16px;padding:14px 6px;text-align:center}
@@ -87,14 +92,14 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   @page{size:A4;margin:12mm}#print table{font-size:8pt;width:100%;border-collapse:collapse}#print th,#print td{padding:1.5pt 4pt!important}#print h2{font-size:11pt!important;margin:8pt 0 3pt!important}#print .pgrid{display:grid;grid-template-columns:1fr 1.3fr;gap:10mm}#print ul{font-size:9.5pt;margin:4pt 0 8pt;padding-left:14pt}#print p{font-size:9.5pt;margin:2pt 0}#print .pfoot{font-size:7.5pt;color:#666;margin-top:8pt}#print th,#print td{border-bottom:1px solid #ccc;padding:3pt 5pt}#print h1{font-size:15pt}#print h2{font-size:12pt;margin-top:12pt}}
 </style>
 
-<script>(function(){var V=2,K="analyze";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
+<script>(function(){var V=3,K="analyze";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
 </head>
 <body>
 <div class="wrap">
   <header>
     <span class="badge">무료 · 설치·가입 없음</span>
     <h1>시험 결과, 어디서 많이 틀렸을까요?</h1>
-    <p class="lead">성적표를 넣으면 문항별 정답률과 단원별 약점, 학생별 피드백을 바로 보여 드려요. 성적표는 이 화면 밖으로 나가지 않아요.</p>
+    <p class="lead">중간·기말은 물론 쪽지시험, 구글 설문 퀴즈 결과도 넣으면 단원별 약점과 학생별 피드백을 바로 보여 드려요. 성적표는 이 화면 밖으로 나가지 않아요.</p>
     <a class="applink" id="applink" href="../app/">학생별 맞춤 숙제까지 만들기 (앱) ›</a>
   </header>
 
@@ -103,6 +108,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
     <div class="pick">
       <label class="tile" for="file"><b>엑셀 파일 올리기</b><span>.xlsx · .csv · 여러 반 파일을 한 번에 골라도 돼요</span></label>
       <input type="file" id="file" accept=".xlsx,.xls,.csv,.txt" multiple hidden>
+      <label class="tile" for="file" id="gf-tile"><b>구글 설문 퀴즈 결과 넣기</b><span>응답 → 스프레드시트 → 파일 → 다운로드 → CSV로 받은 파일</span></label>
       <button type="button" class="tile" id="paste-btn"><b>표 붙여 넣기</b><span>엑셀에서 복사한 뒤 여기 누르고 붙여 넣기</span></button>
       <button type="button" class="tile" id="ex-soc"><b>예시로 먼저 보기</b><span>고등 통합사회 30명 · 20문항</span></button>
     </div>
@@ -112,10 +118,12 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
     <div id="keybox" hidden class="keybox">
       <p style="margin:0"><b>정답을 넣어 주세요.</b> 표에 정답 줄이 없어요. 문항마다 정답 번호를 넣거나, 정답을 한 줄로 붙여 넣으세요 (예: 3 2 1 4 5).</p>
       <input type="text" id="keyline" placeholder="정답 한 줄 붙여 넣기: 3 2 1 4 5 …" inputmode="numeric">
+      <button type="button" class="g" id="key-guess">많이 고른 답으로 일단 채우기 (꼭 확인해 주세요)</button>
       <div class="keys" id="keys"></div>
     </div>
     <details><summary class="note">형식 자세히</summary>
       <ul class="note">
+        <li>학교 OMR 채점 결과를 엑셀로 내보낸 파일, 구글 설문 퀴즈 응답 CSV도 그대로 넣을 수 있어요. 구글 설문은 정답 표시가 파일에 없어서, 문항마다 정답 보기를 한 번 골라 주시면 돼요.</li>
         <li>첫 줄: 학생 칸 + 문항 이름. 앞에 <b>학번·번호·이름</b> 칸이 여러 개 있어도 됩니다.</li>
         <li><b>단원</b>(또는 유형)으로 시작하는 줄이 있으면 단원별로 묶어 봅니다. 없으면 결과 표에서 직접 적을 수 있습니다.</li>
         <li><b>정답</b>으로 시작하는 줄이 있으면 고른 답과 비교하고, 많이 고른 오답도 보여 줍니다. ①②③④⑤도 됩니다.</li>
@@ -128,6 +136,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   <section class="card sum" id="sum" hidden>
     <h2>한눈에 보기</h2>
     <ul id="sum-list"></ul>
+    <label class="hidechk"><input type="checkbox" id="hide-names"> 화면과 인쇄에서 이름 대신 번호로 보기</label>
     <button type="button" class="g" id="print-one">인쇄용 한 장 보기 (PDF로 저장 가능)</button>
   </section>
 
@@ -173,6 +182,15 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
     </section>
   </div>
 
+  <section class="card trust">
+    <h2>학교에서 써도 괜찮을까요?</h2>
+    <ul>
+      <li>성적표는 서버로 보내지 않아요. 계산은 모두 이 화면(브라우저) 안에서 해요.</li>
+      <li>아무것도 저장하지 않아요. 창을 닫으면 사라져요.</li>
+      <li>가입·설치가 없고, 방문 기록이나 통계도 보내지 않아요.</li>
+      <li>화면 공유나 인쇄 때는 "이름 대신 번호로 보기"를 켜 두세요.</li>
+    </ul>
+  </section>
   <p class="note">계산은 모두 이 브라우저 안에서 합니다. 붙여 넣은 성적표는 저장하지 않으며, 페이지를 닫으면 사라집니다. 방문 수와 '분석 완료' 횟수만 개인정보 없이 셉니다.</p>
 </div>
 <div id="print"></div>
@@ -195,11 +213,32 @@ const norm = v => { v = String(v == null ? "" : v).trim(); return (CIRC[v] || v)
 const YES = new Set(["O","○","◯","1","정답","정","T","TRUE","Y"]), NO = new Set(["X","×","0","오답","오","F","FALSE","N",""]);
 let D = null;  // 분석 데이터
 
+function rowsOf(text){ // 탭 표 또는 따옴표가 있는 CSV
+  text = text.replace(/^\ufeff/, "").replace(/\r/g, "");
+  const first = text.split("\n")[0];
+  if(first.includes("\t")) return text.split("\n").filter(l => l.trim()).map(l => l.split("\t"));
+  const rows = []; let row = [], cur = "", q = false;
+  for(let i = 0; i < text.length; i++){ const ch = text[i];
+    if(q){ if(ch === '"'){ if(text[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if(ch === '"') q = true; else if(ch === ","){ row.push(cur); cur = ""; } else if(ch === "\n"){ row.push(cur); rows.push(row); row = []; cur = ""; } else cur += ch; }
+  if(cur || row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
+}
+function fromForms(rows){ // 구글 설문 퀴즈 응답 → 학생 × 문항 표
+  const h = rows[0].map(x => x.trim());
+  const ts = h.findIndex(x => /^(타임스탬프|timestamp)$/i.test(x)); if(ts < 0) return null;
+  const skip = new Set([ts]); h.forEach((x, i) => { if(/^(점수|score|이메일 주소|email address|이메일)$/i.test(x)) skip.add(i); });
+  const ni = h.findIndex((x, i) => !skip.has(i) && /(이름|성명|학번|번호|name)/i.test(x)); if(ni >= 0) skip.add(ni);
+  const qi = h.map((_, i) => i).filter(i => !skip.has(i));
+  const short = t => t.replace(/\s+/g, " ").slice(0, 14) + (t.length > 14 ? "…" : "");
+  const out = [["이름", ...qi.map((i, k) => `${k + 1}번 ${short(h[i])}`)]];
+  rows.slice(1).forEach((r, j) => out.push([ni >= 0 && r[ni] ? r[ni].trim() : `학생${j + 1}`, ...qi.map(i => (r[i] || "").trim())]));
+  return out;
+}
 function parse(text){
-  const lines = text.replace(/\r/g, "").split("\n").filter(l => l.trim());
-  if(lines.length < 2) throw "표가 너무 짧습니다. 첫 줄(문항 이름)과 학생 줄이 필요합니다.";
-  const sep = lines[0].includes("\t") ? "\t" : ",";
-  let cells = lines.map(l => l.split(sep));
+  let cells = rowsOf(text);
+  if(cells.length < 2) throw "표가 너무 짧습니다. 첫 줄(문항 이름)과 학생 줄이 필요합니다.";
+  const gf = fromForms(cells); if(gf) cells = gf;
   let last = cells[0].length - 1; while(last > 0 && !cells[0][last].trim()) last--;
   cells = cells.map(r => r.slice(0, last + 1));
   const ID = /^(학년|학번|번호|이름|성명|반|학급|학생|출석번호)$/;
@@ -216,11 +255,12 @@ function parse(text){
     const vals = qs.map((_, i) => r[i+lead] == null ? "" : r[i+lead]);
     if(ids.some(x => /^(유형|태그|단원)$/.test(x))) tags = vals.map(v => String(v).trim());
     else if(ids.some(x => /^(정답|답|key)$/i.test(x))) key = vals.map(norm);
-    else stu.push({name: (cls && head ? cls + " " : "") + (head || `${cls || "학생"}${stu.length+1}`), cls, raw: vals.map(norm)});
+    else stu.push({name: (cls && head ? cls + " " : "") + (head || `${cls || "학생"}${stu.length+1}`), cls, no: stu.length + 1, raw: vals.map(norm)});
   }
   if(!stu.length) throw "학생 줄이 없습니다.";
   const D0 = {qs, tags, key, stu};
-  if(!key && stu.some(s => s.raw.some(v => !YES.has(v) && !NO.has(v)))) return {...D0, needKey: true};
+  if(gf) D0.forms = true;
+  if(!key && (gf || stu.some(s => s.raw.some(v => !YES.has(v) && !NO.has(v))))) return {...D0, needKey: true};
   grade(D0); return D0;
 }
 
@@ -267,10 +307,11 @@ function analyze(){
   return {Q, types, S, C, n, avg: stu.reduce((a, s) => a + s.score, 0) / (n * qs.length)};
 }
 
+const nm = s => $("hide-names") && $("hide-names").checked ? `${s.cls ? s.cls + " " : ""}학생 ${s.no}` : s.name;
 function feedback(s, total, multi){
-  if(!s.weak.length) return `${s.name} 학생, 이번 평가 ${s.score}/${total}점으로 모든 문항을 맞혔습니다. 다음에는 한 단계 어려운 문제로 넘어가 보겠습니다.`;
+  if(!s.weak.length) return `${nm(s)} 학생, 이번 평가 ${s.score}/${total}점으로 모든 문항을 맞혔습니다. 다음에는 한 단계 어려운 문제로 넘어가 보겠습니다.`;
   const w = s.weak.map(x => `${x.tag}(${x.c}/${x.n})`).join(", ");
-  let t = `${s.name} 학생, 이번 평가 ${s.score}/${total}점입니다. ${w}에서 실수가 있었습니다.`;
+  let t = `${nm(s)} 학생, 이번 평가 ${s.score}/${total}점입니다. ${w}에서 실수가 있었습니다.`;
   if(s.strong && multi) t += ` ${s.strong.tag}은(는) 모두 맞혀 잘하고 있습니다.`;
   t += ` 다음 시간까지 ${s.weak[0].tag} 문제를 다시 풀어 보고, 틀린 이유를 한 줄로 적어 와 주세요.`;
   return t;
@@ -312,7 +353,7 @@ function render(){
   const box = $("stus"); box.innerHTML = "";
   R.S.slice().sort((a, b) => a.score - b.score).forEach(s => {
     const d = el("div","stu");
-    d.appendChild(el("b",null,`${s.name} · ${s.score}/${total}`));
+    d.appendChild(el("b",null,`${nm(s)} · ${s.score}/${total}`));
     d.appendChild(el("div","note", s.weak.length ? "약점: " + s.weak.map(x => `${x.tag} ${x.c}/${x.n} (반 평균 ${pct(x.cls)}%)`).join(" · ") : "틀린 문항 없음"));
     const fb = feedback(s, total, multi); d.appendChild(el("div","fb",fb));
     const cp = el("button","g","피드백 복사"); cp.type = "button"; cp.style.justifySelf = "start"; cp.style.padding = "4px 10px";
@@ -340,7 +381,7 @@ function printSummary(){
   grid.append(box1, box2); p.appendChild(grid);
   const help = R.S.filter(s => s.weak.length).sort((a, b) => a.score - b.score).slice(0, 8);
   if(help.length){ p.appendChild(el("h2",null,"먼저 챙길 학생 (점수 낮은 순)")); const t3 = el("table"); t3.appendChild(tr(["학생","점수","약한 단원"], true));
-    help.forEach(s => t3.appendChild(tr([s.name, `${s.score}/${D.qs.length}`, s.weak.map(x => x.tag).join(", ")]))); p.appendChild(t3); }
+    help.forEach(s => t3.appendChild(tr([nm(s), `${s.score}/${D.qs.length}`, s.weak.map(x => x.tag).join(", ")]))); p.appendChild(t3); }
   p.appendChild(el("p","pfoot","오답 분석기 · quanter02.github.io/analyze · 성적표는 이 기기 밖으로 나가지 않았습니다"));
   window.print();
 }
@@ -372,17 +413,24 @@ function run(){
   try{ render(); track("analyze-done"); $("sum").scrollIntoView({behavior: "smooth", block: "start"}); }
   catch(e){ $("err").textContent = typeof e === "string" ? e : "분석하지 못했어요. 표를 확인해 주세요."; }
 }
+function choices(i){ const c = {}; D.stu.forEach(st => { const v = st.raw[i]; if(v) c[v] = (c[v] || 0) + 1; }); return Object.entries(c).sort((x, y) => y[1] - x[1]).map(x => x[0]); }
 function showKeys(){
   const box = $("keys"); box.innerHTML = ""; $("keybox").hidden = false;
-  D.qs.forEach((q, i) => { const l = el("label"); l.textContent = q; const inp = el("input"); inp.id = "key" + i; inp.maxLength = 2; inp.inputMode = "numeric";
-    inp.oninput = tryKey; l.appendChild(inp); box.appendChild(l); });
-  $("keyline").value = ""; $("keyline").focus();
+  const numeric = D.stu.every(st => st.raw.every(v => !v || /^[1-5]$/.test(v)));
+  box.className = "keys" + (numeric ? "" : " sel"); $("keyline").hidden = !numeric;
+  D.qs.forEach((q, i) => { const l = el("label"); l.textContent = q;
+    let inp;
+    if(numeric){ inp = el("input"); inp.maxLength = 2; inp.inputMode = "numeric"; inp.oninput = tryKey; }
+    else { inp = el("select"); const o0 = el("option", null, "정답 고르기"); o0.value = ""; inp.appendChild(o0); choices(i).forEach(v => { const o = el("option", null, v); o.value = v; inp.appendChild(o); }); inp.onchange = tryKey; }
+    inp.id = "key" + i; l.appendChild(inp); box.appendChild(l); });
+  (numeric ? $("keyline") : $("key0")).focus();
 }
 function tryKey(){
   if(!D || !D.needKey) return;
   const k = D.qs.map((_, i) => norm($("key" + i).value));
   if(k.every(v => v)){ D.key = k; delete D.needKey; grade(D); $("keybox").hidden = true; $("found").textContent += " 정답을 넣었어요."; run(); }
 }
+$("key-guess").onclick = () => { if(!D || !D.needKey) return; D.qs.forEach((_, i) => { const c = choices(i)[0]; if(c) $("key" + i).value = c; }); $("found").textContent += " 많이 고른 답을 정답으로 넣었어요. 문항별 분석의 '정답' 칸을 꼭 확인해 주세요."; tryKey(); };
 $("keyline").addEventListener("input", e => { if(!D || !D.needKey) return; const parts = e.target.value.trim().split(/[\s,]+/).filter(Boolean);
   parts.slice(0, D.qs.length).forEach((v, i) => { $("key" + i).value = v; }); tryKey(); });
 $("run").onclick = () => load($("src").value);
@@ -391,7 +439,7 @@ $("src").addEventListener("paste", () => setTimeout(() => load($("src").value, "
 document.addEventListener("paste", e => { const a = document.activeElement; if(a && /INPUT|TEXTAREA/.test(a.tagName)) return; const t = e.clipboardData && e.clipboardData.getData("text"); if(t){ e.preventDefault(); load(t, "붙여 넣은 표"); } });
 function loadXLSX(){ return window.XLSX ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); }
 async function tablesOf(f){
-  if(/\.(csv|txt)$/i.test(f.name)){ const t = (await f.text()).replace(/^\ufeff/, ""); return [{name: f.name.replace(/\.[^.]+$/, ""), text: t.includes("\t") ? t : t.split("\n").map(l => l.split(",").join("\t")).join("\n")}]; }
+  if(/\.(csv|txt)$/i.test(f.name)){ const t = (await f.text()).replace(/^\ufeff/, ""); return [{name: f.name.replace(/\.[^.]+$/, ""), text: rowsOf(t).map(r => r.map(c => c.replace(/[\t\n]/g, " ")).join("\t")).join("\n")}]; }
   await loadXLSX(); const wb = XLSX.read(await f.arrayBuffer(), {type: "array"});
   return wb.SheetNames.map(n => ({name: wb.SheetNames.length > 1 ? n : f.name.replace(/\.[^.]+$/, ""), text: XLSX.utils.sheet_to_csv(wb.Sheets[n], {FS: "\t", blankrows: false})})).filter(t => t.text.trim().split("\n").length >= 2);
 }
@@ -439,13 +487,14 @@ dock.onclick = () => { if(D && !D.needKey && !$("out").hidden){ $("copy-q").clic
 function dockState(){ dock.textContent = (D && !D.needKey && !$("out").hidden) ? "문항 분석표 복사하기" : "예시로 먼저 보기"; }
 new MutationObserver(dockState).observe($("out"), {attributes: true, attributeFilter: ["hidden"]});
 if(new URLSearchParams(location.search).get("t") === "school"){
-  $("applink").hidden = true; $("more-ex").hidden = true;
+  $("applink").hidden = true; $("more-ex").hidden = true; $("hide-names").checked = true;
   const c = $("cta"); c.querySelector("h2").textContent = "써 보신 의견을 들려주세요";
   c.querySelectorAll("p")[0].textContent = "지금 시험 끝나고 문항 분석을 어떻게 하시는지, 써 보니 불편했던 점 하나만 알려 주시면 바로 고칩니다.";
   c.querySelectorAll("p")[1].textContent = "성적표는 이 페이지 밖으로 나가지 않습니다. 학생 이름 대신 번호를 써 주세요.";
   $("apply").textContent = "의견 보내기 (카카오톡)"; const last = c.querySelectorAll("p")[2]; if(last) last.hidden = true;
 }
 $("print-btn").onclick = () => { if(D){ printSummary(); track("print"); } };
+$("hide-names").onchange = () => { if(D && !D.needKey) render(); };
 $("print-one").onclick = () => { if(D){ printSummary(); track("print-one"); } };
 const a = $("apply");
 if(LINKS.apply){ a.href = LINKS.apply; a.target = "_blank"; a.rel = "noopener"; a.addEventListener("click", () => track("apply-click")); }
