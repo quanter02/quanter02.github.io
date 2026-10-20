@@ -84,10 +84,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 .dock button:active{background:var(--accent-d)}
 #print{display:none}
 @media print{body{background:#fff;color:#000;padding:0}.wrap,.dock{display:none}#print{display:block;color:#000;font-family:var(--font)}
-  @page{size:A4;margin:12mm}#print table{font-size:8.5pt;width:100%;border-collapse:collapse}#print .pgrid{display:grid;grid-template-columns:1fr 1.3fr;gap:10mm}#print ul{font-size:9.5pt;margin:4pt 0 8pt;padding-left:14pt}#print p{font-size:9.5pt;margin:2pt 0}#print .pfoot{font-size:7.5pt;color:#666;margin-top:8pt}#print th,#print td{border-bottom:1px solid #ccc;padding:3pt 5pt}#print h1{font-size:15pt}#print h2{font-size:12pt;margin-top:12pt}}
+  @page{size:A4;margin:12mm}#print table{font-size:8pt;width:100%;border-collapse:collapse}#print th,#print td{padding:1.5pt 4pt!important}#print h2{font-size:11pt!important;margin:8pt 0 3pt!important}#print .pgrid{display:grid;grid-template-columns:1fr 1.3fr;gap:10mm}#print ul{font-size:9.5pt;margin:4pt 0 8pt;padding-left:14pt}#print p{font-size:9.5pt;margin:2pt 0}#print .pfoot{font-size:7.5pt;color:#666;margin-top:8pt}#print th,#print td{border-bottom:1px solid #ccc;padding:3pt 5pt}#print h1{font-size:15pt}#print h2{font-size:12pt;margin-top:12pt}}
 </style>
 
-<script>(function(){var V=1,K="analyze";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
+<script>(function(){var V=2,K="analyze";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
 </head>
 <body>
 <div class="wrap">
@@ -202,7 +202,7 @@ function parse(text){
   let cells = lines.map(l => l.split(sep));
   let last = cells[0].length - 1; while(last > 0 && !cells[0][last].trim()) last--;
   cells = cells.map(r => r.slice(0, last + 1));
-  const ID = /^(학번|번호|이름|성명|반|학급|학생|출석번호)$/;
+  const ID = /^(학년|학번|번호|이름|성명|반|학급|학생|출석번호)$/;
   let lead = 1; while(lead < cells[0].length - 1 && ID.test(cells[0][lead].trim())) lead++;
   const ci = cells[0].slice(0, lead).findIndex(h => /^(반|학급)$/.test(h.trim()));
   const qs = cells[0].slice(lead).map((s, i) => s.trim() || `${i+1}번`);
@@ -210,8 +210,9 @@ function parse(text){
   let tags = qs.map(() => ""), key = null; const stu = [];
   for(const r of cells.slice(1)){
     const ids = r.slice(0, lead).map(x => String(x || "").trim()).filter(Boolean);
-    const cls = ci >= 0 ? String(r[ci] || "").trim() : "";
-    const head = r.slice(0, lead).filter((_, j) => j !== ci).map(x => String(x || "").trim()).filter(Boolean).join(" ");
+    let cls = ci >= 0 ? String(r[ci] || "").trim() : ""; if(/^\d+$/.test(cls)) cls += "반";
+    const pickc = re => { const j = cells[0].slice(0, lead).findIndex(h => re.test(h.trim())); return j >= 0 ? String(r[j] || "").trim() : ""; };
+    const head = pickc(/^(이름|성명)$/) || pickc(/^(번호|학번|출석번호)$/) || r.slice(0, lead).filter((_, j) => j !== ci).map(x => String(x || "").trim()).filter(Boolean).join(" ");
     const vals = qs.map((_, i) => r[i+lead] == null ? "" : r[i+lead]);
     if(ids.some(x => /^(유형|태그|단원)$/.test(x))) tags = vals.map(v => String(v).trim());
     else if(ids.some(x => /^(정답|답|key)$/i.test(x))) key = vals.map(norm);
@@ -337,7 +338,7 @@ function printSummary(){
   const t2 = el("table"); t2.appendChild(tr(["문항","정답률", ...(D.key ? ["많이 고른 오답"] : []), "변별도",""], true));
   R.Q.forEach(x => t2.appendChild(tr([x.q, pct(x.p) + "%", ...(D.key ? [x.wrong ? `${x.wrong.v} (${x.wrong.c}명)` : "-"] : []), x.disc == null ? "-" : x.disc.toFixed(2), x.p < 0.4 ? "다시 짚기" : (x.disc != null && x.disc < 0 ? "정답 확인" : "")]))); box2.appendChild(t2);
   grid.append(box1, box2); p.appendChild(grid);
-  const help = R.S.filter(s => s.weak.length).sort((a, b) => a.score - b.score).slice(0, 12);
+  const help = R.S.filter(s => s.weak.length).sort((a, b) => a.score - b.score).slice(0, 8);
   if(help.length){ p.appendChild(el("h2",null,"먼저 챙길 학생 (점수 낮은 순)")); const t3 = el("table"); t3.appendChild(tr(["학생","점수","약한 단원"], true));
     help.forEach(s => t3.appendChild(tr([s.name, `${s.score}/${D.qs.length}`, s.weak.map(x => x.tag).join(", ")]))); p.appendChild(t3); }
   p.appendChild(el("p","pfoot","오답 분석기 · quanter02.github.io/analyze · 성적표는 이 기기 밖으로 나가지 않았습니다"));
