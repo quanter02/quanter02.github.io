@@ -174,11 +174,25 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
 .cta #primary{flex:1}
 .prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--blue);transition:width .3s}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-radius:20px 20px 0 0;margin-inline:-20px;padding:6px 8px 4px;box-shadow:0 -1px 0 var(--line)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-radius:20px 20px 0 0;margin-inline:-20px;padding:6px 8px 4px;box-shadow:0 -1px 0 var(--line)}
 .tab{display:grid;justify-items:center;gap:2px;padding:6px 4px;font-size:12px;font-weight:600;color:var(--ink3);position:relative;min-height:52px}
 .tab svg{width:26px;height:26px}
 .tab[aria-current="step"]{color:var(--ink)}
 .tab .c{position:absolute;top:2px;left:calc(50% + 8px);min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:700;line-height:18px;padding:0 5px;text-align:center}
+/* 분석 탭 */
+.a-row{display:grid;gap:6px}
+.a-head{display:flex;align-items:center;gap:10px;min-width:0}
+.a-head b{font-size:16px;font-weight:600;white-space:nowrap}
+.n-badge{width:24px;height:24px;border-radius:8px;background:var(--fill);color:var(--ink2);font-size:13px;font-weight:700;display:grid;place-items:center;flex:none}
+.a-pct{font-weight:700;font-variant-numeric:tabular-nums;color:var(--blue)} .a-pct.low{color:var(--red)}
+.meter{height:8px;border-radius:4px;background:var(--fill);overflow:hidden} .meter i{display:block;height:100%;background:var(--blue);border-radius:4px} .meter.low i{background:var(--red)}
+input.a-tag{width:auto;flex:1;min-width:0;max-width:160px;padding:6px 10px;font-size:14px}
+.a-stu summary{list-style:none;cursor:pointer} .a-stu summary::-webkit-details-marker{display:none}
+.a-stu[open] .chev{transform:rotate(90deg)}
+.a-body{display:grid;gap:10px;padding:0 20px 16px 78px;font-size:15px;color:var(--ink2)}
+.a-body .btn{justify-self:start}
+.err{background:var(--red-soft);color:var(--red);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600}
+@media (max-width:400px){.stats3 b{font-size:18px}.a-body{padding-left:20px}}
 .foot{font-size:12px;color:var(--ink3);line-height:1.6;padding:8px 4px}
 .foot a{color:var(--ink3)}
 </style>
@@ -189,6 +203,24 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
     <span class="name">조교 도우미</span><span class="sp"></span>
     <button class="icon-btn" type="button" id="gear" aria-label="학원 코드와 설정" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
+
+  <!-- 분석 (무료, AI 없음) -->
+  <main id="s0" class="wrap" style="gap:12px">
+    <div class="hero"><h1>반 성적표로<br>약점부터 볼까요?</h1><p>엑셀 표를 붙여 넣으면 바로 분석해요. 무료이고, 성적표는 저장하지 않아요.</p></div>
+    <section class="card">
+      <label class="card-title" for="a-src">성적표 붙여 넣기</label>
+      <textarea id="a-src" spellcheck="false" placeholder="엑셀에서 표를 그대로 복사해 붙여 넣으세요.&#10;학생	1번	2번	3번&#10;유형	수동태	시제	관계사   ← 선택&#10;정답	3	2	1        ← 선택&#10;S01	3	1	1&#10;S02	O	X	O        ← 정답 줄이 없으면 O/X"></textarea>
+      <div class="chips" aria-label="예시"><button type="button" class="chip" id="a-ex-en">영어 예시 (고른 답)</button><button type="button" class="chip" id="a-ex-math">수학 예시 (O/X)</button></div>
+      <details class="more"><summary>표 형식 자세히</summary><ul>
+        <li>첫 줄: 학생 칸 + 문항 이름. 둘째 줄부터 학생 한 명씩. 엑셀 복사(탭)나 쉼표 표 모두 돼요.</li>
+        <li><b>유형</b> 줄이 있으면 문항 유형으로, <b>정답</b> 줄이 있으면 고른 답과 비교해요. ①②③④도 돼요.</li>
+        <li>정답 줄이 없으면 O·1·정답은 맞음, X·0·오답·빈칸은 틀림이에요.</li>
+        <li>학생 이름 대신 번호나 별명을 써 주세요.</li></ul></details>
+      <div class="err" id="a-err" hidden></div>
+    </section>
+    <section class="card"><div class="card-title">과목</div><div class="chips" id="a-subj" role="group" aria-label="과목"></div><span class="sub">학습지를 만들 때 이 과목으로 넣어요.</span></section>
+    <div id="a-out" class="wrap" style="gap:12px"></div>
+  </main>
 
   <!-- 1단계: 학생 목록 -->
   <main id="s1" class="wrap" style="gap:12px">
@@ -228,7 +260,7 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
     </details></section>
   </main>
 
-  <p class="foot">조교 도우미 앱 v2.1 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
+  <p class="foot">조교 도우미 앱 v2.2 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
 </div>
 
 <!-- 설정 시트 -->
@@ -277,6 +309,7 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
     <div class="msg" id="msg" role="status" aria-live="polite"></div>
     <div class="cta"><button type="button" class="btn grey big" id="stop" hidden>멈춤</button><button type="button" class="btn blue big" id="primary">학습지 만들기</button></div>
     <nav class="tabs" id="tabs" aria-label="단계">
+      <button class="tab" type="button" data-step="0"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20a1 1 0 0 1-1-1v-6a1 1 0 1 1 2 0v6a1 1 0 0 1-1 1zm7 0a1 1 0 0 1-1-1V5a1 1 0 1 1 2 0v14a1 1 0 0 1-1 1zm7 0a1 1 0 0 1-1-1v-9a1 1 0 1 1 2 0v9a1 1 0 0 1-1 1z"/></svg><span>분석</span></button>
       <button class="tab" type="button" data-step="1"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2h7.6L20 7.4V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm2 9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9zm0 4a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2H9z" opacity=".9"/></svg><span>학생</span><span class="c" id="c1">0</span></button>
       <button class="tab" type="button" data-step="2"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm4.3 6.8a1 1 0 0 0-1.4 0l-4 4-1.8-1.8a1 1 0 1 0-1.4 1.4l2.5 2.5a1 1 0 0 0 1.4 0l4.7-4.7a1 1 0 0 0 0-1.4z" opacity=".9"/></svg><span>확인</span><span class="c" id="c2">0</span></button>
       <button class="tab" type="button" data-step="3"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 2.3a1 1 0 0 1 .2 1.1l-7 18a1 1 0 0 1-1.8.1L9.6 14.4 2.5 10.9a1 1 0 0 1 .1-1.8l18-7a1 1 0 0 1 1.1.2z" opacity=".9"/></svg><span>보내기</span><span class="c" id="c3">0</span></button>
@@ -288,7 +321,7 @@ details.more ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:14p
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
 const KEY = "tutor-helper-v1";
-let S = {subj:"naesin", set:{make:20, grade:10, review:4, wage:10320}, stu:[], log:[], step:1, cur:null, seeded:false};
+let S = {subj:"naesin", set:{make:20, grade:10, review:4, wage:10320}, stu:[], log:[], step:0, cur:null, seeded:false};
 try{ const v = JSON.parse(localStorage.getItem(KEY) || "null"); if(v && v.stu) S = Object.assign(S, v); }catch(e){}
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
 const ymd = x => `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
@@ -386,15 +419,20 @@ function render(){
   if(PAGE != null && !S.stu[PAGE]) PAGE = null;
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-current", +b.dataset.step === S.step && PAGE == null ? "step" : "false"));
   document.querySelectorAll(".tab .c").forEach(c => c.hidden = c.textContent === "0" || c.id === "c1");
-  [1,2,3].forEach(n => $("s" + n).hidden = PAGE != null || n !== S.step);
+  [0,1,2,3].forEach(n => $("s" + n).hidden = PAGE != null || n !== S.step);
   $("page").hidden = PAGE == null; $("tabs").hidden = PAGE != null;
   document.querySelector(".appbar").hidden = PAGE != null;
-  if(PAGE != null) rp(); else if(S.step === 1) r1(); else if(S.step === 2) r2(); else r3();
+  if(PAGE != null) rp(); else if(S.step === 0) r0(); else if(S.step === 1) r1(); else if(S.step === 2) r2(); else r3();
   bar();
 }
 
 function bar(){
   const p = $("primary"); p.hidden = false; p.disabled = BUSY;
+  if(PAGE == null && S.step === 0){
+    if(AR){ p.textContent = `${AR.n}명 학생 탭에 넣고 학습지 만들기`; p.onclick = sendToStudents; }
+    else { p.textContent = "분석하기"; p.disabled = !$("a-src").value.trim(); p.onclick = runAnalyze; }
+    return;
+  }
   if(PAGE != null){
     const st = S.stu[PAGE];
     p.textContent = st.sheet ? "다시 만들기" : "이 학생 학습지 만들기"; p.disabled = BUSY || !hasInput(st);
@@ -539,6 +577,120 @@ const addOpen = on => { $("addsheet").hidden = $("scrim2").hidden = !on; if(on){
 function rchips(){ const chips = $("subjchips"); chips.innerHTML = "";
   Object.entries(SUBJ).forEach(([k, v]) => { const b = el("button", "chip", v.name); b.type = "button"; b.setAttribute("aria-pressed", S.subj === k); b.onclick = () => { S.subj = k; save(); rchips(); }; chips.appendChild(b); }); }
 
+// ===== 분석 탭: 기존 무료 오답 분석기(/analyze) 계산을 그대로 옮김. 성적표는 저장하지 않는다 =====
+const A_EX = {en: "학생\t1번\t2번\t3번\t4번\t5번\t6번\t7번\t8번\t9번\t10번\n유형\t수동태\t수동태\t시제\t시제\t관계사\t관계사\t수 일치\t수 일치\t동명사/to부정사\t분사\n정답\t3\t2\t1\t4\t2\t2\t3\t1\t4\t3\nS01\t3\t1\t1\t1\t2\t2\t3\t1\t4\t2\nS02\t1\t2\t2\t4\t2\t2\t3\t2\t4\t3\nS03\t1\t2\t2\t2\t2\t1\t3\t1\t4\t3\nS04\t1\t2\t2\t4\t4\t2\t1\t1\t4\t2\nS05\t3\t2\t1\t4\t2\t3\t3\t2\t4\t3\nS06\t3\t2\t2\t4\t2\t2\t4\t1\t4\t3\nS07\t1\t2\t1\t4\t2\t2\t3\t1\t4\t3\nS08\t3\t4\t2\t2\t2\t2\t3\t1\t1\t3\nS09\t3\t2\t1\t4\t2\t1\t4\t1\t4\t2\nS10\t3\t2\t3\t2\t2\t4\t3\t1\t4\t4\nS11\t3\t1\t1\t2\t2\t2\t3\t1\t4\t3\nS12\t3\t2\t3\t4\t2\t2\t3\t3\t4\t3",
+  math: "학생\t1번\t2번\t3번\t4번\t5번\t6번\t7번\t8번\n유형\t일차방정식\t일차방정식\t연립방정식\t연립방정식\t일차함수\t일차함수\t부등식\t부등식\nM01\tO\tX\tO\tO\tX\tX\tO\tO\nM02\tO\tO\tX\tX\tO\tX\tO\tX\nM03\tX\tX\tO\tO\tX\tX\tO\tO\nM04\tO\tO\tO\tO\tX\tO\tX\tO\nM05\tX\tO\tX\tO\tX\tX\tO\tO\nM06\tO\tO\tO\tX\tO\tX\tO\tO\nM07\tO\tX\tO\tO\tX\tX\tX\tO\nM08\tO\tO\tX\tO\tO\tO\tO\tX"};
+const pct = x => Math.round(x * 100);
+const A_CIRC = {"①":"1","②":"2","③":"3","④":"4","⑤":"5"};
+const aNorm = v => { v = String(v == null ? "" : v).trim(); return (A_CIRC[v] || v).toUpperCase(); };
+const A_YES = new Set(["O","○","◯","1","정답","정","T","TRUE","Y"]), A_NO = new Set(["X","×","0","오답","오","F","FALSE","N",""]);
+let AD = null, AR = null, ATEXT = "", AERR = "";
+
+function aParse(text){
+  const lines = text.replace(/\r/g, "").split("\n").filter(l => l.trim());
+  if(lines.length < 2) throw "표가 너무 짧아요. 첫 줄(문항 이름)과 학생 줄이 필요해요.";
+  const sep = lines[0].includes("\t") ? "\t" : ",";
+  const cells = lines.map(l => l.split(sep));
+  const qs = cells[0].slice(1).map((s, i) => s.trim() || `${i+1}번`);
+  if(!qs.length) throw "첫 줄에 문항 이름이 없어요.";
+  let tags = qs.map(() => ""), key = null; const stu = [];
+  for(const r of cells.slice(1)){
+    const head = r[0].trim(), vals = qs.map((_, i) => r[i+1] == null ? "" : r[i+1]);
+    if(/^(유형|태그|단원)$/.test(head)) tags = vals.map(v => String(v).trim());
+    else if(/^(정답|답|key)$/i.test(head)) key = vals.map(aNorm);
+    else stu.push({name: head || `학생${stu.length+1}`, raw: vals.map(aNorm)});
+  }
+  if(!stu.length) throw "학생 줄이 없어요.";
+  for(const s of stu){
+    s.ok = s.raw.map((v, i) => { if(key) return v !== "" && v === key[i]; if(A_YES.has(v)) return true; if(A_NO.has(v)) return false;
+      throw `정답 줄이 없어서 "${v}"를 맞음/틀림으로 읽을 수 없어요 (${s.name}, ${qs[i]}). 정답 줄을 넣거나 O/X로 바꿔 주세요.`; });
+    s.score = s.ok.filter(Boolean).length;
+  }
+  return {qs, tags, key, stu};
+}
+function aAnalyze(){
+  const {qs, key, stu} = AD, n = stu.length, tags = AD.tags.map(t => t || "미분류");
+  const sorted = stu.slice().sort((a, b) => b.score - a.score), g = Math.max(1, Math.round(n * 0.27)), up = sorted.slice(0, g), lo = sorted.slice(-g);
+  const Q = qs.map((q, i) => { const p = stu.filter(s => s.ok[i]).length / n; let wrong = null;
+    if(key){ const cnt = {}; stu.forEach(s => { if(!s.ok[i]){ const v = s.raw[i] || "무응답"; cnt[v] = (cnt[v] || 0) + 1; } }); const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]; if(top) wrong = {v: top[0], c: top[1]}; }
+    const disc = n >= 6 ? up.filter(s => s.ok[i]).length / g - lo.filter(s => s.ok[i]).length / g : null;
+    return {q, i, tag: tags[i], p, wrong, disc}; });
+  const T = {}; Q.forEach(x => { (T[x.tag] = T[x.tag] || {tag: x.tag, idx: []}).idx.push(x.i); });
+  const types = Object.values(T).map(t => ({...t, p: stu.reduce((a, s) => a + t.idx.filter(i => s.ok[i]).length, 0) / (n * t.idx.length)})).sort((a, b) => a.p - b.p);
+  const S2 = stu.map(s => { const per = types.map(t => ({tag: t.tag, n: t.idx.length, c: t.idx.filter(i => s.ok[i]).length, cls: t.p})); per.forEach(x => x.p = x.c / x.n);
+    const weak = per.filter(x => x.c < x.n).sort((a, b) => a.p - b.p || (b.cls - b.p) - (a.cls - a.p)).slice(0, 3);
+    const strong = per.filter(x => x.c === x.n).sort((a, b) => a.cls - b.cls)[0]; return {...s, weak, strong}; });
+  return {Q, types, S: S2, n, avg: stu.reduce((a, s) => a + s.score, 0) / (n * qs.length)};
+}
+function aFeedback(s, total, multi){
+  if(!s.weak.length) return `${s.name} 학생, 이번 평가 ${s.score}/${total}점으로 모든 문항을 맞혔습니다. 다음에는 한 단계 어려운 문제로 넘어가 보겠습니다.`;
+  let t = `${s.name} 학생, 이번 평가 ${s.score}/${total}점입니다. ${s.weak.map(x => `${x.tag}(${x.c}/${x.n})`).join(", ")}에서 실수가 있었습니다.`;
+  if(s.strong && multi) t += ` ${s.strong.tag}은(는) 모두 맞혀 잘하고 있습니다.`;
+  return t + ` 다음 시간까지 ${s.weak[0].tag} 문제를 다시 풀어 보고, 틀린 이유를 한 줄로 적어 와 주세요.`;
+}
+// 학습지 만들기에 넘길 메모: 점수, 약한 유형, 틀린 문항(고른 답·정답)
+function aMemo(s, total){
+  const wrong = AD.qs.map((q, i) => s.ok[i] ? null : `${q}(${AD.tags[i] || "미분류"}${AD.key ? `, 고른 답 ${s.raw[i] || "무응답"} / 정답 ${AD.key[i]}` : ""})`).filter(Boolean);
+  return `${total}문항 중 ${s.score}개 맞음. 약한 유형: ${s.weak.map(x => `${x.tag} ${x.c}/${x.n}(반 평균 ${pct(x.cls)}%)`).join(", ") || "없음"}. 틀린 문항: ${wrong.join(", ") || "없음"}`;
+}
+const meter = (p, low) => { const m = el("div", "meter" + (low ? " low" : "")); const i = el("i"); i.style.width = pct(p) + "%"; m.appendChild(i); return m; };
+
+function r0(){
+  const box = $("a-out"); box.innerHTML = "";
+  const chips = $("a-subj"); chips.innerHTML = "";
+  Object.entries(SUBJ).forEach(([k, v]) => { const b = el("button", "chip", v.name); b.type = "button"; b.setAttribute("aria-pressed", S.subj === k); b.onclick = () => { S.subj = k; save(); r0(); }; chips.appendChild(b); });
+  if(document.activeElement !== $("a-src")) $("a-src").value = ATEXT;
+  $("a-err").textContent = AERR; $("a-err").hidden = !AERR;
+  if(!AR) return;
+  const total = AD.qs.length, multi = AR.types.length > 1, sc = AD.stu.map(s => s.score);
+  const sum = el("section", "card"); sum.appendChild(el("div", "sub", "이번 시험 요약"));
+  const g = el("div", "stats3"); g.style.gridTemplateColumns = "repeat(4,1fr)";
+  [[AR.n, "학생"], [total, "문항"], [pct(AR.avg) + "%", "평균 정답률"], [`${Math.min(...sc)}~${Math.max(...sc)}`, "최저~최고"]].forEach(([b, t]) => { const d = el("div"); d.append(el("b", "", b), el("span", "", t)); g.appendChild(d); });
+  sum.appendChild(g); box.appendChild(sum);
+
+  const ty = el("section", "card"); ty.appendChild(el("div", "card-title", "반 전체가 약한 유형"));
+  AR.types.forEach((t, k) => { const r = el("div", "a-row"); const h = el("div", "a-head"); h.append(el("span", "n-badge", k + 1), el("b", "", t.tag), el("span", "sp"), el("span", "a-pct" + (t.p < .5 ? " low" : ""), pct(t.p) + "%"));
+    r.append(h, meter(t.p, t.p < .5), el("span", "sub", `${t.idx.length}문항`)); ty.appendChild(r); });
+  ty.appendChild(el("span", "sub", "정답률이 낮은 순서예요. 다음 수업 보강은 위에서부터 고르면 돼요.")); box.appendChild(ty);
+
+  const qc = el("section", "card"); const qd = el("details", "more"); qd.appendChild(el("summary", "", `문항별 분석 ${total}개 보기`));
+  const ql = el("div"); ql.style.cssText = "display:grid;gap:14px;margin-top:12px";
+  AR.Q.forEach(x => { const r = el("div", "a-row"); const h = el("div", "a-head"); h.append(el("b", "", x.q));
+    const tin = el("input"); tin.type = "text"; tin.className = "a-tag"; tin.value = AD.tags[x.i]; tin.placeholder = "유형 적기"; tin.setAttribute("aria-label", `${x.q} 유형`);
+    tin.onchange = () => { AD.tags[x.i] = tin.value.trim(); AR = aAnalyze(); r0(); bar(); };
+    h.append(tin, el("span", "sp"), el("span", "a-pct" + (x.p < .4 ? " low" : ""), pct(x.p) + "%")); r.append(h, meter(x.p, x.p < .4));
+    const notes = []; if(AD.key) notes.push(`정답 ${AD.key[x.i]}` + (x.wrong ? ` · 많이 고른 오답 ${x.wrong.v} (${x.wrong.c}명)` : ""));
+    if(x.disc != null) notes.push(`변별도 ${x.disc.toFixed(2)}`); if(x.disc != null && x.disc < 0) notes.push("⚠ 잘하는 학생이 더 많이 틀림 · 정답 확인");
+    if(notes.length) r.appendChild(el("span", "sub", notes.join(" · "))); ql.appendChild(r); });
+  qd.appendChild(ql); qd.appendChild(el("p", "sub", AR.n >= 6 ? "변별도 = 상위 27% 정답률 − 하위 27% 정답률. 음수면 정답이나 문항 오류를 확인해 보세요." : "변별도는 학생 6명 이상일 때 계산해요."));
+  qc.appendChild(qd); box.appendChild(qc);
+
+  const st = el("section", "card tight"); const sh = el("div", "card-title"); sh.style.padding = "8px 20px 4px"; sh.textContent = "학생별 약점과 피드백"; st.appendChild(sh);
+  AR.S.slice().sort((a, b) => a.score - b.score).forEach(s => { const d = el("details", "a-stu"); const sm = el("summary", "row-btn");
+    sm.append(el("span", "avatar " + (s.weak.length ? (s.score / total < .5 ? "warn" : "pen") : "ok"), String(s.score)));
+    const m = el("span", "row-main"); m.append(el("b", "", `${s.name} · ${s.score}/${total}`), el("span", "", s.weak.length ? s.weak.map(x => `${x.tag} ${x.c}/${x.n}`).join(" · ") : "틀린 문항 없음")); sm.appendChild(m);
+    const ch = el("span", "chev"); ch.innerHTML = SVG_CHEV; sm.appendChild(ch); d.appendChild(sm);
+    const body = el("div", "a-body"); const fb = aFeedback(s, total, multi); body.appendChild(el("p", "", fb));
+    const cp = btn("grey", "피드백 복사"); cp.onclick = () => copyA(fb, cp, "피드백 복사"); body.appendChild(cp); d.appendChild(body); st.appendChild(d); });
+  box.appendChild(st);
+
+  const nx = el("section", "card"); nx.append(el("div", "card-title", "이 약점으로 학생별 맞춤 숙제 만들기"),
+    el("span", "sub", "아래 큰 버튼을 누르면 학생들이 학생 탭에 약점 메모와 함께 들어가요. 학생 이름은 번호나 별명으로 바꿔 주세요."));
+  const ap = el("a", "btn soft wide", "한 반 무료 샘플 신청 (카카오톡)"); ap.href = "https://open.kakao.com/o/spOlfgTi"; ap.target = "_blank"; ap.rel = "noopener"; nx.appendChild(ap); box.appendChild(nx);
+}
+async function copyA(t, b, label){ try{ await navigator.clipboard.writeText(t); b.textContent = "복사했어요"; setTimeout(() => b.textContent = label, 1500); } catch(e){ setMsg("자동 복사가 막힌 화면이에요. 글을 길게 눌러 복사해 주세요."); } }
+function runAnalyze(){
+  ATEXT = $("a-src").value; AERR = "";
+  try{ AD = aParse(ATEXT); AR = aAnalyze(); setMsg(`${AR.n}명 분석했어요.`); }
+  catch(e){ AD = AR = null; AERR = String(e); }
+  r0(); bar(); if(AR) setTimeout(() => $("a-out").scrollIntoView({behavior: "smooth", block: "start"}), 50);
+}
+function sendToStudents(){
+  const total = AD.qs.length; let n = 0, dup = 0;
+  AR.S.forEach(s => { if(addStu(s.name, aMemo(s, total), S.subj)) n++; else dup++; });
+  save(); go(1); setMsg(`${n}명을 학생 탭에 넣었어요.` + (dup ? ` 같은 이름 ${dup}명은 건너뛰었어요.` : "") + " 아래 버튼으로 학습지를 만들어요.");
+}
+
 function onPhoto(st, fi){
   const fs = [...fi.files].filter(f => f.type.startsWith("image/")).slice(0, CAN_IMG.maxCount); if(!fs.length) return;
   PHOTOS[st.nick] = fs; st.photoN = fs.length; st.sheet = null; st.ok = false; st.ex = false; save(); render();
@@ -617,6 +769,9 @@ $("bulkgo").onclick = () => { let n = 0, skip = 0;
   $("bulk").value.split("\n").map(l => l.trim()).filter(Boolean).forEach(l => { const m = l.match(/^([^:：]{1,20})[:：]\s*(.+)$/); if(m && addStu(m[1], m[2], S.subj)) n++; else skip++; });
   save(); render(); $("bulkmsg").textContent = n ? `${n}명 추가했어요.` + (skip ? ` ${skip}줄은 '별명: 메모' 형식이 아니거나 이미 있는 별명이라 건너뛰었어요.` : "") : "'별명: 메모' 형식의 줄을 찾지 못했어요."; if(n){ $("bulk").value = ""; setTimeout(() => addOpen(false), 600); } };
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => go(+b.dataset.step));
+$("a-src").oninput = () => { ATEXT = $("a-src").value; if(AR){ AR = AD = null; r0(); } bar(); };
+$("a-ex-en").onclick = () => { $("a-src").value = A_EX.en; S.subj = "naesin"; save(); runAnalyze(); };
+$("a-ex-math").onclick = () => { $("a-src").value = A_EX.math; S.subj = "math_mid"; save(); runAnalyze(); };
 const sheetOpen = on => { $("settings").hidden = $("scrim").hidden = !on; $("gear").setAttribute("aria-expanded", on); if(on) setTimeout(() => (S.code ? $("m-make") : $("code")).focus(), 50); };
 $("gear").onclick = () => sheetOpen(true); $("scrim").onclick = $("setclose").onclick = () => sheetOpen(false);
 document.addEventListener("keydown", e => { if(e.key !== "Escape") return; if(!$("settings").hidden) sheetOpen(false); else if(!$("addsheet").hidden) addOpen(false); else if(PAGE != null){ PAGE = null; render(); } });
