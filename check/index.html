@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>숙제 제출률 진단</title>
+<meta name="description" content="숫자 5개만 넣으면 우리 학원 숙제 제출률, 미제출 안내에 드는 시간, 바로 쓸 학부모 안내 문구 24개를 알려 줘요. 무료, 가입 없음, 입력한 숫자는 어디로도 보내지 않아요.">
+<link rel="canonical" href="https://quanter02.github.io/check/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="우리 학원 숙제 제출률은 몇 점일까요? · 1분 무료 진단">
+<meta property="og:description" content="숫자 5개로 제출률·안내 시간 진단 + 미제출 학부모 안내 문구 24개 무료.">
+<meta property="og:url" content="https://quanter02.github.io/check/">
+<meta property="og:locale" content="ko_KR">
+<meta name="theme-color" content="#f2f4f6">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#f2f4f6; --card:#ffffff; --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --line:#e5e8eb; --fill:#f2f4f6;
+  --blue:#3182f6; --blue-d:#1b64da; --blue-soft:#e8f3ff; --red:#f04452; --red-soft:#ffeeee; --green:#03b26c; --green-soft:#e5f8f0; --amber:#ff9f00; --amber-soft:#fff4e0;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17171c;--card:#202027;--ink:#ececee;--ink2:#b0b0b8;--ink3:#7e7e87;--line:#2c2c35;--fill:#2c2c35;--blue:#4c9aff;--blue-d:#3182f6;--blue-soft:#1b2b45;--red:#ff6b77;--red-soft:#3a2025;--green:#2fcc8a;--green-soft:#173327;--amber:#ffb84d;--amber-soft:#3a2e17;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;padding:24px 16px 120px;word-break:keep-all}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:12px}
+h1,h2,p{margin:0}
+h1{font-size:26px;line-height:1.35;font-weight:700;text-wrap:balance}
+h2{font-size:18px;font-weight:700}
+.sub{color:var(--ink3);font-size:14px}
+.lead{color:var(--ink2);font-size:15px;margin-top:6px}
+.card{background:var(--card);border-radius:20px;padding:20px;display:grid;gap:14px;min-width:0}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);margin-bottom:8px}
+.field{display:grid;gap:6px}
+.field label{font-size:14px;font-weight:600;color:var(--ink2)}
+input,select{font:inherit;font-size:17px;color:var(--ink);background:var(--fill);border:0;border-radius:12px;padding:12px 14px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:14px;padding:12px 14px;cursor:pointer;text-decoration:none;text-align:center;display:inline-block}
+.btn.blue{background:var(--blue);color:#fff}.btn.soft{background:var(--blue-soft);color:var(--blue)}.btn.grey{background:var(--fill);color:var(--ink2)}
+.btn.big{font-size:17px;padding:16px}.wide{width:100%}
+.dock{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
+.dock .btn{max-width:520px;display:block;margin:0 auto}
+.score{display:flex;align-items:baseline;gap:8px}
+.score b{font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.pill{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px}
+.pill.ok{background:var(--green-soft);color:var(--green)}.pill.mid{background:var(--blue-soft);color:var(--blue)}.pill.bad{background:var(--red-soft);color:var(--red)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpis div{background:var(--fill);border-radius:14px;padding:12px 8px;text-align:center}
+.kpis b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.kpis span{font-size:12px;color:var(--ink3)}
+ol.rec{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--ink2);font-size:15px}
+ol.rec b{color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:14px;font-weight:600;border:0;border-radius:999px;padding:7px 12px;background:var(--fill);color:var(--ink2);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.msg{display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)}
+.msg:first-child{border-top:0;padding-top:0}
+.msg .h{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink3);font-weight:600}
+.msg p{font-size:15px;color:var(--ink)}
+.warn{font-size:12px;font-weight:700;color:var(--amber);background:var(--amber-soft);border-radius:999px;padding:2px 8px}
+.msg .btn{justify-self:start;padding:8px 12px;font-size:14px}
+.foot{font-size:12px;color:var(--ink3);text-align:center}
+.foot a{color:var(--ink3)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">무료 · 가입 없음 · 1분</span>
+    <h1>우리 학원 숙제 제출률은 몇 점일까요?</h1>
+    <p class="lead">최근 2주 숫자 5개만 넣어 주세요. 입력한 숫자는 이 화면 밖으로 나가지 않아요.</p>
+  </header>
+
+  <section class="card" id="form">
+    <div class="grid2">
+      <div class="field"><label for="n">학생 수</label><input id="n" type="number" inputmode="numeric" min="1" placeholder="예: 30"></div>
+      <div class="field"><label for="k">2주간 숙제 횟수(1인당)</label><input id="k" type="number" inputmode="numeric" min="1" placeholder="예: 4"></div>
+      <div class="field"><label for="m">2주간 미제출 건수(합계)</label><input id="m" type="number" inputmode="numeric" min="0" placeholder="예: 18"></div>
+      <div class="field"><label for="r">2주간 2번 이상 안 낸 학생</label><input id="r" type="number" inputmode="numeric" min="0" placeholder="예: 4"></div>
+    </div>
+    <div class="field"><label for="how">미제출 학생 학부모 안내는?</label>
+      <select id="how"><option value="none">따로 안 해요</option><option value="oral">학생에게 말로만</option><option value="manual">문자·카톡을 그때그때 써요</option><option value="tpl">정해 둔 문구를 써요</option></select></div>
+    <div class="field"><label for="t">미제출 1건 확인·안내에 드는 시간(분)</label><input id="t" type="number" inputmode="numeric" min="0" value="5"></div>
+    <p class="sub" id="err" hidden></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <section class="card">
+        <p class="sub">진단 결과</p>
+        <div class="score"><b id="rate">0%</b><span class="pill" id="grade"></span></div>
+        <div class="kpis">
+          <div><b id="k-miss">0</b><span>한 달 미제출</span></div>
+          <div><b id="k-hour">0</b><span>한 달 안내 시간</span></div>
+          <div><b id="k-rep">0%</b><span>반복 미제출</span></div>
+        </div>
+        <p class="sub">등급 기준은 우리가 정한 임시 기준이에요(90% 이상 좋아요, 75~90% 보통, 75% 미만 확인 필요). 업계 평균이 아니에요.</p>
+      </section>
+      <section class="card"><h2>지금 바로 할 3가지</h2><ol class="rec" id="rec"></ol></section>
+      <section class="card">
+        <h2>다른 원장님께도 알려 주기</h2>
+        <p class="sub">숫자만 공유돼요. 학원 이름은 들어가지 않아요.</p>
+        <button class="btn soft wide" type="button" id="share">결과 공유하기</button>
+      </section>
+    </div>
+  </section>
+
+  <section class="card" id="pack">
+    <div><h2>미제출 학부모 안내 문구 24개</h2><p class="sub">상황 8개 × 톤 3단계. 이름을 넣으면 문구에 바로 채워져요. 이름은 저장하지 않아요.</p></div>
+    <div class="grid2">
+      <div class="field"><label for="f-acad">학원</label><input id="f-acad" type="text" placeholder="예: 바른수학" maxlength="20"></div>
+      <div class="field"><label for="f-tch">선생님</label><input id="f-tch" type="text" placeholder="예: 김 선생님" maxlength="20"></div>
+      <div class="field"><label for="f-stu">학생</label><input id="f-stu" type="text" placeholder="예: 민준" maxlength="20"></div>
+      <div class="field"><label for="f-stu2">형제·자매(선택)</label><input id="f-stu2" type="text" placeholder="예: 서윤" maxlength="20"></div>
+    </div>
+    <div class="chips" id="tones" role="group" aria-label="톤">
+      <button class="chip" type="button" data-tone="" aria-pressed="true">전체</button>
+      <button class="chip" type="button" data-tone="부드럽게" aria-pressed="false">부드럽게</button>
+      <button class="chip" type="button" data-tone="보통" aria-pressed="false">보통</button>
+      <button class="chip" type="button" data-tone="상담 요청" aria-pressed="false">상담 요청</button>
+    </div>
+    <div id="msgs"></div>
+    <button class="btn grey wide" type="button" id="tsv">구글 시트용 파일 받기 (24개 전체)</button>
+    <p class="sub"><span class="warn">원장 확인</span> 표시는 횟수·기한·약속이 들어간 문구예요. 학원 사정에 맞는지 보고 보내 주세요.</p>
+  </section>
+
+  <section class="card">
+    <h2>이 문구, 학생마다 자동으로 쓰고 싶다면</h2>
+    <p class="sub">조교 도우미 앱은 시험 결과로 약점 분석, 맞춤 학습지, 학부모 리포트까지 만들어요. 학원마다 학습지 20장 무료.</p>
+    <a class="btn soft wide" href="../app/">조교 도우미 앱 무료로 써 보기</a>
+    <a class="btn grey wide" href="https://open.kakao.com/o/spOlfgTi" target="_blank" rel="noopener">문의 · 한 반 무료 샘플 (카카오톡)</a>
+  </section>
+  <p class="foot">숙제 제출률 진단 v1 · 입력값은 저장·전송하지 않아요 · <a href="../app/">조교 도우미</a></p>
+</div>
+<div class="dock"><button class="btn blue big wide" type="button" id="go">진단하기</button></div>
+
+<script>
+// 화면 문구와 문구 팩은 여기 한곳에 모아 둔다 (나중에 언어 파일로 분리)
+const URL_SELF = "https://quanter02.github.io/check/";
+const GREET = "안녕하세요, 학부모님. [학원] [선생님]입니다.";
+const PACK = [
+ ["1회 미제출","부드럽게","오늘 [학생] 학생의 숙제가 아직 제출되지 않아 안내드려요. 바쁜 일이 있었을 수 있어 다음 수업 때 함께 확인하고 마무리하겠습니다. 감사합니다.",""],
+ ["1회 미제출","보통","오늘 [학생] 학생의 숙제가 제출되지 않았습니다. 다음 수업 전까지 마무리할 수 있도록 댁에서 한 번만 확인 부탁드립니다. 감사합니다.",""],
+ ["1회 미제출","상담 요청","오늘 [학생] 학생의 숙제가 제출되지 않아 연락드려요. 숙제 분량이나 일정에 어려운 점이 있다면 편하실 때 짧게 통화 가능할까요?",""],
+ ["3회 연속 미제출","부드럽게","최근 세 번의 숙제가 제출되지 않아 안내드려요. 숙제가 부담이 되는 부분이 있는지 수업 중에 [학생] 학생과 천천히 이야기해 보겠습니다.","횟수"],
+ ["3회 연속 미제출","보통","최근 세 차례 연속으로 [학생] 학생의 숙제가 제출되지 않았습니다. 학습 흐름이 이어지도록 이번 주 숙제는 댁에서도 함께 확인 부탁드립니다.","횟수"],
+ ["3회 연속 미제출","상담 요청","최근 세 차례 숙제가 제출되지 않아 연락드려요. 숙제 방식을 [학생] 학생에게 맞게 조정하고 싶어 10분 정도 상담이 가능하실지 여쭙니다.","횟수"],
+ ["평소 잘 내던 학생 첫 미제출","부드럽게","늘 숙제를 꼼꼼히 챙기던 [학생] 학생이 오늘은 제출하지 못해, 혹시 무슨 일이 있었는지 여쭙고자 연락드려요. 편하실 때 알려 주세요.",""],
+ ["평소 잘 내던 학생 첫 미제출","보통","평소 숙제를 잘 챙기던 [학생] 학생이 오늘은 숙제를 제출하지 않았습니다. 다음 수업 전까지 마무리할 수 있도록 확인 부탁드립니다.",""],
+ ["평소 잘 내던 학생 첫 미제출","상담 요청","늘 숙제를 잘 챙기던 [학생] 학생이 이번에 제출하지 못해 연락드려요. 요즘 컨디션이나 일정에 변화가 있는지 잠깐 통화 가능할까요?",""],
+ ["시험 직전 미제출","부드럽게","시험을 앞두고 [학생] 학생의 숙제가 아직 제출되지 않아 안내드려요. 시험 전 숙제는 실력 점검에 도움이 되니 마무리할 수 있게 응원 부탁드려요.",""],
+ ["시험 직전 미제출","보통","시험을 앞두고 [학생] 학생의 숙제가 제출되지 않았습니다. 시험 전 복습과 이어지는 숙제라 시험 전까지 제출할 수 있도록 확인 부탁드립니다.","시험 범위"],
+ ["시험 직전 미제출","상담 요청","시험을 앞두고 숙제가 제출되지 않아 연락드려요. 남은 기간 [학생] 학생에게 맞는 복습 계획을 함께 정하고 싶어 짧게 통화 가능할까요?",""],
+ ["형제·자매 동시 미제출","부드럽게","오늘 [학생1], [학생2] 학생 모두 숙제가 제출되지 않아 안내드려요. 바쁜 일정이 있었을 수 있어 다음 수업 때 두 학생과 함께 챙기겠습니다.",""],
+ ["형제·자매 동시 미제출","보통","오늘 [학생1], [학생2] 학생 둘 다 숙제가 제출되지 않았습니다. 다음 수업 전까지 마무리할 수 있도록 댁에서 한 번만 확인 부탁드립니다.",""],
+ ["형제·자매 동시 미제출","상담 요청","[학생1], [학생2] 학생 모두 숙제가 제출되지 않아 연락드려요. 두 학생의 숙제 일정을 댁 일정에 맞게 조정해 보고 싶어 통화 가능할까요?",""],
+ ["일부만 제출","부드럽게","오늘 [학생] 학생이 숙제를 일부 해 왔어요. 해 온 부분은 수업에서 함께 확인하고, 남은 부분은 다음 수업 전까지 마무리할 수 있게 돕겠습니다.","약속"],
+ ["일부만 제출","보통","오늘 [학생] 학생이 숙제의 일부만 제출했습니다. 남은 부분은 다음 수업 전까지 마무리할 수 있도록 댁에서 한 번만 확인 부탁드립니다.",""],
+ ["일부만 제출","상담 요청","이번 숙제를 [학생] 학생이 일부만 제출해 연락드려요. 분량이 많거나 어려운 부분이 있는지 함께 살펴보고 싶어 짧게 통화 가능할까요?",""],
+ ["사유 있음(미리 연락 받음)","부드럽게","미리 말씀 주셔서 감사합니다. [학생] 학생 숙제는 상황이 괜찮아지면 마무리하면 되고, 다음 수업 때 필요한 부분을 함께 보겠습니다.","기한"],
+ ["사유 있음(미리 연락 받음)","보통","미리 연락 주셔서 감사합니다. [학생] 학생의 이번 숙제는 다음 수업 전까지 제출하면 됩니다. 어려운 부분은 수업 때 함께 확인하겠습니다.","기한"],
+ ["사유 있음(미리 연락 받음)","상담 요청","사정 말씀 주셔서 감사합니다. [학생] 학생 일정이 당분간 바쁘다면 숙제 분량을 조정할 수 있으니, 편하실 때 짧게 통화 가능할까요?","방침"],
+ ["미제출 반복 + 성적 하락","부드럽게","최근 [학생] 학생이 숙제를 챙기기 어려워 보여 안내드려요. 숙제 부담을 덜면서 실력을 다질 방법을 수업에서 함께 찾아보겠습니다. 감사합니다.",""],
+ ["미제출 반복 + 성적 하락","보통","최근 [학생] 학생의 숙제 미제출이 이어지고 시험 결과도 지난번보다 낮아졌습니다. 이번 주 숙제를 댁에서 확인해 주시면 수업에서도 보충하겠습니다.","약속"],
+ ["미제출 반복 + 성적 하락","상담 요청","최근 숙제 제출과 시험 결과를 보며 [학생] 학생에게 맞는 학습 방법을 다시 정하고 싶어 연락드려요. 이번 주 중 10~15분 상담 가능하실까요?","약속"]
+];
+const T = {
+  needNums: "학생 수와 숙제 횟수, 미제출 건수를 넣어 주세요.",
+  tooMany: "미제출 건수가 전체 숙제 수보다 많아요. 숫자를 확인해 주세요.",
+  good: "좋아요", mid: "보통", bad: "확인 필요",
+  copied: "복사했어요", copyFail: "자동 복사가 막혔어요. 문구를 길게 눌러 복사해 주세요."
+};
+
+const $ = id => document.getElementById(id);
+const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : NaN; };
+let tone = "";
+
+function toast(t){ const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1600); }
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); toast(T.copied); }catch(e){ toast(T.copyFail); } }
+
+function diagnose(){
+  const n = num("n"), k = num("k"), m = num("m"), r = Math.max(0, num("r") || 0), t = Math.max(0, num("t") || 0), how = $("how").value;
+  const err = $("err");
+  if(!(n > 0) || !(k > 0) || !(m >= 0)){ err.textContent = T.needNums; err.hidden = false; return null; }
+  if(m > n * k){ err.textContent = T.tooMany; err.hidden = false; return null; }
+  err.hidden = true;
+  const rate = 1 - m / (n * k);
+  const missMonth = Math.round(m * 2);
+  const hours = missMonth * t / 60;
+  const rep = Math.min(1, r / n);
+  return {n, k, m, r, t, how, rate, missMonth, hours, rep};
+}
+
+function recs(d){
+  const out = [];
+  if(d.how === "none" || d.how === "oral") out.push(["학부모 안내를 시작해요.", "첫 미제출은 아래 '부드럽게' 문구로 짧게 알리면 다음 제출률이 오르기 쉬워요."]);
+  if(d.rep >= 0.1) out.push([`반복 미제출 학생 ${d.r}명은 따로 챙겨요.`, "'상담 요청' 톤 문구로 10분 통화를 잡고, 숙제 분량부터 조정해 보세요."]);
+  if(d.hours >= 2 || d.how === "manual") out.push([`안내에 한 달 약 ${fmtH(d.hours)}을 써요.`, "정해 둔 문구에 이름만 바꿔 넣으면 1건을 1분 안에 끝낼 수 있어요."]);
+  if(d.rate < 0.75) out.push(["숙제 분량과 난이도를 점검해요.", "4명 중 1명 이상이 못 내고 있어요. 한 번에 내는 양을 줄이고 횟수를 유지해 보세요."]);
+  if(d.rate >= 0.9) out.push(["지금 방식을 기록해 두세요.", "잘 되는 반의 숙제 방식(분량·확인 방법)을 다른 반에도 그대로 써 보세요."]);
+  out.push(["2주 뒤 같은 숫자로 다시 진단해요.", "숫자가 어떻게 바뀌었는지 보면 어떤 방법이 효과 있었는지 알 수 있어요."]);
+  return out.slice(0, 3);
+}
+const fmtH = h => h < 1 ? `${Math.round(h * 60)}분` : `${Math.round(h * 10) / 10}시간`;
+
+function render(d){
+  const pct = Math.round(d.rate * 100);
+  $("rate").textContent = pct + "%";
+  const g = $("grade");
+  if(d.rate >= 0.9){ g.textContent = T.good; g.className = "pill ok"; }
+  else if(d.rate >= 0.75){ g.textContent = T.mid; g.className = "pill mid"; }
+  else { g.textContent = T.bad; g.className = "pill bad"; }
+  $("k-miss").textContent = d.missMonth + "건";
+  $("k-hour").textContent = fmtH(d.hours);
+  $("k-rep").textContent = Math.round(d.rep * 100) + "%";
+  const ol = $("rec"); ol.innerHTML = "";
+  recs(d).forEach(([b, s]) => { const li = document.createElement("li"); const bb = document.createElement("b"); bb.textContent = b; li.append(bb, document.createElement("br"), s); ol.appendChild(li); });
+  $("result").hidden = false;
+  $("result").scrollIntoView({behavior: "smooth", block: "start"});
+  shareText = `우리 학원 숙제 제출률 진단: ${pct}% (${g.textContent}), 미제출 안내에 한 달 약 ${fmtH(d.hours)}. 숫자 5개로 1분 무료 진단 + 학부모 안내 문구 24개 → ${URL_SELF}`;
+}
+let shareText = "";
+
+function fill(s){
+  const v = id => $(id).value.trim();
+  const rep = (str, key, val) => val ? str.split(key).join(val) : str;
+  let t = rep(s, "[학원]", v("f-acad")); t = rep(t, "[선생님]", v("f-tch"));
+  t = rep(t, "[학생1]", v("f-stu")); t = rep(t, "[학생2]", v("f-stu2")); t = rep(t, "[학생]", v("f-stu"));
+  return t;
+}
+const full = p => GREET + " " + p[2];
+
+function renderPack(){
+  const box = $("msgs"); box.innerHTML = "";
+  PACK.forEach((p, i) => {
+    if(tone && p[1] !== tone) return;
+    const d = document.createElement("div"); d.className = "msg";
+    const h = document.createElement("div"); h.className = "h"; h.textContent = `${i + 1}. ${p[0]} · ${p[1]}`;
+    if(p[3]){ const w = document.createElement("span"); w.className = "warn"; w.textContent = "원장 확인: " + p[3]; h.appendChild(w); }
+    const tx = document.createElement("p"); tx.textContent = fill(full(p));
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn grey"; b.textContent = "복사";
+    b.onclick = () => copyText(fill(full(p)));
+    d.append(h, tx, b); box.appendChild(d);
+  });
+}
+
+function downloadTSV(){
+  const rows = [["번호","상황","톤","문구","원장 확인"]].concat(PACK.map((p, i) => [i + 1, p[0], p[1], full(p), p[3]]));
+  rows.push([]); rows.push(["", "", "", "학생마다 자동으로: " + "https://quanter02.github.io/app/", ""]);
+  const tsv = "﻿" + rows.map(r => r.join("\t")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([tsv], {type: "text/tab-separated-values;charset=utf-8"}));
+  a.download = "미제출-안내-문구-24.tsv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+$("go").onclick = () => { const d = diagnose(); if(d) render(d); else $("form").scrollIntoView({behavior: "smooth"}); };
+$("share").onclick = async () => {
+  if(navigator.share){ try{ await navigator.share({title: "숙제 제출률 진단", text: shareText}); return; }catch(e){ if(e && e.name === "AbortError") return; } }
+  copyText(shareText);
+};
+$("tones").onclick = e => { const c = e.target.closest(".chip"); if(!c) return; tone = c.dataset.tone; document.querySelectorAll("#tones .chip").forEach(x => x.setAttribute("aria-pressed", x === c ? "true" : "false")); renderPack(); };
+["f-acad","f-tch","f-stu","f-stu2"].forEach(id => $(id).addEventListener("input", renderPack));
+$("tsv").onclick = downloadTSV;
+renderPack();
+</script>
+</body>
+</html>

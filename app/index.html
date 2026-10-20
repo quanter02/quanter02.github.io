@@ -260,7 +260,7 @@ input.a-tag{width:auto;flex:1;min-width:0;max-width:160px;padding:6px 10px;font-
     </details></section>
   </main>
 
-  <p class="foot">조교 도우미 앱 v2.3 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
+  <p class="foot">조교 도우미 앱 v2.4 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
 </div>
 
 <!-- 설정 시트 -->
@@ -282,6 +282,9 @@ input.a-tag{width:auto;flex:1;min-width:0;max-width:160px;padding:6px 10px;font-
     <div class="field"><label for="wage">조교 시급(원)</label><input type="number" id="wage" min="0" inputmode="numeric"></div>
   </div>
   <span class="sub">학습지 1장당 아낀 시간 = 만들기 + 채점·리포트 − 강사 확인</span>
+  <div class="divider"></div>
+  <label style="display:flex;gap:10px;align-items:center;font-weight:600"><input type="checkbox" id="tag" style="width:20px;height:20px;accent-color:var(--blue)"> 리포트·피드백 끝에 앱 링크 한 줄 붙이기</label>
+  <span class="sub">복사한 글 맨 끝에 "조교 도우미로 작성 · quanter02.github.io/app"이 붙어요. 끄면 붙지 않아요.</span>
 </section>
 
 <!-- 학생 추가 시트 -->
@@ -381,6 +384,8 @@ if(!S.seeded && !S.stu.length){
 
 // 지시문(프롬프트)은 서버(worker)에만 있다. 앱 코드에는 두지 않는다.
 
+const TAG = "\n\n— 조교 도우미로 작성 · quanter02.github.io/app";
+const tagged = t => S.set.tag !== false ? t + TAG : t;
 const saved = () => Math.max(0, (+S.set.make || 0) + (+S.set.grade || 0) - (+S.set.review || 0));
 const hasInput = st => !!(st.result || (PHOTOS[st.nick] || []).length);
 function status(st){
@@ -414,7 +419,7 @@ const tone = st => st.ok ? "ok" : st.sheet && st.sheet.unclear && st.sheet.uncle
 const btn = (cls, text, fn) => { const b = el("button", "btn " + cls, text); b.type = "button"; if(fn) b.onclick = fn; return b; };
 
 function render(){
-  ["make","grade","review"].forEach(k => $("m-" + k).value = S.set[k]); $("wage").value = S.set.wage;
+  ["make","grade","review"].forEach(k => $("m-" + k).value = S.set[k]); $("wage").value = S.set.wage; $("tag").checked = S.set.tag !== false;
   counts(); kpi();
   if(PAGE != null && !S.stu[PAGE]) PAGE = null;
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-current", +b.dataset.step === S.step && PAGE == null ? "step" : "false"));
@@ -568,7 +573,7 @@ function r3(){
     const a = el("div", "send-actions");
     const f = btn("blue", "학습지 열어서 인쇄"); f.onclick = () => saveFile([st], f);
     const cp = btn("grey", "학습지 복사"); cp.onclick = () => copy(sheetText(st), cp, "학습지 복사");
-    const pr = btn("grey", "리포트 복사"); pr.onclick = () => copy(st.sheet.parent, pr, "리포트 복사");
+    const pr = btn("grey", "리포트 복사"); pr.onclick = () => copy(tagged(st.sheet.parent), pr, "리포트 복사");
     a.append(f, cp, pr); c.appendChild(a); box.appendChild(c);
   });
 }
@@ -671,7 +676,7 @@ function r0(){
     const m = el("span", "row-main"); m.append(el("b", "", `${s.name} · ${s.score}/${total}`), el("span", "", s.weak.length ? s.weak.map(x => `${x.tag} ${x.c}/${x.n}`).join(" · ") : "틀린 문항 없음")); sm.appendChild(m);
     const ch = el("span", "chev"); ch.innerHTML = SVG_CHEV; sm.appendChild(ch); d.appendChild(sm);
     const body = el("div", "a-body"); const fb = aFeedback(s, total, multi); body.appendChild(el("p", "", fb));
-    const cp = btn("grey", "피드백 복사"); cp.onclick = () => copyA(fb, cp, "피드백 복사"); body.appendChild(cp); d.appendChild(body); st.appendChild(d); });
+    const cp = btn("grey", "피드백 복사"); cp.onclick = () => copyA(tagged(fb), cp, "피드백 복사"); body.appendChild(cp); d.appendChild(body); st.appendChild(d); });
   box.appendChild(st);
 
   const nx = el("section", "card"); nx.append(el("div", "card-title", "이 약점으로 학생별 맞춤 숙제 만들기"),
@@ -777,6 +782,7 @@ $("gear").onclick = () => sheetOpen(true); $("scrim").onclick = $("setclose").on
 document.addEventListener("keydown", e => { if(e.key !== "Escape") return; if(!$("settings").hidden) sheetOpen(false); else if(!$("addsheet").hidden) addOpen(false); else if(PAGE != null){ PAGE = null; render(); } });
 ["make","grade","review"].forEach(k => $("m-" + k).onchange = () => { S.set[k] = +$("m-" + k).value || 0; save(); kpi(); });
 $("wage").onchange = () => { S.set.wage = +$("wage").value || 0; save(); kpi(); };
+$("tag").onchange = () => { S.set.tag = $("tag").checked; save(); };
 $("stop").onclick = () => ctl && ctl.abort();
 $("export").onclick = () => {
   const out = S.stu.filter(st => st.sheet).map(st => `[${st.nick} · ${sname(st)}]${st.photoN ? ` · 사진 ${st.photoN}장` : ""}\n입력: ${(st.result || "(사진만)").slice(0, 300)}\n읽은 결과: ${(st.sheet.read || []).join(" | ")}\n확인 필요: ${(st.sheet.unclear || []).join(" | ") || "없음"}\n약점: ${st.sheet.weak.map(w => `${w.type} (${w.rule})`).join(" / ")}\n` + st.sheet.qs.map((q, i) => `${i+1}. ${q.stem}\n   ${q.options.map((o, j) => `${"ABCD"[j]}) ${o}`).join("  ")}\n   표시된 정답 ${"ABCD"[q.answer]} · ${q.explain}`).join("\n")).join("\n\n");
