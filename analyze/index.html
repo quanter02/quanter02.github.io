@@ -58,6 +58,8 @@ details summary{cursor:pointer;padding:4px 0}
 .sum{display:grid;gap:10px}
 .sum ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
 .sum li{background:var(--fill);border-radius:14px;padding:12px 14px;font-size:15px}.sum li b{color:var(--accent)}
+td.n.lo{color:var(--warn)}
+#print-one{justify-self:start}
 .sum li.w{background:var(--warn-soft)}.sum li.w b{color:var(--warn)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .kpis div{background:var(--card);border-radius:16px;padding:14px 6px;text-align:center}
@@ -82,9 +84,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 .dock button:active{background:var(--accent-d)}
 #print{display:none}
 @media print{body{background:#fff;color:#000;padding:0}.wrap,.dock{display:none}#print{display:block;color:#000;font-family:var(--font)}
-  #print table{font-size:9pt}#print th,#print td{border-bottom:1px solid #ccc;padding:3pt 5pt}#print h1{font-size:15pt}#print h2{font-size:12pt;margin-top:12pt}}
+  @page{size:A4;margin:12mm}#print table{font-size:8.5pt;width:100%;border-collapse:collapse}#print .pgrid{display:grid;grid-template-columns:1fr 1.3fr;gap:10mm}#print ul{font-size:9.5pt;margin:4pt 0 8pt;padding-left:14pt}#print p{font-size:9.5pt;margin:2pt 0}#print .pfoot{font-size:7.5pt;color:#666;margin-top:8pt}#print th,#print td{border-bottom:1px solid #ccc;padding:3pt 5pt}#print h1{font-size:15pt}#print h2{font-size:12pt;margin-top:12pt}}
 </style>
 
+<script>(function(){var V=1,K="analyze";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
 </head>
 <body>
 <div class="wrap">
@@ -98,12 +101,12 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   <section class="card in" style="display:grid;gap:14px">
     <div><h2>성적표를 넣어 주세요</h2><p class="note" style="margin:4px 0 0">학생마다 고른 답(1~5)이나 O/X가 있는 표면 돼요. 학번·이름 칸이 있어도 괜찮아요.</p></div>
     <div class="pick">
-      <label class="tile" for="file"><b>엑셀 파일 올리기</b><span>.xlsx · .csv 파일을 고르세요</span></label>
-      <input type="file" id="file" accept=".xlsx,.xls,.csv,.txt" hidden>
+      <label class="tile" for="file"><b>엑셀 파일 올리기</b><span>.xlsx · .csv · 여러 반 파일을 한 번에 골라도 돼요</span></label>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv,.txt" multiple hidden>
       <button type="button" class="tile" id="paste-btn"><b>표 붙여 넣기</b><span>엑셀에서 복사한 뒤 여기 누르고 붙여 넣기</span></button>
       <button type="button" class="tile" id="ex-soc"><b>예시로 먼저 보기</b><span>고등 통합사회 30명 · 20문항</span></button>
     </div>
-    <div class="row note">다른 예시: <button class="g" type="button" id="ex-en">중고등 영어</button><button class="g" type="button" id="ex-cs">대학 자료구조 (O/X)</button><button class="g" type="button" id="tpl">빈 양식 받기 (엑셀용)</button></div>
+    <div class="row note" id="more-ex">다른 예시: <button class="g" type="button" id="ex-en">중고등 영어</button><button class="g" type="button" id="ex-cs">대학 자료구조 (O/X)</button><button class="g" type="button" id="tpl">빈 양식 받기 (엑셀용)</button></div>
     <textarea id="src" spellcheck="false" hidden placeholder="여기에 붙여 넣으세요 (Ctrl+V / Cmd+V)"></textarea>
     <div id="found" hidden class="found"></div>
     <div id="keybox" hidden class="keybox">
@@ -125,6 +128,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   <section class="card sum" id="sum" hidden>
     <h2>한눈에 보기</h2>
     <ul id="sum-list"></ul>
+    <button type="button" class="g" id="print-one">인쇄용 한 장 보기 (PDF로 저장 가능)</button>
   </section>
 
   <div id="out" hidden style="display:grid;gap:16px">
@@ -133,6 +137,13 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
       <div><b id="k-q">0</b><span>문항</span></div>
       <div><b id="k-avg">0</b><span>평균 정답률</span></div>
       <div><b id="k-range">-</b><span>최저~최고 점수</span></div>
+    </section>
+
+    <section class="card" id="cls-card" hidden>
+      <h2>반별 비교</h2>
+      <div class="tbl"><table id="t-cls"></table></div>
+      <div class="tbl"><table id="t-clsu"></table></div>
+      <p class="note">단원별 칸에서 빨간 숫자는 그 단원에서 가장 낮은 반이에요.</p>
     </section>
 
     <section class="card">
@@ -191,18 +202,20 @@ function parse(text){
   let cells = lines.map(l => l.split(sep));
   let last = cells[0].length - 1; while(last > 0 && !cells[0][last].trim()) last--;
   cells = cells.map(r => r.slice(0, last + 1));
-  const ID = /^(학번|번호|이름|성명|반|학생|출석번호)$/;
+  const ID = /^(학번|번호|이름|성명|반|학급|학생|출석번호)$/;
   let lead = 1; while(lead < cells[0].length - 1 && ID.test(cells[0][lead].trim())) lead++;
+  const ci = cells[0].slice(0, lead).findIndex(h => /^(반|학급)$/.test(h.trim()));
   const qs = cells[0].slice(lead).map((s, i) => s.trim() || `${i+1}번`);
   if(!qs.length) throw "첫 줄에 문항 이름이 없습니다.";
   let tags = qs.map(() => ""), key = null; const stu = [];
   for(const r of cells.slice(1)){
     const ids = r.slice(0, lead).map(x => String(x || "").trim()).filter(Boolean);
-    const head = ids.join(" ");
+    const cls = ci >= 0 ? String(r[ci] || "").trim() : "";
+    const head = r.slice(0, lead).filter((_, j) => j !== ci).map(x => String(x || "").trim()).filter(Boolean).join(" ");
     const vals = qs.map((_, i) => r[i+lead] == null ? "" : r[i+lead]);
     if(ids.some(x => /^(유형|태그|단원)$/.test(x))) tags = vals.map(v => String(v).trim());
     else if(ids.some(x => /^(정답|답|key)$/i.test(x))) key = vals.map(norm);
-    else stu.push({name: head || `학생${stu.length+1}`, raw: vals.map(norm)});
+    else stu.push({name: (cls && head ? cls + " " : "") + (head || `${cls || "학생"}${stu.length+1}`), cls, raw: vals.map(norm)});
   }
   if(!stu.length) throw "학생 줄이 없습니다.";
   const D0 = {qs, tags, key, stu};
@@ -245,7 +258,12 @@ function analyze(){
     const strong = per.filter(x => x.c === x.n).sort((a, b) => a.cls - b.cls)[0];
     return {...s, weak, strong};
   });
-  return {Q, types, S, n, avg: stu.reduce((a, s) => a + s.score, 0) / (n * qs.length)};
+  const names = [...new Set(stu.map(s => s.cls).filter(Boolean))];
+  const C = names.length >= 2 ? names.map(c => { const ss = stu.filter(s => s.cls === c);
+    const per = types.map(t => ss.reduce((a, s) => a + t.idx.filter(i => s.ok[i]).length, 0) / (ss.length * t.idx.length));
+    const w = per.indexOf(Math.min(...per));
+    return {c, n: ss.length, avg: ss.reduce((a, s) => a + s.score, 0) / (ss.length * qs.length), per, weak: types[w] ? types[w].tag : "-"}; }) : [];
+  return {Q, types, S, C, n, avg: stu.reduce((a, s) => a + s.score, 0) / (n * qs.length)};
 }
 
 function feedback(s, total, multi){
@@ -264,6 +282,14 @@ function render(){
   const R = analyze(), total = D.qs.length, multi = R.types.length > 1;
   $("k-n").textContent = R.n; $("k-q").textContent = total; $("k-avg").textContent = pct(R.avg) + "%";
   const sc = D.stu.map(s => s.score); $("k-range").textContent = `${Math.min(...sc)}~${Math.max(...sc)}`;
+  $("cls-card").hidden = !R.C.length;
+  if(R.C.length){
+    const tc = $("t-cls"); tc.innerHTML = ""; tc.appendChild(tr(["반","학생","평균 정답률","","가장 약한 단원"], true));
+    R.C.forEach(c => tc.appendChild(tr([c.c, {t: c.n, cls:"n"}, {t: pct(c.avg) + "%", cls:"n"}, bar(c.avg), c.weak])));
+    const tu = $("t-clsu"); tu.innerHTML = ""; tu.appendChild(tr(["단원", ...R.C.map(c => c.c)], true));
+    R.types.forEach((t, k) => { const vals = R.C.map(c => c.per[k]); const lo = Math.min(...vals);
+      tu.appendChild(tr([t.tag, ...vals.map(v => ({t: pct(v) + "%", cls: "n" + (v === lo ? " lo" : "")}))])); });
+  }
   // 유형
   const tt = $("t-type"); tt.innerHTML = "";
   tt.appendChild(tr(["순위","단원·유형","문항 수","정답률",""], true));
@@ -299,15 +325,22 @@ function render(){
 
 function printSummary(){
   const R = analyze(), p = $("print"); p.innerHTML = "";
-  p.appendChild(el("h1",null,`반 요약 · 학생 ${R.n}명 · 문항 ${D.qs.length}개 · 평균 정답률 ${pct(R.avg)}%`));
-  p.appendChild(el("h2",null,"약점 유형"));
-  const t1 = el("table"); t1.appendChild(tr(["유형","문항 수","정답률"], true)); R.types.forEach(t => t1.appendChild(tr([t.tag, t.idx.length, pct(t.p) + "%"]))); p.appendChild(t1);
-  p.appendChild(el("h2",null,"문항별"));
-  const t2 = el("table"); t2.appendChild(tr(["문항","유형","정답률", ...(D.key ? ["많이 고른 오답"] : []), "변별도"], true));
-  R.Q.forEach(x => t2.appendChild(tr([x.q, x.tag, pct(x.p) + "%", ...(D.key ? [x.wrong ? `${x.wrong.v} (${x.wrong.c}명)` : "-"] : []), x.disc == null ? "-" : x.disc.toFixed(2)]))); p.appendChild(t2);
-  p.appendChild(el("h2",null,"학생별 약점"));
-  const t3 = el("table"); t3.appendChild(tr(["학생","점수","약점"], true));
-  R.S.forEach(s => t3.appendChild(tr([s.name, `${s.score}/${D.qs.length}`, s.weak.map(x => x.tag).join(", ") || "-"]))); p.appendChild(t3);
+  const today = new Date().toISOString().slice(0, 10);
+  p.appendChild(el("h1",null,`시험 결과 요약 · ${today}`));
+  p.appendChild(el("p",null,`학생 ${R.n}명 · 문항 ${D.qs.length}개 · 평균 정답률 ${pct(R.avg)}% · 점수 ${Math.min(...D.stu.map(s => s.score))}~${Math.max(...D.stu.map(s => s.score))}점`));
+  const ul = el("ul"); [...$("sum-list").children].slice(1).forEach(li => ul.appendChild(el("li",null,li.textContent))); p.appendChild(ul);
+  const grid = el("div","pgrid");
+  const box1 = el("div"); box1.appendChild(el("h2",null,"단원별 정답률"));
+  const t1 = el("table"); t1.appendChild(tr(["단원·유형","문항","정답률"], true)); R.types.forEach(t => t1.appendChild(tr([t.tag, t.idx.length, pct(t.p) + "%"]))); box1.appendChild(t1);
+  if(R.C.length){ box1.appendChild(el("h2",null,"반별")); const tc = el("table"); tc.appendChild(tr(["반","학생","평균","약한 단원"], true)); R.C.forEach(c => tc.appendChild(tr([c.c, c.n, pct(c.avg) + "%", c.weak]))); box1.appendChild(tc); }
+  const box2 = el("div"); box2.appendChild(el("h2",null,"문항별"));
+  const t2 = el("table"); t2.appendChild(tr(["문항","정답률", ...(D.key ? ["많이 고른 오답"] : []), "변별도",""], true));
+  R.Q.forEach(x => t2.appendChild(tr([x.q, pct(x.p) + "%", ...(D.key ? [x.wrong ? `${x.wrong.v} (${x.wrong.c}명)` : "-"] : []), x.disc == null ? "-" : x.disc.toFixed(2), x.p < 0.4 ? "다시 짚기" : (x.disc != null && x.disc < 0 ? "정답 확인" : "")]))); box2.appendChild(t2);
+  grid.append(box1, box2); p.appendChild(grid);
+  const help = R.S.filter(s => s.weak.length).sort((a, b) => a.score - b.score).slice(0, 12);
+  if(help.length){ p.appendChild(el("h2",null,"먼저 챙길 학생 (점수 낮은 순)")); const t3 = el("table"); t3.appendChild(tr(["학생","점수","약한 단원"], true));
+    help.forEach(s => t3.appendChild(tr([s.name, `${s.score}/${D.qs.length}`, s.weak.map(x => x.tag).join(", ")]))); p.appendChild(t3); }
+  p.appendChild(el("p","pfoot","오답 분석기 · quanter02.github.io/analyze · 성적표는 이 기기 밖으로 나가지 않았습니다"));
   window.print();
 }
 
@@ -317,6 +350,8 @@ function summary(R){
   add(`학생 <b>${R.n}명</b> · 문항 <b>${D.qs.length}개</b> · 평균 정답률 <b>${pct(R.avg)}%</b>`);
   if(R.types.length > 1) add(`가장 약한 단원: <b>${esc(R.types[0].tag)}</b> (정답률 ${pct(R.types[0].p)}%). 다음 수업 보강은 여기부터 하시면 돼요.`);
   else add(`단원 줄이 없어서 단원별로 묶지 못했어요. 아래 '문항별 분석' 표에 단원을 적으면 바로 묶여요.`);
+  if(R.C.length){ const lo = R.C.slice().sort((a, b) => a.avg - b.avg)[0], hi = R.C.slice().sort((a, b) => b.avg - a.avg)[0];
+    add(`반별: <b>${esc(hi.c)}</b> ${pct(hi.avg)}%로 가장 높고, <b>${esc(lo.c)}</b> ${pct(lo.avg)}%로 가장 낮아요. ${esc(lo.c)}은(는) ${esc(lo.weak)} 단원이 특히 약해요.`, lo.avg < hi.avg - 0.05); }
   const low = R.Q.filter(x => x.p < 0.4); if(low.length) add(`다시 짚을 문항: <b>${low.map(x => esc(x.q)).join(", ")}</b> (정답률 40% 미만)`, true);
   const neg = R.Q.filter(x => x.disc != null && x.disc < 0); if(neg.length) add(`정답·문항 확인이 필요한 문항: <b>${neg.map(x => esc(x.q)).join(", ")}</b> (잘하는 학생이 더 많이 틀렸어요)`, true);
   const help = R.S.filter(s => s.score / D.qs.length < 0.5).length; if(help) add(`정답률 50% 미만 학생 <b>${help}명</b>. 아래 '학생별 약점'에 피드백 초안이 있어요.`, true);
@@ -354,20 +389,34 @@ $("paste-btn").onclick = () => { const t = $("src"); t.hidden = false; t.focus()
 $("src").addEventListener("paste", () => setTimeout(() => load($("src").value, "붙여 넣은 표"), 0));
 document.addEventListener("paste", e => { const a = document.activeElement; if(a && /INPUT|TEXTAREA/.test(a.tagName)) return; const t = e.clipboardData && e.clipboardData.getData("text"); if(t){ e.preventDefault(); load(t, "붙여 넣은 표"); } });
 function loadXLSX(){ return window.XLSX ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); }
-async function readFile(f){
-  if(!f) return; $("err").textContent = "";
+async function tablesOf(f){
+  if(/\.(csv|txt)$/i.test(f.name)){ const t = (await f.text()).replace(/^\ufeff/, ""); return [{name: f.name.replace(/\.[^.]+$/, ""), text: t.includes("\t") ? t : t.split("\n").map(l => l.split(",").join("\t")).join("\n")}]; }
+  await loadXLSX(); const wb = XLSX.read(await f.arrayBuffer(), {type: "array"});
+  return wb.SheetNames.map(n => ({name: wb.SheetNames.length > 1 ? n : f.name.replace(/\.[^.]+$/, ""), text: XLSX.utils.sheet_to_csv(wb.Sheets[n], {FS: "\t", blankrows: false})})).filter(t => t.text.trim().split("\n").length >= 2);
+}
+function merge(tabs){ // 여러 반 표를 '반' 칸 하나 붙여 한 표로
+  const rows = tabs.map(t => t.text.replace(/\r/g, "").split("\n").filter(l => l.trim()).map(l => l.split("\t")));
+  const head = rows[0][0], out = [["반", ...head].join("\t")];
+  const meta = r => /^(유형|태그|단원|정답|답|key)$/i.test(String(r[0]).trim()) || r.slice(0, 3).some(x => /^(유형|태그|단원|정답|답)$/.test(String(x).trim()));
+  rows[0].slice(1).filter(meta).forEach(r => out.push([r.find(x => /^(유형|태그|단원|정답|답|key)$/i.test(String(x).trim())), ...r].join("\t")));
+  rows.forEach((rs, k) => rs.slice(1).filter(r => !meta(r)).forEach(r => out.push([tabs[k].name, ...r].join("\t"))));
+  return out.join("\n");
+}
+async function readFiles(list){
+  const files = [...(list || [])]; if(!files.length) return; $("err").textContent = "";
   try{
-    if(/\.(csv|txt)$/i.test(f.name)){ const t = await f.text(); load(t.replace(/^﻿/, ""), f.name); }
-    else { await loadXLSX(); const wb = XLSX.read(await f.arrayBuffer(), {type: "array"}); const ws = wb.Sheets[wb.SheetNames[0]];
-      load(XLSX.utils.sheet_to_csv(ws, {FS: "\t", blankrows: false}), f.name); }
+    let tabs = []; for(const f of files) tabs = tabs.concat(await tablesOf(f));
+    if(!tabs.length) throw 0;
+    if(tabs.length === 1) load(tabs[0].text, files[0].name);
+    else load(merge(tabs), `${tabs.length}개 반(${tabs.map(t => t.name).join(", ")})`);
     track("file");
   }catch(e){ $("err").textContent = "파일을 읽지 못했어요. 엑셀에서 표를 복사해 '표 붙여 넣기'로 넣어 주세요."; }
 }
-$("file").onchange = e => readFile(e.target.files[0]);
+$("file").onchange = e => readFiles(e.target.files);
 const zone = document.querySelector(".in");
 ["dragover","dragenter"].forEach(t => zone.addEventListener(t, e => { e.preventDefault(); zone.classList.add("drag"); }));
 ["dragleave","drop"].forEach(t => zone.addEventListener(t, () => zone.classList.remove("drag")));
-zone.addEventListener("drop", e => { e.preventDefault(); readFile(e.dataTransfer.files[0]); });
+zone.addEventListener("drop", e => { e.preventDefault(); readFiles(e.dataTransfer.files); });
 $("tpl").onclick = () => {
   const rows = [["번호","이름","1번","2번","3번","4번","5번"],["단원","","인권 보장과 헌법","인권 보장과 헌법","시장 경제","시장 경제","사회 정의"],["정답","","3","2","1","4","5"],["1","","3","2","2","4","5"],["2","","1","2","1","4","3"]];
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + rows.map(r => r.join(",")).join("\n")], {type: "text/csv"})); a.download = "오답분석-양식.csv"; document.body.appendChild(a); a.click(); a.remove(); track("template");
@@ -389,13 +438,14 @@ dock.onclick = () => { if(D && !D.needKey && !$("out").hidden){ $("copy-q").clic
 function dockState(){ dock.textContent = (D && !D.needKey && !$("out").hidden) ? "문항 분석표 복사하기" : "예시로 먼저 보기"; }
 new MutationObserver(dockState).observe($("out"), {attributes: true, attributeFilter: ["hidden"]});
 if(new URLSearchParams(location.search).get("t") === "school"){
-  $("applink").hidden = true;
+  $("applink").hidden = true; $("more-ex").hidden = true;
   const c = $("cta"); c.querySelector("h2").textContent = "써 보신 의견을 들려주세요";
   c.querySelectorAll("p")[0].textContent = "지금 시험 끝나고 문항 분석을 어떻게 하시는지, 써 보니 불편했던 점 하나만 알려 주시면 바로 고칩니다.";
   c.querySelectorAll("p")[1].textContent = "성적표는 이 페이지 밖으로 나가지 않습니다. 학생 이름 대신 번호를 써 주세요.";
   $("apply").textContent = "의견 보내기 (카카오톡)"; const last = c.querySelectorAll("p")[2]; if(last) last.hidden = true;
 }
 $("print-btn").onclick = () => { if(D){ printSummary(); track("print"); } };
+$("print-one").onclick = () => { if(D){ printSummary(); track("print-one"); } };
 const a = $("apply");
 if(LINKS.apply){ a.href = LINKS.apply; a.target = "_blank"; a.rel = "noopener"; a.addEventListener("click", () => track("apply-click")); }
 else a.onclick = e => { e.preventDefault(); track("apply-click"); alert("신청 창구를 곧 열어요. 이 페이지를 알려 준 사람에게 연락해 주세요."); };

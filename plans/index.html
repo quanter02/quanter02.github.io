@@ -45,6 +45,7 @@ input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:va
 ol.steps{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--ink2);font-size:15px}
 details summary{font-weight:600;cursor:pointer;padding:6px 0}details p{padding:0 0 8px}
 </style>
+<script>(function(){var V=1,K="plans";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
 </head>
 <body>
 <div class="wrap">
