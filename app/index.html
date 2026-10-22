@@ -196,7 +196,7 @@ input.a-tag{width:auto;flex:1;min-width:0;max-width:160px;padding:6px 10px;font-
 .foot{font-size:12px;color:var(--ink3);line-height:1.6;padding:8px 4px}
 .foot a{color:var(--ink3)}
 </style>
-<script>(function(){var V=1,K="app";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
+<script>(function(){var V=2,K="app";fetch("../version.json?ts="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v[K]>V){var u=new URL(location.href);if(u.searchParams.get("v")!==String(v[K])){u.searchParams.set("v",v[K]);location.replace(u.toString())}}}).catch(function(){})})();</script>
 </head>
 <body>
 <div class="wrap">
@@ -261,7 +261,7 @@ input.a-tag{width:auto;flex:1;min-width:0;max-width:160px;padding:6px 10px;font-
     </details></section>
   </main>
 
-  <p class="foot">조교 도우미 앱 v2.6 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요.</p>
+  <p class="foot">조교 도우미 앱 v2.7 · <a href="privacy.html">개인정보 처리방침</a><br>AI가 만든 문항은 틀릴 수 있어서 강사가 확인한 학습지만 보내기로 넘어가요. 학생 기록은 이 기기에만 저장돼요. 학습지를 만들 때만 메모와 사진을 서버를 거쳐 Claude(Anthropic)로 보내고, 서버는 내용을 저장하지 않아요. 확인 완료 때 남긴 의견과 뺀 문제 문장만 180일 보관해 학습지를 개선해요.</p>
 </div>
 
 <!-- 설정 시트 -->
@@ -457,7 +457,7 @@ function bar(){
     if(st && st.sheet && !st.ok){
       const done = list.filter(([s]) => s.ok).length;
       p.textContent = `확인 완료 (${done + 1}/${list.length})`; p.disabled = BUSY || !st.sheet.qs.length;
-      p.onclick = () => { st.ok = true; S.log.push({day: ymd(new Date()), nick: st.nick}); const rest = list.filter(([s, i]) => !s.ok && i !== S.cur);
+      p.onclick = () => { st.ok = true; sendFb(st); S.log.push({day: ymd(new Date()), nick: st.nick}); const rest = list.filter(([s, i]) => !s.ok && i !== S.cur);
         if(rest.length){ S.cur = rest[0][1]; save(); render(); window.scrollTo({top:0}); setMsg(`${st.nick} 확인 완료. 다음 학생이에요.`); } else { save(); go(3); setMsg("모두 확인했어요."); } };
       if(!BUSY && !$("msg").textContent) setMsg("");
     } else { p.textContent = "보내기로 이동"; p.onclick = () => go(3); }
@@ -551,12 +551,19 @@ function r2(){
   qc.appendChild(qt);
   sd.qs.forEach((q, qi) => {
     const d = el("div", "q"); const top = el("div", "q-top"); top.append(el("span", "q-n", qi + 1), el("span", "q-stem", q.stem));
-    if(!st.ok){ const x = el("button", "q-x", "빼기"); x.type = "button"; x.onclick = () => { sd.qs.splice(qi, 1); save(); r2(); bar(); }; top.appendChild(x); }
+    if(!st.ok){ const x = el("button", "q-x", "빼기"); x.type = "button"; x.onclick = () => { (sd.removed = sd.removed || []).push({type: q.type, stem: q.stem}); sd.qs.splice(qi, 1); save(); r2(); bar(); }; top.appendChild(x); }
     d.appendChild(top);
     const os = el("div", "opts"); q.options.forEach((o, j) => { const e = el("div", "opt" + (j === q.answer ? " ans" : "")); e.append(el("span", "L", "ABCD"[j]), el("span", "", o)); os.appendChild(e); }); d.appendChild(os);
     d.appendChild(el("div", "exp", q.explain)); qc.appendChild(d);
   });
   sh.appendChild(qc);
+
+  if(!st.ok){ const fb = sd.fb = sd.fb || {rate: "", note: ""};
+    const fc = el("section", "card"); fc.appendChild(el("div", "card-title", "이 학습지 어땠어요?"));
+    const ch = el("div", "chips"); [["up", "👍 좋아요"], ["down", "👎 아쉬워요"]].forEach(([k, t]) => { const b = el("button", "chip", t); b.type = "button"; b.id = "fb-" + k; b.setAttribute("aria-pressed", fb.rate === k);
+      b.onclick = () => { fb.rate = fb.rate === k ? "" : k; save(); ch.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.id === "fb-" + fb.rate)); }; ch.appendChild(b); });
+    const nt = el("textarea"); nt.id = "fb-note"; nt.rows = 2; nt.placeholder = "고칠 점 (선택) 예: 3번 정답이 틀렸어요, 너무 쉬웠어요"; nt.value = fb.note; nt.setAttribute("aria-label", "고칠 점"); nt.oninput = () => { fb.note = nt.value; save(); };
+    fc.append(ch, nt, el("span", "sub", "확인 완료를 누를 때 의견과 문제 문장만 보내요. 학생 이름은 쓰지 말아 주세요. 다음 학습지를 더 정확하게 만드는 데 써요.")); sh.appendChild(fc); }
 
   const pc = el("section", "card"); const pl = el("label", "card-title", "학부모 리포트"); pl.htmlFor = "parent-" + S.cur;
   const pt = el("textarea"); pt.id = "parent-" + S.cur; pt.value = sd.parent; pt.oninput = () => { sd.parent = pt.value; save(); };
@@ -707,6 +714,13 @@ function shrink(file){ return new Promise((ok, no) => { const u = URL.createObje
   im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
     c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok({type: "image/jpeg", data: c.toDataURL("image/jpeg", 0.85).split(",")[1]}); };
   im.onerror = () => { URL.revokeObjectURL(u); no({code: "bad_image"}); }; im.src = u; }); }
+
+// 강사 피드백: 별명·메모·리포트는 빼고 평가·고칠 점·뺀 문제만 보낸다. 실패해도 확인 흐름은 막지 않는다
+function sendFb(st){ const sd = st.sheet, fb = sd.fb || {};
+  if(!API || !S.code || sd.fbSent || (!fb.rate && !(fb.note || "").trim() && !(sd.removed || []).length)) return;
+  sd.fbSent = true;
+  fetch(API + "/feedback", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({code: S.code, subj: st.subj || S.subj, rate: fb.rate,
+    note: (fb.note || "").trim(), nq: sd.qs.length, removed: sd.removed || [], weak: sd.weak.map(w => w.type), ex: !!st.ex})}).catch(() => {}); }
 
 function sheetText(st){ const sd = st.sheet;
   return `${st.nick} 맞춤 학습지 (${ymd(new Date())})\n오늘의 규칙: ${sd.weak.map(w => w.rule).join(" / ") || "단원 기본 문제"}\n\n` + sd.qs.map((q, i) => `${i+1}. ${q.stem}\n   ${q.options.map((o, j) => `(${"ABCD"[j]}) ${o}`).join("   ")}`).join("\n\n")
