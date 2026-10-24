@@ -8,8 +8,19 @@
 export const GUIDE_FRET = 5;      // 가이드 사각형이 너트부터 몇 번 프렛까지 덮는지
 export const STRING_MARGIN = 0.1; // 지판 가장자리에서 바깥 줄까지의 거리 (지판 폭 대비)
 
-// MediaPipe 손 관절 번호: 손가락 끝
+// MediaPipe 손 관절 번호: 손가락 끝, 끝마디 관절(DIP)
 export const TIP = { 1: 8, 2: 12, 3: 16, 4: 20 };
+export const DIP = { 1: 7, 2: 11, 3: 15, 4: 19 };
+// 줄을 실제로 누르는 곳은 손톱 끝이 아니라 손가락 끝마디 살(패드). 끝에서 관절 쪽으로 30% 지점을 쓴다
+export const PAD_T = 0.3;
+
+// 판정 기준 (2026-10-23 강화: 한 줄 가까이 벗어나도 맞음으로 나오던 문제)
+export const STRING_FULL = 0.25;  // 이 거리(줄 단위) 안이면 줄 점수 만점
+export const STRING_ZERO = 0.9;   // 이 거리면 줄 점수 0점 (반 줄이면 약 63점 → 최소 기준 미달)
+export const OK_AVG = 80;         // 맞음: 손가락 평균 이 점수 이상
+export const OK_MIN = 60;         //       그리고 모든 손가락이 이 점수 이상 (시뮬레이션으로 고름: llm-reliability/products/chord_test)
+export const HOLD_SEC = 0.5;      // 맞음이 이 시간 동안 유지돼야 최종 맞음
+export const HOLD_FRAC = 0.8;     //       그 시간 동안 이 비율 이상의 프레임이 맞음
 export const FINGER_NAME = { 1: '검지', 2: '중지', 3: '약지', 4: '새끼' };
 
 // 운지표. string: 줄 번호, fret: 프렛, finger: 1 검지 ~ 4 새끼. barre: 검지로 여러 줄을 누름
@@ -107,11 +118,17 @@ export function pickFrettingHand(neck, hands) {
 // ---------- 판정 ----------
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
+// 판정에 쓰는 손가락 점: 끝(TIP)에서 끝마디 관절(DIP) 쪽으로 PAD_T 만큼
+export function padPoint(lm, finger) {
+  const t = lm[TIP[finger]], d = lm[DIP[finger]];
+  return { x: t.x + PAD_T * (d.x - t.x), y: t.y + PAD_T * (d.y - t.y) };
+}
+
 export function evaluateNote(neck, lm, note) {
-  const at = locate(neck, lm[TIP[note.finger]]);
-  // 줄: 0.3줄 이내면 만점, 옆 줄(1.0)이면 0점. 바레는 6번줄 쪽(5번줄 너머)이면 만점
+  const at = locate(neck, padPoint(lm, note.finger));
+  // 줄: STRING_FULL 이내면 만점, STRING_ZERO면 0점. 바레는 6번줄 쪽(5번줄 너머)이면 만점
   const sErr = note.barre ? Math.max(0, 5 - at.string) : Math.abs(at.string - note.string);
-  const sScore = clamp01(1 - Math.max(0, sErr - 0.3) / 0.7);
+  const sScore = clamp01(1 - Math.max(0, sErr - STRING_FULL) / (STRING_ZERO - STRING_FULL));
   // 프렛: 칸 (n-1, n] 안이면 만점(쇠막대를 살짝 넘는 0.2까지 허용), 칸 밖으로 0.6칸 벗어나면 0점
   const lo = note.fret - 1, hi = note.fret + 0.2;
   const fErr = at.fret < lo ? lo - at.fret : at.fret > hi ? at.fret - hi : 0;
@@ -140,12 +157,39 @@ export function evaluateNote(neck, lm, note) {
   return { note, at, score, sScore, fScore, status, label, msg };
 }
 
+// 맞음: 평균 OK_AVG 이상이고 모든 손가락이 OK_MIN 이상
+export function isOk(fingers) {
+  const avg = fingers.reduce((s, f) => s + f.score, 0) / fingers.length;
+  return avg >= OK_AVG && Math.min(...fingers.map((f) => f.score)) >= OK_MIN;
+}
+
 export function evaluateChord(neck, lm, chord) {
   const fingers = chord.notes.map((n) => evaluateNote(neck, lm, n));
   const score = Math.round(fingers.reduce((s, f) => s + f.score, 0) / fingers.length);
-  const minF = Math.min(...fingers.map((f) => f.score));
-  // 맞음: 평균 80점 이상이고 모든 손가락이 50점 이상
-  return { chord, fingers, score, ok: score >= 80 && minF >= 50 };
+  return { chord, fingers, score, ok: isOk(fingers) };
+}
+
+// 프레임마다 흔들리는 판정을 시간으로 거른다: 최근 sec초 동안 frac 이상 맞아야 최종 맞음.
+// 손가락 위치 추정 잡음(약 한 줄)으로 우연히 맞게 나오는 프레임을 걸러 낸다
+export function makeHold(sec = HOLD_SEC, frac = HOLD_FRAC) {
+  let q = [];
+  return {
+    push(t, ok) {
+      q.push([t, ok]);
+      while (q.length && t - q[0][0] > sec) q.shift();
+      const span = q.length > 1 ? t - q[0][0] : 0;
+      const good = q.filter((x) => x[1]).length / q.length;
+      return span >= sec * 0.9 && good >= frac;
+    },
+    reset() { q = []; },
+  };
+}
+
+// 가이드(지판 너트~끝 프렛)가 화면 폭에서 차지하는 비율. 작을수록 줄 간격이 좁아 판정이 흔들린다
+export function guideWidth(corners) {
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const n = mid(corners.nut6, corners.nut1), f = mid(corners.fret6, corners.fret1);
+  return Math.hypot(f[0] - n[0], f[1] - n[1]);
 }
 
 // 기본 가이드: 거울 화면 기준으로 왼쪽에 헤드, 오른쪽으로 몸통. 원본(비반전) 좌표로 저장
