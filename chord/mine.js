@@ -1,7 +1,7 @@
 // 내 손 등록: 지판 판정이 '맞음'으로 2초 이어질 때 그 순간의 손 모양과 손끝 치우침을 코드별로 저장하고,
 // 이후 같은 코드를 연습할 때 (1) 치우침을 빼고 판정하고 (2) 내가 등록한 모양과 얼마나 다른지 2차 확인한다.
 // 저장은 이 기기 브라우저(localStorage)에만. 화면·사진은 저장하지 않고 손 관절 좌표에서 만든 숫자만 둔다.
-import { features } from './shape.js?v=1';
+import { features } from './shape.js?v=2';
 
 export const ENROLL_SEC = 2.0;   // 맞음이 이만큼 이어지면 저장
 export const WARN_SEC = 1.0;     // 내 모양과 다름이 이만큼 이어지면 문구

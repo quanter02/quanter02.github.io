@@ -386,8 +386,8 @@ body.playing .nav, body.playing .top { display: none; }
 <script type="module">
 import * as C from './core.js?v=4';
 import * as TR from './track.js';
-import * as SH from './shape.js?v=1';
-import * as MN from './mine.js?v=2';
+import * as SH from './shape.js?v=2';
+import * as MN from './mine.js?v=3';
 // 내 손 등록: 코드별 손 모양 + 손끝 치우침. 등록된 코드는 치우침을 빼고 판정하고, 손 모양 AI 대신 내 모양과 비교
 let mine = MN.load(), enroll = null, mineWarn = null, enrollMsg = '';
 const mineCheck = MN.makeMineCheck();
