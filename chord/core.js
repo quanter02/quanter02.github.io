@@ -124,8 +124,10 @@ export function padPoint(lm, finger) {
   return { x: t.x + PAD_T * (d.x - t.x), y: t.y + PAD_T * (d.y - t.y) };
 }
 
-export function evaluateNote(neck, lm, note) {
-  const at = locate(neck, padPoint(lm, note.finger));
+// cal: 내 손 등록에서 잰 손끝 치우침 {s: 줄, f: 프렛}. 있으면 빼고 판정 (없으면 이전과 같음)
+export function evaluateNote(neck, lm, note, cal = null) {
+  const at0 = locate(neck, padPoint(lm, note.finger));
+  const at = cal ? { ...at0, string: at0.string - cal.s, fret: at0.fret - cal.f } : at0;
   // 줄: STRING_FULL 이내면 만점, STRING_ZERO면 0점. 바레는 6번줄 쪽(5번줄 너머)이면 만점
   const sErr = note.barre ? Math.max(0, 5 - at.string) : Math.abs(at.string - note.string);
   const sScore = clamp01(1 - Math.max(0, sErr - STRING_FULL) / (STRING_ZERO - STRING_FULL));
@@ -163,8 +165,8 @@ export function isOk(fingers) {
   return avg >= OK_AVG && Math.min(...fingers.map((f) => f.score)) >= OK_MIN;
 }
 
-export function evaluateChord(neck, lm, chord) {
-  const fingers = chord.notes.map((n) => evaluateNote(neck, lm, n));
+export function evaluateChord(neck, lm, chord, cal = null) {
+  const fingers = chord.notes.map((n) => evaluateNote(neck, lm, n, cal));
   const score = Math.round(fingers.reduce((s, f) => s + f.score, 0) / fingers.length);
   return { chord, fingers, score, ok: isOk(fingers) };
 }
