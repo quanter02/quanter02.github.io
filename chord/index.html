@@ -384,10 +384,10 @@ body.playing .nav, body.playing .top { display: none; }
 </nav>
 
 <script type="module">
-import * as C from './core.js?v=3';
+import * as C from './core.js?v=4';
 import * as TR from './track.js';
 import * as SH from './shape.js?v=1';
-import * as MN from './mine.js?v=1';
+import * as MN from './mine.js?v=2';
 // 내 손 등록: 코드별 손 모양 + 손끝 치우침. 등록된 코드는 치우침을 빼고 판정하고, 손 모양 AI 대신 내 모양과 비교
 let mine = MN.load(), enroll = null, mineWarn = null, enrollMsg = '';
 const mineCheck = MN.makeMineCheck();
@@ -697,7 +697,7 @@ function smooth(ev, key) {
   });
   const score = Math.round(fingers.reduce((s, f) => s + f.score, 0) / fingers.length);
   // 최종 맞음: 이 프레임(날것)과 평균 낸 점수가 모두 맞음이고, 그 상태가 HOLD_SEC 동안 유지
-  const okNow = C.isOk(fingers);
+  const okNow = C.isOk(fingers) && ev.ok;   // 주석대로: 이번 프레임 원래 판정도 맞음이어야 (틀리게 바꾼 직후 평균만 남아 맞음이 되는 것 방지)
   Object.assign(sm, { chord: ev.chord, fingers, score, okNow, ok: hold.push(performance.now() / 1000, okNow), raw: ev, onNeck: ev.fingers.some((f) => f.at.fret > -1 && f.at.fret < C.GUIDE_FRET + 2 && f.at.string > -0.5 && f.at.string < 7.5) });
   return sm;
 }

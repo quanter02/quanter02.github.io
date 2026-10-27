@@ -18,7 +18,9 @@ export function save(db) { try { localStorage.setItem(KEY, JSON.stringify(db)); 
 export function calibration(db) {
   const xs = Object.values(db.chords).map((c) => c.off).filter(Boolean);
   if (!xs.length) return null;
-  return { s: xs.reduce((a, o) => a + o[0], 0) / xs.length, f: xs.reduce((a, o) => a + o[1], 0) / xs.length };
+  // 상한: 맞음 범위 안의 손가락 버릇(늘 쇠막대 반대쪽 등)까지 카메라 치우침으로 옮겨 담지 않게
+  const lim = (v, m) => Math.max(-m, Math.min(m, v));
+  return { s: lim(xs.reduce((a, o) => a + o[0], 0) / xs.length, 0.4), f: lim(xs.reduce((a, o) => a + o[1], 0) / xs.length, 0.3) };
 }
 
 // 등록 진행: 프레임마다 push. 맞음이 끊기면 처음부터. 다 모이면 저장할 기록을 돌려준다

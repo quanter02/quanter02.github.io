@@ -134,7 +134,8 @@ export function evaluateNote(neck, lm, note, cal = null) {
   // 프렛: 칸 (n-1, n] 안이면 만점(쇠막대를 살짝 넘는 0.2까지 허용), 칸 밖으로 0.6칸 벗어나면 0점
   const lo = note.fret - 1, hi = note.fret + 0.2;
   const fErr = at.fret < lo ? lo - at.fret : at.fret > hi ? at.fret - hi : 0;
-  let fScore = clamp01(1 - fErr / 0.6);
+  // 내 손 등록으로 치우침을 보정한 경우에는 한 칸 어긋남을 더 엄격히 (0.45칸에서 0점). 시뮬레이션: 어긋남 통과 18%→4%, 맞는 모양 통과 유지
+  let fScore = clamp01(1 - fErr / (cal ? 0.45 : 0.6));
   const farFromWire = fErr === 0 && at.fret < note.fret - 0.65;
   if (farFromWire) fScore *= 0.85;
   const score = Math.round(100 * sScore * fScore);
