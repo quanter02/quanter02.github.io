@@ -317,6 +317,7 @@ body.playing .nav, body.playing .top { display: none; }
           <div class="meter" id="codeMeter"><span></span></div>
         </div>
         <div class="fingers" id="fingers"></div>
+        <label class="tiny" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="shapeOn"> 손 모양 2차 확인 (실험 · AI가 다른 코드로 보이면 알려 줘요)</label>
         <button class="btn primary block" id="nextChord">다음 코드로 넘어가기 →</button>
       </div>
     </section>
@@ -384,6 +385,11 @@ body.playing .nav, body.playing .top { display: none; }
 <script type="module">
 import * as C from './core.js?v=2';
 import * as TR from './track.js';
+import * as SH from './shape.js?v=1';
+// 손 모양 2차 확인 (실험, 기본 꺼짐): 지판 판정이 맞음인데 손 모양이 다른 코드에 훨씬 가까우면 참고 문구만 띄운다
+let shapeCheck = null, shapeWarn = null;
+let shapeOn = (() => { try { return localStorage.getItem('chord.shape') === '1'; } catch { return false; } })();
+fetch('./shape_model.json?v=1').then((r) => r.json()).then((m) => { shapeCheck = SH.makeShapeCheck(m); }).catch(() => {});
 
 const MP_VER = '0.10.14';
 const CFG = window.CHORD_CFG || {
@@ -652,6 +658,8 @@ function loop(ts) {
     updateFraming(hands, idx, dt);
     const key = S.tab === 'play' ? play.current() : S.chord;
     const ev = smooth(lm && key ? C.evaluateChord(S.neck, lm, C.CHORDS[key]) : null, key);
+    if (shapeOn && shapeCheck && S.tab === 'code' && ev?.ok) shapeWarn = shapeCheck.update(lm, key, dt);
+    else { shapeWarn = null; shapeCheck?.reset(); }
     if (S.tab === 'code') onCodeFrame(ev, dt, !!lm);
     if (S.tab === 'play') onPlayFrame(ev, dt, !!lm);
     if (lm || S.tab === 'play' && play.running) { day().sec += dt; dirty = true; }
@@ -841,7 +849,8 @@ function renderFingers(ev, onNeck) {
   meter.className = 'meter ' + (ev.ok ? '' : ev.score >= 50 ? 'close' : 'bad');
   $('span', meter).style.width = ev.score + '%';
   $('#fingers').innerHTML = ev.fingers.map((f) => `<div class="finger ${f.status}"><span class="mark">${f.status === 'good' ? '✓' : '!'}</span><div><b>${esc(f.label)}</b><p>${esc(f.msg)}</p></div></div>`).join('')
-    + (onNeck ? '' : `<p class="tiny" style="margin:0">손가락이 지판 가이드 밖에 있어요. 위치가 다르면 “지판 위치 맞추기”로 가이드를 지판에 맞춰 주세요.</p>`);
+    + (onNeck ? '' : `<p class="tiny" style="margin:0">손가락이 지판 가이드 밖에 있어요. 위치가 다르면 “지판 위치 맞추기”로 가이드를 지판에 맞춰 주세요.</p>`)
+    + (shapeWarn ? `<p class="tiny" style="margin:0">손 모양이 ${esc(shapeWarn)} 코드에 더 가까워 보여요. 손가락 위치를 한 번 더 확인해 주세요 (실험 기능, 참고용)</p>` : '');
 }
 let okSince = 0, badSince = 0, uiT = 0;
 function onCodeFrame(ev, dt, hasHand) {
@@ -1062,6 +1071,8 @@ setChord('A');
 renderSongs();
 renderHome();
 $('.top').hidden = true;
+{ const so = document.getElementById('shapeOn');
+  if (so) { so.checked = shapeOn; so.onchange = () => { shapeOn = so.checked; try { localStorage.setItem('chord.shape', shapeOn ? '1' : '0'); } catch {} }; } }
 </script>
 </body>
 </html>
