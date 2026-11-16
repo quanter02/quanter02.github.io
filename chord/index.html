@@ -479,6 +479,7 @@ function updateFraming(hands, idx, dt) {
 function stageHint() {
   if (S.calib) return '';
   if (follow.lost) return '지판을 놓쳤어요. “위치 맞추기”로 가이드를 다시 맞춰 주세요';
+  if (S.offNeckFor > 0.5) return '손가락 끝을 지판 가이드 안에 올려 주세요';
   return framing.msg;
 }
 
@@ -662,7 +663,10 @@ function loop(ts) {
     updateStrum(hands, idx, dt);
     updateFraming(hands, idx, dt);
     const key = S.tab === 'play' ? play.current() : S.chord;
-    const ev = smooth(lm && key ? C.evaluateChord(S.neck, lm, C.CHORDS[key], MN.calibration(mine)) : null, key);
+    // 잡음 인식: 손가락 끝 2개 이상이 지판 가이드 안에 있을 때만 판정 (아니면 맞음 유지 기록도 끊는다)
+    const playing = !!lm && C.isPlaying(S.neck, lm);
+    S.offNeckFor = lm && !playing ? (S.offNeckFor || 0) + dt : 0;
+    const ev = smooth(playing && key ? C.evaluateChord(S.neck, lm, C.CHORDS[key], MN.calibration(mine)) : null, key, !!lm && !playing);
     if (enroll && S.tab === 'code' && enroll.key === key) {
       // 치우침은 보정 전 원래 위치로 잰다 (줄·프렛 단위)
       const res = lm ? C.CHORDS[key].notes.filter((n) => !n.barre).map((n) => { const a = C.locate(S.neck, C.padPoint(lm, n.finger)); return [a.string - n.string, a.fret - (n.fret - 0.3)]; }) : [];
@@ -685,7 +689,8 @@ function loop(ts) {
 
 // 손가락별 점수를 프레임 사이에서 부드럽게 (지수 이동 평균)
 let sm = null; const hold = C.makeHold();
-function smooth(ev, key) {
+function smooth(ev, key, offNeck = false) {
+  if (offNeck) { sm = null; hold.reset(); return null; }
   if (!ev) { if (sm) { sm.miss = (sm.miss || 0) + 1; if (sm.miss > 12) sm = null; } return sm && sm.miss <= 12 ? sm : null; }
   if (!sm || sm.key !== key) { sm = { key, scores: ev.fingers.map((f) => f.score) }; hold.reset(); }
   const a = 0.35;

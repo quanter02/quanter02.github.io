@@ -21,6 +21,9 @@ export const OK_AVG = 80;         // 맞음: 손가락 평균 이 점수 이상
 export const OK_MIN = 60;         //       그리고 모든 손가락이 이 점수 이상 (시뮬레이션으로 고름: llm-reliability/products/chord_test)
 export const HOLD_SEC = 0.5;      // 맞음이 이 시간 동안 유지돼야 최종 맞음
 export const HOLD_FRAC = 0.8;     //       그 시간 동안 이 비율 이상의 프레임이 맞음
+// 잡음 인식(게이트): 손가락 끝 GATE_MIN개 이상이 지판 가이드(앞뒤 0.5칸·줄 바깥 조금 넓게) 안에 있어야 '연주 중'으로 보고 판정한다.
+// 기타를 잡지 않은 손·지판 밖 손이 우연히 맞음으로 통과하는 것을 막는다 (시뮬레이션: llm-reliability/products/chord_test/stage_sim)
+export const GATE_MIN = 2;
 export const FINGER_NAME = { 1: '검지', 2: '중지', 3: '약지', 4: '새끼' };
 
 // 운지표. string: 줄 번호, fret: 프렛, finger: 1 검지 ~ 4 새끼. barre: 검지로 여러 줄을 누름
@@ -159,6 +162,17 @@ export function evaluateNote(neck, lm, note, cal = null) {
   }
   return { note, at, score, sScore, fScore, status, label, msg };
 }
+
+// 지판 가이드 안에 있는 손가락 끝(검지~새끼) 수
+export function fingersOnNeck(neck, lm) {
+  let inside = 0;
+  for (const f of [1, 2, 3, 4]) {
+    const a = locate(neck, lm[TIP[f]]);
+    if (a.fret > -0.5 && a.fret < GUIDE_FRET + 0.5 && a.string > 0 && a.string < 7.2) inside++;
+  }
+  return inside;
+}
+export function isPlaying(neck, lm, min = GATE_MIN) { return fingersOnNeck(neck, lm) >= min; }
 
 // 맞음: 평균 OK_AVG 이상이고 모든 손가락이 OK_MIN 이상
 export function isOk(fingers) {
