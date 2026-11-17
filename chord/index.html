@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#f3f5f9">
-<title>오락가락</title>
+<title>오락가락 — 통기타 코드 코치</title>
+<meta name="description" content="카메라로 통기타 코드 운지를 판정하고, 배운 코드로 곡을 연주하며 박자까지 채점하는 독학 코칭 앱">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="오락가락">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
@@ -244,7 +250,7 @@ body.playing .nav, body.playing .top { display: none; }
     <!-- ================= 홈 ================= -->
     <section id="tab-home">
       <div class="brand">
-        <div class="eyebrow">AI 악기 독학 코칭</div>
+        <div class="eyebrow">AI 통기타 독학 코칭</div>
         <h1>오락가락</h1>
       </div>
 
@@ -1104,5 +1110,6 @@ function renderMine() {
   if (mb) mb.onclick = () => { enroll = MN.makeEnroll(S.chord); enrollMsg = '내 손 등록 중 · 맞는 모양을 2초 유지해 주세요'; };
   renderMine(); }
 </script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});</script>
 </body>
 </html>

@@ -1,0 +1,19 @@
+{
+  "name": "오락가락 — 통기타 코드 코치",
+  "short_name": "오락가락",
+  "description": "카메라로 통기타 코드 운지를 판정하고, 배운 코드로 곡을 연주하며 박자까지 채점하는 독학 코칭 앱",
+  "id": "/chord/",
+  "start_url": "/chord/",
+  "scope": "/chord/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "ko",
+  "background_color": "#f3f5f9",
+  "theme_color": "#f3f5f9",
+  "categories": ["education", "music"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
