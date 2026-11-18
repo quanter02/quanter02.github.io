@@ -4,242 +4,286 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#f3f5f9">
+<meta name="theme-color" content="#f4ebdd">
+<script>/* 화면 모드: 저장된 선택을 그리기 전에 먼저 적용 (밝게/어둡게, 없으면 기기 설정) */
+try { var t = JSON.parse(localStorage.getItem('gc-theme')); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <title>오락가락 — 통기타 코드 코치</title>
 <meta name="description" content="카메라로 통기타 코드 운지를 판정하고, 배운 코드로 곡을 연주하며 박자까지 채점하는 독학 코칭 앱">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="오락가락">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
+/* 오락가락 디자인: 통기타 우드 톤 · 파스텔
+   스프루스 상판(배경) · 메이플(카드) · 월넛(글자) · 허니(포인트) · 로즈우드(지판)
+   판정 색은 세이지(맞음) · 살구(근접) · 로즈(틀림) 파스텔 */
 :root {
-  --bg: #f3f5f9; --card: #ffffff; --ink: #111827; --ink-2: #4b5563; --ink-3: #9ca3af; --line: #e5e7eb;
-  --blue: #2563eb; --blue-ink: #1d4ed8; --blue-soft: #eaf1ff;
-  --navy: #0f1d3a; --navy-2: #172a52; --navy-line: #2a3d66;
-  --green: #16a34a; --green-soft: #e8f7ee; --red: #dc2626; --red-soft: #fdecec; --orange: #ea580c; --orange-soft: #fff1e7;
+  --bg: #f4ebdd; --card: #fff9f1; --card-2: #f8efe2; --line: #e7d8c3; --line-2: #dcc8ad;
+  --ink: #4a3628; --ink-2: #6e5847; --ink-3: #7a6553;
+  --honey: #e2be8f; --honey-2: #d4a873; --honey-soft: #f5e6cf; --honey-ink: #7a5329;
+  --wood: #9c7a64; --wood-dark: #543d2e;
+  --sage: #cfe3cf; --sage-2: #8fbf98; --sage-ink: #3f6647;
+  --apricot: #f7dcbd; --apricot-2: #ecb27a; --apricot-ink: #85511f;
+  --rose: #f3d3ce; --rose-2: #e59a90; --rose-ink: #8e4239;
+  --gold: #f1cb7e;
+  --hero-a: #fbf1e2; --hero-b: #f1dcbf; --primary-hover: #dcb47f; --cell: #f6dfb2; --segs: rgba(156,122,100,.18);
+  --good-bg: #eaf3e8; --close-bg: #fbecdc; --bad-bg: #f9e5e1; --mark-ink: #fff7ec;
+  --ring-a: #fffaf3; --ring-b: #f6e7d2; --ring-track: #eadbc6; --seg-on: #fff9f1; --shadow: rgba(111,84,68,.16);
+  --fb-wood: #a98670; --fb-label: #7a6553; --fb-fret-on: #7a5329; --fb-mute: #8e4239; --fb-open: #3f6647; --fb-cell-op: .92;
   --font: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --display: "Gowun Batang", "Noto Serif KR", "AppleMyungjo", serif;
+  --r-lg: 20px; --r-md: 14px; --r-sm: 9px;
   color-scheme: light;
+}
+/* 다크 모드: 월넛 나이트 (진한 호두나무 바탕 · 크림 글자 · 허니 포인트 그대로). 글자 대비 모두 4.5:1 이상
+   data-theme="dark"면 항상, 설정 안 했으면(시스템) 기기 다크 모드를 따른다 */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #211915; --card: #2c221c; --card-2: #33281f; --line: #45372c; --line-2: #57463a;
+  --ink: #f2e5d3; --ink-2: #cfb9a2; --ink-3: #ad967f;
+  --honey: #e2be8f; --honey-2: #c99a62; --honey-soft: #3a2c1f; --honey-ink: #e8c697;
+  --wood: #8a6a57; --wood-dark: #3a2a1e;
+  --sage: #24342a; --sage-2: #7fb08a; --sage-ink: #9fcca7;
+  --apricot: #3b2a1c; --apricot-2: #d99a5e; --apricot-ink: #ecb27a;
+  --rose: #3d2522; --rose-2: #d07f74; --rose-ink: #eea79d;
+  --hero-a: #33271f; --hero-b: #3a2c21; --primary-hover: #ebc99c; --cell: #b8996f; --segs: rgba(242,229,211,.14);
+  --good-bg: #24342a; --close-bg: #3b2a1c; --bad-bg: #3d2522; --mark-ink: #1d1612;
+  --ring-a: #33281f; --ring-b: #2a2019; --ring-track: #45372c; --seg-on: #4d3d30; --shadow: rgba(0,0,0,.35);
+  --fb-wood: #7a5c4a; --fb-label: #ad967f; --fb-fret-on: #e8c697; --fb-mute: #eea79d; --fb-open: #9fcca7; --fb-cell-op: .62;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #0b1020; --card: #141b2d; --ink: #eef2f8; --ink-2: #b3bdcf; --ink-3: #7c879b; --line: #263049;
-    --blue-soft: #1a2747; --green-soft: #12301f; --red-soft: #3a1717; --orange-soft: #3a2413;
+  color-scheme: dark;
+  --bg: #211915; --card: #2c221c; --card-2: #33281f; --line: #45372c; --line-2: #57463a;
+  --ink: #f2e5d3; --ink-2: #cfb9a2; --ink-3: #ad967f;
+  --honey: #e2be8f; --honey-2: #c99a62; --honey-soft: #3a2c1f; --honey-ink: #e8c697;
+  --wood: #8a6a57; --wood-dark: #3a2a1e;
+  --sage: #24342a; --sage-2: #7fb08a; --sage-ink: #9fcca7;
+  --apricot: #3b2a1c; --apricot-2: #d99a5e; --apricot-ink: #ecb27a;
+  --rose: #3d2522; --rose-2: #d07f74; --rose-ink: #eea79d;
+  --hero-a: #33271f; --hero-b: #3a2c21; --primary-hover: #ebc99c; --cell: #b8996f; --segs: rgba(242,229,211,.14);
+  --good-bg: #24342a; --close-bg: #3b2a1c; --bad-bg: #3d2522; --mark-ink: #1d1612;
+  --ring-a: #33281f; --ring-b: #2a2019; --ring-track: #45372c; --seg-on: #4d3d30; --shadow: rgba(0,0,0,.35);
+  --fb-wood: #7a5c4a; --fb-label: #ad967f; --fb-fret-on: #e8c697; --fb-mute: #eea79d; --fb-open: #9fcca7; --fb-cell-op: .62;
   }
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
 button:disabled { opacity: .45; cursor: not-allowed; }
-.app { max-width: 520px; margin: 0 auto; min-height: 100vh; padding-bottom: 84px; }
+:focus-visible { outline: 3px solid var(--honey-2); outline-offset: 2px; border-radius: 6px; }
+input[type="checkbox"] { accent-color: var(--honey-ink); width: 18px; height: 18px; }
+.app { max-width: 520px; margin: 0 auto; min-height: 100vh; padding-bottom: 88px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 /* 상단바 */
-.top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); }
-.logo { width: 34px; height: 34px; border-radius: 9px; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 15px; flex: none; }
-.top h1 { font-size: 18px; margin: 0; font-weight: 800; flex: 1; }
+.top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); }
+.logo { width: 36px; height: 36px; flex: none; border-radius: 50%; box-shadow: 0 1px 3px var(--shadow); }
+.top h1 { font-family: var(--display); font-size: 20px; margin: 0; font-weight: 700; flex: 1; }
 .iconbtn { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); }
 .iconbtn:hover { background: var(--line); }
 main > section { padding: 4px 16px 16px; display: grid; gap: 14px; }
 
 /* 공통 */
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
-.pill { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
-.pill.green { background: var(--green-soft); color: var(--green); }
-.pill.red { background: var(--red-soft); color: var(--red); }
-.pill.orange { background: var(--orange-soft); color: var(--orange); }
-.pill.dark { background: rgba(255,255,255,.1); color: #dbe6ff; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; border-radius: 12px; padding: 13px 16px; font-weight: 700; font-size: 15px; }
-.btn.primary { background: var(--blue); color: #fff; }
-.btn.primary:hover { background: var(--blue-ink); }
-.btn.ghost { background: var(--blue-soft); color: var(--blue); }
-.btn.line { border: 1px solid var(--line); background: var(--card); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--honey-soft); color: var(--honey-ink); }
+.pill.green { background: var(--sage); color: var(--sage-ink); }
+.pill.red { background: var(--rose); color: var(--rose-ink); }
+.pill.orange { background: var(--apricot); color: var(--apricot-ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; border-radius: var(--r-md); padding: 13px 16px; font-weight: 700; font-size: 15px; }
+.btn.primary { background: var(--honey); color: var(--wood-dark); box-shadow: inset 0 -2px 0 var(--honey-2); }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.line { border: 1px solid var(--line-2); background: var(--card); color: var(--ink); }
 .btn.block { width: 100%; }
+.btn.danger { color: var(--rose-ink); border-color: var(--rose); background: var(--card); }
 .row { display: flex; align-items: center; gap: 8px; }
 .between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .muted { color: var(--ink-2); font-size: 13px; }
 .tiny { color: var(--ink-3); font-size: 12px; }
-h2 { font-size: 17px; margin: 0; font-weight: 800; }
-h3 { font-size: 15px; margin: 0; font-weight: 700; }
-.link { color: var(--blue); font-size: 13px; font-weight: 700; }
+h2 { font-family: var(--display); font-size: 19px; margin: 0; font-weight: 700; }
+h3 { font-family: var(--display); font-size: 17px; margin: 0; font-weight: 700; }
+
+/* 지판 그림 (홈 · 코드 수업 · 연주 화면 공통). 카메라 거울 화면과 같은 방향: 헤드 왼쪽, 6번줄 위 */
+.board { width: 100%; }
+.board svg { display: block; width: 100%; height: auto; }
+.strumcap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; color: var(--ink-2); }
+.strumcap b { color: var(--honey-ink); }
+.strumcap .key { display: inline-flex; align-items: center; gap: 5px; }
+.strumcap .key i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; background: var(--gold); }
+.strumcap .key i.cell { width: 14px; height: 12px; border-radius: 3px; background: var(--cell); border: 1px solid var(--honey-2); }
+.strumcap .key i.mute { background: none; height: auto; width: auto; color: var(--rose-ink); font-style: normal; font-weight: 800; }
 
 /* 홈 */
-.hello h2 { font-size: 21px; margin-top: 8px; }
-.hero { background: linear-gradient(160deg, var(--navy-2), var(--navy)); color: #fff; border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
-.hero .big { font-size: 26px; font-weight: 800; line-height: 1.25; }
-.hero .big em { font-style: normal; color: #6ea8ff; }
-.hero .pct { font-size: 30px; font-weight: 800; color: #4ade80; }
+.homebar { display: flex; justify-content: flex-end; padding-top: 10px; margin-bottom: -18px; }
+.themes { display: flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--line); }
+.themes button { width: 32px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: var(--ink-3); }
+.themes button svg { width: 17px; height: 17px; }
+.themes button:hover { color: var(--ink); }
+.themes button.on { background: var(--seg-on); color: var(--ink); box-shadow: 0 1px 2px var(--shadow); }
+.brand { padding-top: 22px; display: flex; align-items: center; gap: 12px; }
+.brandmark { width: 76px; height: 76px; flex: none; border-radius: 50%; box-shadow: 0 2px 8px var(--shadow); }
+.brand h1 { font-family: var(--display); font-size: 34px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.brand p { margin: 2px 0 0; color: var(--ink-2); font-size: 14px; }
+.hero { background: linear-gradient(170deg, var(--hero-a), var(--hero-b)); color: var(--ink); border: 1px solid var(--line-2); border-radius: 24px; padding: 18px 18px 14px; display: grid; gap: 10px; }
+button.hero { text-align: left; width: 100%; }
+.hero .eb { color: var(--honey-ink); font-size: 13px; font-weight: 700; }
+.hero .big2 { font-family: var(--display); font-size: 25px; font-weight: 700; line-height: 1.25; }
+.hero .meta { color: var(--ink-2); font-size: 12px; }
+.hero .board { margin: 2px -4px 0; }
 .segs { display: flex; gap: 6px; }
-.segs i { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.18); }
-.segs i.on { background: #4b8bff; }
+.segs i { flex: 1; height: 6px; border-radius: 3px; background: var(--segs); }
+.segs i.on { background: var(--sage-2); }
 .course { display: flex; gap: 14px; align-items: center; text-align: left; width: 100%; }
-.course .ic { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; flex: none; }
-.course .ic.blue { background: var(--blue-soft); color: var(--blue); }
-.course .ic.red { background: var(--red-soft); color: var(--red); }
+.course .ic { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.course .ic.blue { background: var(--honey-soft); color: var(--honey-ink); }
+.course .ic.orange { background: var(--sage); color: var(--sage-ink); }
 .course .body { flex: 1; display: grid; gap: 2px; }
+.course .chev { color: var(--ink-3); font-size: 22px; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
-.learned { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.ltile { display: grid; justify-items: center; gap: 4px; }
-.ltile b { width: 100%; aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; font-size: 18px; font-weight: 800; background: var(--bg); border: 1px solid var(--line); color: var(--ink-2); }
-.ltile.done b { background: var(--blue); border-color: var(--blue); color: #fff; }
-.ltile.tried b { background: var(--blue-soft); border-color: transparent; color: var(--blue); }
-.ltile span { font-size: 11px; color: var(--ink-2); }
-.tip { display: flex; gap: 8px; background: var(--bg); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--ink-2); }
-.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 96px; margin-top: 10px; }
-.week div { display: grid; gap: 4px; justify-items: center; align-items: end; height: 100%; grid-template-rows: 1fr auto; }
-.week i { width: 100%; border-radius: 6px 6px 2px 2px; background: #b9cdf8; min-height: 3px; display: block; align-self: end; }
-.week .today i { background: var(--blue); }
-.week span { font-size: 11px; color: var(--ink-3); }
-.week .today span { color: var(--blue); font-weight: 700; }
+.chip { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: var(--r-sm); background: var(--card-2); border: 1px solid var(--line); }
+.lgrid { display: flex; flex-wrap: wrap; gap: 8px; }
+.lgrid button { width: 44px; height: 44px; border-radius: 50%; font-family: var(--display); font-weight: 700; font-size: 15px; display: grid; place-items: center; }
+.lgrid .done { background: var(--sage); color: var(--sage-ink); border: 1px solid var(--sage-2); }
+.lgrid .todo { background: var(--card-2); color: var(--ink-2); border: 1px dashed var(--line-2); }
+.lgrid button.long, .next div.long, .tabs button.long { font-size: 12px; }
 
 /* 카메라 무대 */
-.stage { position: relative; background: #0b1224; border-radius: 18px; overflow: hidden; aspect-ratio: 4 / 3; touch-action: none; }
+.stage { position: relative; background: #2e2219; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; touch-action: none; }
 .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .stage .ov { position: absolute; left: 12px; right: 12px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
 .stage .ov > * { pointer-events: auto; }
 .stage .ov.t { top: 12px; } .stage .ov.b { bottom: 12px; justify-content: center; }
-.stage .badge { font-size: 12px; font-weight: 700; color: #fff; background: rgba(15,29,58,.72); border: 1px solid rgba(255,255,255,.15); padding: 5px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
-.stage .badge.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
-.stage .badge.on { background: var(--blue); border-color: var(--blue); }
-.stage .shutter { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.95); color: var(--blue); display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(255,255,255,.25); }
-.stage .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #c9d5ee; padding: 24px; font-size: 14px; }
-.stage .empty b { display: block; color: #fff; font-size: 16px; margin-bottom: 6px; }
-.stage .center-msg { position: absolute; left: 50%; top: 56px; transform: translateX(-50%); background: rgba(15,29,58,.8); color: #fff; font-size: 13px; padding: 8px 12px; border-radius: 10px; text-align: center; max-width: 80%; pointer-events: none; }
+.stage .badge { font-size: 12px; font-weight: 700; color: #fff7ec; background: rgba(46,34,25,.7); border: 1px solid rgba(255,240,220,.18); padding: 5px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+.stage .badge.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sage-2); }
+.stage .badge.on { background: var(--honey); color: var(--wood-dark); border-color: var(--honey); }
+.stage .shutter { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,249,241,.95); color: var(--wood-dark); display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(255,249,241,.25); }
+.stage .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #e9d9c4; padding: 24px; font-size: 14px; }
+.stage .empty b { display: block; color: #fff7ec; font-family: var(--display); font-size: 18px; margin-bottom: 6px; }
+.stage .center-msg { position: absolute; left: 50%; top: 56px; transform: translateX(-50%); background: rgba(46,34,25,.82); color: #fff7ec; font-size: 13px; padding: 8px 12px; border-radius: 10px; text-align: center; max-width: 80%; pointer-events: none; }
 
 /* 코드 수업 */
-.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-.tabs button { flex: none; min-width: 48px; height: 48px; padding: 0 12px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); font-weight: 800; font-size: 15px; }
-.tabs button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 4px; scrollbar-width: none; }
+.tabs button { flex: none; min-width: 48px; height: 48px; padding: 0 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--ink-2); }
+.tabs button.on { background: var(--honey); color: var(--wood-dark); border-color: var(--honey-2); }
 .result-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.result-head .name { font-size: 24px; font-weight: 800; }
-.meter { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 6px; }
-.meter span { display: block; height: 100%; width: 0; background: var(--green); transition: width .15s; }
-.meter.close span { background: var(--orange); } .meter.bad span { background: var(--red); }
+.result-head .name { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.2; }
+.meter { height: 8px; border-radius: 4px; background: var(--card-2); border: 1px solid var(--line); overflow: hidden; margin-top: 6px; }
+.meter span { display: block; height: 100%; width: 0; background: var(--sage-2); transition: width .15s; }
+.meter.close span { background: var(--apricot-2); } .meter.bad span { background: var(--rose-2); }
 .fingers { display: grid; gap: 8px; }
-.finger { display: flex; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--bg); align-items: flex-start; }
-.finger .mark { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--ink-3); display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; margin-top: 1px; }
-.finger.good .mark { border-color: var(--green); color: var(--green); }
-.finger.close { background: var(--orange-soft); } .finger.close .mark { border-color: var(--orange); color: var(--orange); }
-.finger.bad { background: var(--red-soft); } .finger.bad .mark { border-color: var(--red); color: var(--red); }
+.finger { display: flex; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); background: var(--card-2); align-items: flex-start; }
+.finger .mark { width: 24px; height: 24px; border-radius: 50%; background: var(--wood); color: #fff7ec; display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; margin-top: 1px; }
+.finger.good { background: var(--good-bg); } .finger.good .mark { background: var(--sage-2); color: var(--mark-ink); }
+.finger.close { background: var(--close-bg); } .finger.close .mark { background: var(--apricot-2); color: var(--mark-ink); }
+.finger.bad { background: var(--bad-bg); } .finger.bad .mark { background: var(--rose-2); color: var(--mark-ink); }
 .finger b { font-size: 14px; display: block; }
-.finger.close b { color: var(--orange); } .finger.bad b { color: var(--red); }
+.finger.close b { color: var(--apricot-ink); } .finger.bad b { color: var(--rose-ink); }
 .finger p { margin: 1px 0 0; font-size: 13px; color: var(--ink-2); }
 .finger.bad p, .finger.close p { color: var(--ink); }
-.diagram { flex: none; }
-.calib-help { background: var(--blue-soft); color: var(--ink); border-radius: 12px; padding: 12px; font-size: 13px; display: grid; gap: 8px; }
+.calib-help { background: var(--honey-soft); color: var(--ink); border: 1px solid var(--line-2); border-radius: var(--r-md); padding: 12px; font-size: 13px; display: grid; gap: 8px; }
 .calib-help ol { margin: 0; padding-left: 18px; }
+.codeboard { display: grid; gap: 6px; align-content: start; background: var(--card-2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px 8px 10px; }
+.guide2 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 10px; align-items: start; }
+.guide2 .fingers { gap: 6px; }
+.guide2 .finger { padding: 7px 9px; gap: 7px; border-radius: 12px; }
+.guide2 .finger .mark { width: 20px; height: 20px; font-size: 11px; }
+.guide2 .finger b { font-size: 13px; line-height: 1.35; }
+.finger b, .finger p, .finger .pos { word-break: keep-all; }
+.finger .pos { display: block; font-size: 12px; font-weight: 700; color: var(--honey-ink); line-height: 1.35; }
+.finger.close .pos { color: var(--apricot-ink); } .finger.bad .pos { color: var(--rose-ink); }
+.guide2 .finger p { font-size: 12px; line-height: 1.4; }
+.guide2 .fingers > p.tiny { font-size: 11.5px; }
+.codeboard .strumcap { font-size: 12px; gap: 2px 8px; }
+@media (max-width: 360px) { .guide2 { grid-template-columns: 1fr; } }
 
-/* 연주해보자 */
-.player { background: linear-gradient(170deg, var(--navy-2), var(--navy)); color: #fff; border-radius: 20px; padding: 16px; display: grid; gap: 14px; }
-.player select { font: inherit; font-weight: 800; font-size: 17px; color: #fff; background: transparent; border: 0; padding: 0; max-width: 100%; }
-.player select option { color: #111; }
-.player .sub { color: #a8b8d8; font-size: 12px; }
-.player .pts { font-weight: 800; color: #ffd54a; background: rgba(255,255,255,.08); padding: 4px 10px; border-radius: 999px; font-size: 13px; }
-.bars { display: flex; gap: 4px; }
-.bars i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); }
-.bars i.p { background: #4ade80; } .bars i.g { background: #60a5fa; } .bars i.m { background: #f87171; } .bars i.now { background: #fff; }
-.ring { position: relative; width: 210px; height: 210px; margin: 0 auto; }
-.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.ring .in { position: absolute; inset: 22px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #213a72, #101e3e); display: grid; place-items: center; text-align: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
-.ring .chord { font-size: 64px; font-weight: 800; line-height: 1; }
-.ring .kind { font-size: 11px; letter-spacing: .15em; color: #a8b8d8; margin-top: 4px; }
-.verdict { justify-self: center; font-weight: 800; padding: 7px 16px; border-radius: 999px; font-size: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); min-width: 150px; text-align: center; }
-.verdict.p { background: rgba(74,222,128,.15); border-color: #4ade80; color: #4ade80; }
-.verdict.g { background: rgba(96,165,250,.15); border-color: #60a5fa; color: #93c5fd; }
-.verdict.m { background: rgba(248,113,113,.15); border-color: #f87171; color: #fca5a5; }
-.hintbar { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px 12px; font-size: 13px; }
-.hintbar b { display: block; }
-.hintbar .tiny { color: #a8b8d8; }
-.next { display: flex; gap: 8px; overflow: hidden; }
-.next div { flex: none; width: 58px; height: 64px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); display: grid; place-items: center; align-content: center; gap: 2px; font-weight: 800; font-size: 18px; }
-.next div small { font-size: 10px; color: #a8b8d8; font-weight: 500; }
-.next div.cur { background: var(--blue); border-color: var(--blue); }
-.player .stage { aspect-ratio: 16 / 9; border-radius: 14px; }
-.ctrl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.seg { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; }
-.seg button { flex: 1; padding: 7px 8px; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
-.seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+/* 연주 방식 · 곡 목록 */
+.seg { display: flex; background: var(--card-2); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.seg button { flex: 1; padding: 8px; border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.seg button.on { background: var(--seg-on); color: var(--ink); box-shadow: 0 1px 2px var(--shadow); }
 .stepper { display: flex; align-items: center; gap: 4px; }
-.stepper button { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); font-weight: 800; }
+.stepper button { width: 32px; height: 32px; border-radius: 50%; background: var(--card-2); border: 1px solid var(--line); font-weight: 800; }
 .stepper output { min-width: 64px; text-align: center; font-weight: 700; font-size: 14px; }
-.beats { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; }
-.beats i { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 18px; color: #cbd5e1; background: rgba(15,29,58,.72); border: 1px solid rgba(255,255,255,.18); }
-.beats i.now { border-color: #fff; color: #fff; background: rgba(37,99,235,.85); }
-.beats i.hit { background: rgba(34,197,94,.85); color: #fff; } .beats i.near { background: rgba(245,158,11,.85); color: #fff; } .beats i.miss { background: rgba(239,68,68,.75); color: #fff; }
-.summary { text-align: center; display: grid; gap: 6px; }
-.summary .big { font-size: 40px; font-weight: 800; color: var(--blue); }
-
-/* 홈 (시안) */
-.brand { padding-top: 22px; }
-.brand .eyebrow { color: var(--blue); font-weight: 800; font-size: 13px; }
-.brand h1 { font-size: 30px; font-weight: 800; margin: 2px 0 6px; letter-spacing: -.02em; }
-button.hero { text-align: left; width: 100%; gap: 10px; }
-.hero .eb { color: #8fb3ff; font-size: 13px; font-weight: 700; }
-.hero .big2 { font-size: 22px; font-weight: 800; }
-.hero .meta { color: #a8b8d8; font-size: 12px; }
-.course .chev { color: var(--ink-3); font-size: 20px; }
-.course .ic.orange { background: var(--orange-soft); color: var(--orange); }
-.lgrid { display: flex; flex-wrap: wrap; gap: 8px; }
-.lgrid button { width: 40px; height: 40px; border-radius: 10px; font-weight: 800; font-size: 14px; display: grid; place-items: center; }
-.lgrid .done { background: var(--blue); color: #fff; }
-.lgrid .todo { background: var(--blue-soft); color: var(--blue); border: 1px dashed #8fb3ff; }
-
-/* 곡 목록 */
 .song { display: grid; gap: 8px; }
-.song .chips .chip.ok { background: var(--blue); border-color: var(--blue); color: #fff; }
-.song .chips .chip.no { border-style: dashed; color: var(--blue); background: var(--blue-soft); border-color: #8fb3ff; }
+.song .chips .chip.ok { background: var(--sage); border-color: var(--sage-2); color: var(--sage-ink); }
+.song .chips .chip.no { border-style: dashed; color: var(--honey-ink); background: var(--honey-soft); border-color: var(--honey-2); }
+.song .chips button.chip { font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.song .chips button.chip:hover { filter: brightness(.97); }
+.song .best { color: var(--honey-ink); font-weight: 800; }
 
-/* 연주 화면 (전체 화면, 시안) */
+/* 연주 화면 (전체 화면) */
 body.playing { overflow: hidden; }
 body.playing .nav, body.playing .top { display: none; }
-#player { position: fixed; inset: 0; z-index: 30; background: #0d1640; color: #fff; overflow-y: auto; }
-#player .wrap { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); gap: 14px; }
+#player { position: fixed; inset: 0; z-index: 30; background: var(--bg); color: var(--ink); overflow-y: auto; }
+#player .wrap { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); gap: 12px; }
 .ptop { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 8px; }
-.ptop .back { width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; }
+.ptop .back { width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: var(--ink); background: var(--card); border: 1px solid var(--line); }
 .ptitle { text-align: center; display: grid; }
-.ptitle b { font-size: 15px; } .ptitle span { font-size: 11px; color: #a8b8d8; }
-.ptop .pts { background: #1c2a66; color: #ffd54a; font-weight: 800; font-size: 14px; padding: 6px 12px; border-radius: 999px; }
-.prog { height: 5px; border-radius: 3px; background: #1c2a66; overflow: hidden; }
-.prog span { display: block; height: 100%; width: 0; background: #3b6cff; transition: width .3s; }
-.pmid { flex: 1; display: grid; align-content: center; justify-items: center; gap: 14px; padding: 12px 0; min-height: 360px; }
-.pmid .label { color: #c6d3ff; font-weight: 700; font-size: 14px; }
-#player .ring { width: 172px; height: 172px; }
-#player .ring .in { inset: 6px; background: #1b2668; box-shadow: none; }
-#player .ring .chord { font-size: 60px; }
-#player .verdict { background: #13304a; border: 0; color: #a8b8d8; min-width: 120px; }
-#player .verdict.p { background: #0f3b3a; color: #34d399; } #player .verdict.g { background: #13325e; color: #93c5fd; } #player .verdict.m { background: #3b1830; color: #fca5a5; }
-.fix { background: rgba(239,68,68,.12); color: #fecaca; border-radius: 12px; padding: 8px 12px; font-size: 13px; text-align: center; max-width: 100%; }
-.pmid .beats { position: static; transform: none; }
-#player .next div { width: 52px; height: 52px; background: #1b2668; border: 1px solid transparent; color: #c6d3ff; }
-#player .next div.cur { background: transparent; border: 2px solid #3b6cff; color: #fff; }
-.camline { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #8d9cc4; font-size: 13px; }
-.camline button { color: #8fb3ff; font-size: 13px; font-weight: 700; }
+.ptitle b { font-family: var(--display); font-size: 17px; } .ptitle span { font-size: 11px; color: var(--ink-3); }
+.ptop .pts { background: var(--honey-soft); color: var(--honey-ink); font-weight: 800; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); }
+.prog { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.prog span { display: block; height: 100%; width: 0; background: var(--honey-2); transition: width .3s; }
+.secline { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-2); font-size: 12px; margin-top: -4px; }
+.secline button { color: var(--ink-2); font-weight: 700; font-size: 12px; padding: 5px 11px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); white-space: nowrap; }
+.secline button.on { background: var(--sage); color: var(--sage-ink); border-color: var(--sage-2); }
+.pmid { flex: 1; display: grid; align-content: center; justify-items: center; gap: 12px; padding: 6px 0; }
+.pmid .label { color: var(--ink-2); font-weight: 700; font-size: 13px; }
+.ring { position: relative; width: 118px; height: 118px; margin: 0 auto; }
+.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring .in { position: absolute; inset: 7px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, var(--ring-a), var(--ring-b)); display: grid; place-items: center; text-align: center; box-shadow: inset 0 0 0 1px var(--line); }
+.ring .chord { font-family: var(--display); font-size: 44px; font-weight: 700; line-height: 1; color: var(--ink); }
+.nowrow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; width: 100%; }
+.nowcol { display: grid; justify-items: center; gap: 6px; }
+.nowboard { display: grid; gap: 4px; }
+#player .strumcap { font-size: 12px; gap: 2px 8px; }
+.verdict { justify-self: center; font-weight: 800; padding: 7px 16px; border-radius: 999px; font-size: 14px; background: var(--card); border: 1px solid var(--line); color: var(--ink-2); min-width: 140px; text-align: center; }
+.verdict.p { background: var(--sage); border-color: var(--sage-2); color: var(--sage-ink); }
+.verdict.g { background: var(--honey-soft); border-color: var(--honey-2); color: var(--honey-ink); }
+.verdict.m { background: var(--rose); border-color: var(--rose-2); color: var(--rose-ink); }
+.fix { background: var(--rose); color: var(--rose-ink); border-radius: 12px; padding: 8px 12px; font-size: 13px; text-align: center; max-width: 100%; }
+.beats { display: flex; gap: 6px; pointer-events: none; }
+.beats i { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 17px; color: var(--ink-3); background: var(--card); border: 1px solid var(--line); }
+.beats i.now { border-color: var(--honey-2); color: var(--wood-dark); background: var(--honey); }
+.beats i.hit { background: var(--sage); color: var(--sage-ink); border-color: var(--sage-2); } .beats i.near { background: var(--apricot); color: var(--apricot-ink); border-color: var(--apricot-2); } .beats i.miss { background: var(--rose); color: var(--rose-ink); border-color: var(--rose-2); }
+.nextlabel { color: var(--ink-2); font-weight: 700; font-size: 13px; }
+.next { display: flex; gap: 8px; overflow: hidden; }
+.next div { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); color: var(--ink-2); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 18px; }
+.next div.cur { background: var(--honey-soft); border: 2px solid var(--honey-2); color: var(--ink); }
+#player .stage { aspect-ratio: 16 / 9; border-radius: var(--r-md); }
+.camline { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-2); font-size: 13px; }
+.camline button { flex: none; white-space: nowrap; color: var(--honey-ink); font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .pctrl { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; }
-.pctrl button { background: #1b2668; color: #fff; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 14px; }
-.pctrl button.main { background: #3b6cff; }
-#player .stage { aspect-ratio: 16 / 9; border-radius: 14px; }
-#player .summary { background: #16205a; border-radius: 16px; padding: 18px; color: #fff; }
-#player .summary .big { color: #ffd54a; }
-#player .summary .muted { color: #a8b8d8; }
+.pctrl button { background: var(--card); border: 1px solid var(--line-2); color: var(--ink); border-radius: var(--r-md); padding: 12px 6px; font-weight: 700; font-size: 14px; }
+.pctrl button.main { background: var(--honey); border-color: var(--honey-2); color: var(--wood-dark); }
+.summary { text-align: center; display: grid; gap: 6px; }
+#player .summary { background: var(--card); border: 1px solid var(--line-2); border-radius: var(--r-lg); padding: 18px; }
+.summary .big { font-family: var(--display); font-size: 40px; font-weight: 700; color: var(--honey-ink); }
+.summary .newbest { color: var(--sage-ink); font-weight: 800; }
 
 /* 하단 탭 */
 .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--card); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .nav div { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
 .nav button { display: grid; justify-items: center; gap: 2px; padding: 10px 0 8px; font-size: 12px; color: var(--ink-3); font-weight: 700; }
-.nav button.on { color: var(--blue); }
+.nav button.on { color: var(--honey-ink); }
 .nav svg { width: 22px; height: 22px; }
+/* 2026-11-18 디자인 보완: 선택된 탭을 아이콘 뒤 허니색 알약으로 표시, 탭바와 본문 구분 그림자 */
+.nav { box-shadow: 0 -4px 16px var(--shadow); }
+.nav button { -webkit-tap-highlight-color: transparent; }
+.nav button svg { box-sizing: content-box; padding: 3px 16px; border-radius: 999px; transition: background .2s; }
+.nav button.on svg { background: var(--honey-soft); }
+.nav button:focus-visible { outline: 2px solid var(--honey-2); outline-offset: -4px; border-radius: 12px; }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div class="logo" aria-hidden="true">오</div>
+    <img class="logo" src="icons/logo-mark.png" alt="" width="36" height="36">
     <h1 id="title">홈</h1>
     <button class="iconbtn" id="helpBtn" title="사용법" aria-label="사용법">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor"/></svg>
@@ -249,14 +293,25 @@ body.playing .nav, body.playing .top { display: none; }
   <main>
     <!-- ================= 홈 ================= -->
     <section id="tab-home">
+      <div class="homebar">
+        <div class="themes" id="themeSeg" role="radiogroup" aria-label="화면 모드">
+          <button data-theme="system" role="radio" title="시스템 설정 따르기" aria-label="시스템 설정 따르기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+          <button data-theme="light" role="radio" title="밝게" aria-label="밝게"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></button>
+          <button data-theme="dark" role="radio" title="어둡게" aria-label="어둡게"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+        </div>
+      </div>
       <div class="brand">
-        <div class="eyebrow">AI 통기타 독학 코칭</div>
-        <h1>오락가락</h1>
+        <img class="brandmark" src="icons/logo-mark.png" alt="오락가락 로고: 기타 줄 위의 피크와 소리 물결" width="76" height="76">
+        <div>
+          <h1>오락가락</h1>
+          <p>카메라로 보는 통기타 코드 코치</p>
+        </div>
       </div>
 
       <button class="hero" id="hero">
         <span class="eb">오늘의 연습</span>
         <span class="big2" id="heroTitle"></span>
+        <span class="board" id="heroBoard"></span>
         <span class="segs" id="heroSegs"></span>
         <span class="meta" id="heroMeta"></span>
       </button>
@@ -277,7 +332,11 @@ body.playing .nav, body.playing .top { display: none; }
         <div class="lgrid" id="learned"></div>
       </div>
 
-      <p class="tiny" style="text-align:center">기록은 이 브라우저에만 저장됩니다</p>
+      <div class="card" style="display:grid;gap:8px">
+        <h3>내 기록 관리</h3>
+        <p class="tiny" style="margin:0">카메라 영상은 저장하지 않아요. 연습 기록·곡 점수·지판 위치와 ‘내 손 등록’의 손 모양 숫자만 이 기기 브라우저에 저장되고, 외부로 보내지 않아요. (앱을 열 때 글꼴과 손 인식 프로그램을 받기 위해 외부 서버에는 접속합니다)</p>
+        <button class="btn line danger" id="wipeBtn">이 기기에 저장된 기록 모두 지우기</button>
+      </div>
     </section>
 
     <!-- ================= 코드 수업 ================= -->
@@ -313,16 +372,19 @@ body.playing .nav, body.playing .top { display: none; }
             <div class="name" id="codeName">A 코드</div>
             <div class="tiny" id="codeFull"></div>
           </div>
-          <div class="row" style="align-items:flex-start;gap:10px">
-            <span class="pill" id="codeBadge">대기 중</span>
-            <svg class="diagram" id="diagram" width="74" height="92" viewBox="0 0 74 92" aria-label="코드 다이어그램"></svg>
-          </div>
+          <span class="pill" id="codeBadge">대기 중</span>
         </div>
         <div>
           <div class="between muted"><span>코드 매칭 정확도</span><b id="codePct" style="color:var(--ink)">—</b></div>
           <div class="meter" id="codeMeter"><span></span></div>
         </div>
-        <div class="fingers" id="fingers"></div>
+        <div class="guide2">
+          <div class="codeboard">
+            <div class="board" id="codeBoard"></div>
+            <div class="strumcap" id="codeStrum"></div>
+          </div>
+          <div class="fingers" id="fingers"></div>
+        </div>
         <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><button class="btn line" id="mineBtn">내 손 등록</button><span class="tiny" id="mineList"></span></div>
         <label class="tiny" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="shapeOn"> 손 모양 2차 확인 (실험 · AI가 다른 코드로 보이면 알려 줘요)</label>
         <button class="btn primary block" id="nextChord">다음 코드로 넘어가기 →</button>
@@ -339,6 +401,9 @@ body.playing .nav, body.playing .top { display: none; }
         <div class="seg" id="mode"><button data-mode="wait" class="on">맞출 때까지 기다리기</button><button data-mode="tempo">박자대로 진행</button></div>
         <div class="between"><span class="muted">빠르기 (박자대로 진행)</span><div class="stepper"><button id="bpmDown" aria-label="느리게">−</button><output id="bpm">곡 기본</output><button id="bpmUp" aria-label="빠르게">+</button></div></div>
         <label class="between"><span class="muted">메트로놈 소리 (박자대로 진행)</span><input type="checkbox" id="metroChk" checked></label>
+        <label class="between"><span class="muted">맞게 잡으면 효과음</span><input type="checkbox" id="sfxChk" checked></label>
+        <label class="between"><span class="muted">쉬운 코드로 바꾸기<br><span class="tiny">Bm→D, F→Fmaj7 · 바레 없이 연주</span></span><input type="checkbox" id="easyChk"></label>
+        <p class="tiny" style="margin:0">박자 채점은 박마다 다운 스트로크 한 번을 기준으로 해요. 업 스트로크는 섞어 쳐도 감점되지 않아요.</p>
       </div>
 
       <div id="player" hidden>
@@ -349,12 +414,21 @@ body.playing .nav, body.playing .top { display: none; }
             <span class="pts" id="pts">0점</span>
           </div>
           <div class="prog"><span id="progBar"></span></div>
+          <div class="secline"><span id="secName"></span><button id="loopBtn" aria-pressed="false">🔁 이 구간 반복</button></div>
 
           <div class="pmid">
+            <div class="nowrow">
+            <div class="nowcol">
             <div class="label">지금 잡을 코드</div>
             <div class="ring">
-              <svg viewBox="0 0 210 210"><circle cx="105" cy="105" r="100" fill="none" stroke="#2a3a8a" stroke-width="9"/><circle id="ringArc" cx="105" cy="105" r="100" fill="none" stroke="#3b6cff" stroke-width="9" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="0"/></svg>
+              <svg viewBox="0 0 210 210"><circle cx="105" cy="105" r="100" fill="none" style="stroke: var(--ring-track)" stroke-width="9"/><circle id="ringArc" cx="105" cy="105" r="100" fill="none" stroke="#d4a873" stroke-width="9" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="0"/></svg>
               <div class="in"><div class="chord" id="nowChord">G</div></div>
+            </div>
+            </div>
+            <div class="nowboard">
+              <div class="board" id="playBoard"></div>
+              <div class="strumcap" id="playStrum"></div>
+            </div>
             </div>
             <div class="verdict" id="verdict"></div>
             <div class="beats" id="beats" hidden></div>
@@ -369,7 +443,7 @@ body.playing .nav, body.playing .top { display: none; }
           </div>
 
           <div style="display:grid;gap:10px">
-            <div class="label" style="color:#c6d3ff;font-weight:700;font-size:13px">다음 코드</div>
+            <div class="nextlabel">다음 코드</div>
             <div class="next" id="nextList"></div>
             <div class="camline"><span>📹 <span id="camStatus">카메라로 코드 인식 중…</span></span><button id="camToggle">화면 보기</button></div>
             <div class="pctrl"><button id="retryBar">↺ 이 마디</button><button class="main" id="playBtn">❚❚ 일시정지</button><button id="skipBar">다음 ⏭</button></div>
@@ -390,7 +464,7 @@ body.playing .nav, body.playing .top { display: none; }
 </nav>
 
 <script type="module">
-import * as C from './core.js?v=5';
+import * as C from './core.js?v=8';
 import * as TR from './track.js';
 import * as SH from './shape.js?v=2';
 import * as MN from './mine.js?v=3';
@@ -413,12 +487,14 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- 저장 ----------
+let wiped = false;   // 기록 지우기 직후에는 다시 저장하지 않는다
 const store = {
   get(k, d) { try { const v = localStorage.getItem('gc-' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('gc-' + k, JSON.stringify(v)); } catch {} },
+  set(k, v) { if (wiped) return; try { localStorage.setItem('gc-' + k, JSON.stringify(v)); } catch {} },
 };
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-let stats = store.get('stats', { days: {}, chords: {}, tip: '', lastSong: '' });
+let stats = store.get('stats', { days: {}, chords: {}, tip: '', lastSong: '', songs: {} });
+stats.songs ||= {};   // 곡별 최고 기록 (예전 기록에는 없음)
 function day() { return (stats.days[today()] ||= { sec: 0, ok: [] }); }
 let dirty = false;
 setInterval(() => { if (dirty) { store.set('stats', stats); dirty = false; } }, 3000);
@@ -516,21 +592,74 @@ function updateStrum(hands, idx, dt) {
 }
 const recentDown = (sec) => { const T = performance.now() / 1000; return strum.strokes.some((s) => s.dir === 1 && T - s.t < sec); };
 
-// ---------- 코드 다이어그램 (SVG) ----------
-function diagramSVG(svg, key) {
-  const ch = C.CHORDS[key], x0 = 12, y0 = 18, dx = 10, dy = 16;
-  let h = `<rect x="${x0}" y="${y0 - 2}" width="${dx * 5}" height="3" fill="currentColor"/>`;
-  for (let i = 0; i <= 4; i++) h += `<line x1="${x0}" x2="${x0 + dx * 5}" y1="${y0 + i * dy}" y2="${y0 + i * dy}" stroke="currentColor" stroke-opacity=".35"/>`;
-  for (let s = 0; s < 6; s++) h += `<line x1="${x0 + s * dx}" x2="${x0 + s * dx}" y1="${y0}" y2="${y0 + 4 * dy}" stroke="currentColor" stroke-opacity=".6"/>`;
-  for (const m of ch.mute) h += `<text x="${x0 + (6 - m) * dx}" y="${y0 - 6}" font-size="9" text-anchor="middle" fill="currentColor" opacity=".6">×</text>`;
+// ---------- 지판 그림 (SVG): 칠 줄 강조 + 누를 프렛 칸 강조 ----------
+// 카메라 거울 화면과 같은 방향으로 그린다: 왼쪽이 헤드(너트), 위가 6번줄
+// - 칠 줄: 금색, 치지 않는 줄은 흐린 점선 + 왼쪽 ×, 개방현은 왼쪽 ○
+// - 누를 칸: 해당 프렛 칸(쇠막대 사이)을 허니색으로 채우고, 아래 프렛 번호도 진하게
+// 옆에 다른 내용을 나란히 놓을 수 있게 작게(가로 256) 그린다
+const FB = { W: 256, top: 15, gap: 19, nut: 33, end: 246 };
+FB.H = FB.top + FB.gap * 5 + 30;
+const fbX = (fret) => FB.nut + (FB.end - FB.nut) * C.fretToX(fret);
+const fbY = (s) => FB.top + (6 - s) * FB.gap;
+const FB_FILL = { good: '#8fbf98', close: '#e8aa70', bad: '#df8f85' };
+function boardSVG(key, { status = null, ghost = null } = {}) {
+  const ch = C.CHORDS[key]; if (!ch) return '';
+  const played = C.playedStrings(ch), from = C.strumFrom(ch), opens = C.openStrings(ch);
+  const used = new Set(ch.notes.map((n) => n.fret));
+  const y6 = fbY(6), y1 = fbY(1), bx = FB.W - 3;
+  let h = '';
+  // 지판(로즈우드)과 나뭇결
+  h += `<rect x="${FB.nut}" y="${y6 - 12}" width="${bx - FB.nut}" height="${y1 - y6 + 24}" rx="5" style="fill: var(--fb-wood)"/>`;
+  for (const [g, o] of [[0.28, .07], [0.55, .05], [0.8, .06]]) { const y = y6 - 12 + (y1 - y6 + 24) * g; h += `<path d="M${FB.nut} ${y} C ${FB.nut + 70} ${y - 3}, ${FB.nut + 150} ${y + 3}, ${bx} ${y}" stroke="#fff4e2" stroke-opacity="${o}" stroke-width="3" fill="none"/>`; }
+  for (const f of [3, 5]) h += `<circle cx="${(fbX(f - 1) + fbX(f)) / 2}" cy="${(fbY(4) + fbY(3)) / 2}" r="4" fill="#fff4e2" fill-opacity=".35"/>`;
+  // 누를 칸 강조
   for (const n of ch.notes) {
-    const y = y0 + (n.fret - 0.5) * dy;
-    if (n.barre) h += `<rect x="${x0 - 4}" y="${y - 5}" width="${dx * 5 + 8}" height="10" rx="5" fill="#2563eb"/><text x="${x0 + 25}" y="${y + 3.5}" font-size="8" fill="#fff" text-anchor="middle" font-weight="700">1</text>`;
-    else { const x = x0 + (6 - n.string) * dx; h += `<circle cx="${x}" cy="${y}" r="5" fill="#2563eb"/><text x="${x}" y="${y + 3}" font-size="8" fill="#fff" text-anchor="middle" font-weight="700">${n.finger}</text>`; }
+    const xa = fbX(n.fret - 1) + 2.5, xb = fbX(n.fret) - 2.5, ya = fbY(n.string) - 8.5, yb = (n.barre ? y1 : fbY(n.string)) + 8.5;
+    h += `<rect x="${xa}" y="${ya}" width="${xb - xa}" height="${yb - ya}" rx="6" fill="#f7deae" style="fill-opacity: var(--fb-cell-op)"/>`;
   }
-  h += `<text x="${x0 + dx * 5 + 5}" y="${y0 + dy * 0.5 + 3}" font-size="8" fill="currentColor" opacity=".55">1</text>`;
-  svg.innerHTML = h;
-  svg.style.color = 'var(--ink)';
+  // 프렛 쇠막대 · 너트
+  for (let f = 1; f <= C.GUIDE_FRET; f++) h += `<line x1="${fbX(f)}" x2="${fbX(f)}" y1="${y6 - 12}" y2="${y1 + 12}" stroke="#efe0ca" stroke-width="3"/>`;
+  h += `<line x1="${FB.nut}" x2="${FB.nut}" y1="${y6 - 13}" y2="${y1 + 13}" stroke="#fff6e8" stroke-width="6" stroke-linecap="round"/>`;
+  // 줄
+  for (let st = 6; st >= 1; st--) {
+    const y = fbY(st), w = 0.9 + (st - 1) * 0.34, on = played.includes(st);
+    if (on) h += `<line x1="${FB.nut}" x2="${bx}" y1="${y}" y2="${y}" stroke="#f3cf86" stroke-width="${w + 4}" stroke-opacity=".28"/><line x1="${FB.nut}" x2="${bx}" y1="${y}" y2="${y}" stroke="#f6d58f" stroke-width="${w}"/>`;
+    else h += `<line x1="${FB.nut}" x2="${bx}" y1="${y}" y2="${y}" stroke="#fff4e2" stroke-opacity=".35" stroke-width="${w}" stroke-dasharray="4 4"/>`;
+    h += `<text x="7" y="${y + 3.5}" font-size="10" style="fill: var(--fb-label)" text-anchor="middle">${st}</text>`;
+    if (!on) h += `<text x="22" y="${y + 4.5}" font-size="13" font-weight="800" style="fill: var(--fb-mute)" text-anchor="middle">×</text>`;
+    else if (opens.includes(st)) h += `<circle cx="22" cy="${y}" r="4.3" fill="none" style="stroke: var(--fb-open)" stroke-width="1.8"/>`;
+  }
+  // 프렛 번호 (누를 프렛은 진하게)
+  for (let f = 1; f <= C.GUIDE_FRET; f++) {
+    const on = used.has(f);
+    h += `<text x="${(fbX(f - 1) + fbX(f)) / 2}" y="${y1 + 27}" font-size="${on ? 13 : 11}" font-weight="${on ? 800 : 500}" style="fill: var(${on ? '--fb-fret-on' : '--fb-label'})" text-anchor="middle">${f}</text>`;
+  }
+  // 다음 코드 미리보기 (점선)
+  if (ghost && C.CHORDS[ghost]) for (const n of C.CHORDS[ghost].notes) {
+    const x = fbX(n.fret - 0.35);
+    if (n.barre) h += `<rect x="${x - 9.5}" y="${fbY(n.string) - 10}" width="19" height="${y1 - fbY(n.string) + 20}" rx="9.5" fill="none" stroke="#fff6e3" stroke-width="2" stroke-dasharray="4 3"/>`;
+    else h += `<circle cx="${x}" cy="${fbY(n.string)}" r="10" fill="none" stroke="#fff6e3" stroke-width="2" stroke-dasharray="4 3"/>`;
+  }
+  // 손가락 (판정 중이면 상태 색)
+  ch.notes.forEach((n, i) => {
+    const x = fbX(n.fret - 0.35), fill = (status && FB_FILL[status[i]]) || '#5d4535';
+    if (n.barre) {
+      const ya = fbY(n.string) - 10, hh = y1 - fbY(n.string) + 20;
+      h += `<rect x="${x - 9.5}" y="${ya}" width="19" height="${hh}" rx="9.5" fill="${fill}" stroke="#fff8ee" stroke-width="1.5"/><text x="${x}" y="${ya + hh / 2 + 4.5}" font-size="13" font-weight="800" fill="#fff8ee" text-anchor="middle">${n.finger}</text>`;
+    } else h += `<circle cx="${x}" cy="${fbY(n.string)}" r="10" fill="${fill}" stroke="#fff8ee" stroke-width="1.5"/><text x="${x}" y="${fbY(n.string) + 4.5}" font-size="13" font-weight="800" fill="#fff8ee" text-anchor="middle">${n.finger}</text>`;
+  });
+  const desc = ch.notes.map((n) => `${C.FINGER_NAME[n.finger]} ${n.fret}번 프렛 ${n.barre ? C.barreText(n) : n.string + '번줄'}`).join(', ');
+  return `<svg viewBox="0 0 ${FB.W} ${FB.H}" role="img" aria-label="${key} 코드 지판: ${desc}. ${from}번줄부터 1번줄까지 쳐요${ch.mute.length ? `, ${ch.mute.join('·')}번줄은 치지 않아요` : ''}" font-family="Noto Sans KR, sans-serif">${h}</svg>`;
+}
+// 같은 그림이면 다시 그리지 않는다 (판정 화면은 초당 여러 번 갱신)
+function setBoard(el, key, opts = {}) {
+  if (!el) return;
+  const sig = `${key}|${opts.status || ''}|${opts.ghost || ''}`;
+  if (el.dataset.sig !== sig) { el.dataset.sig = sig; el.innerHTML = boardSVG(key, opts); }
+}
+function strumCaption(key) {
+  const ch = C.CHORDS[key], from = C.strumFrom(ch);
+  return `<span><b>${from}~1번줄</b>을 쳐요</span>` + (ch.mute.length ? `<span class="key"><i class="mute">×</i>${ch.mute.join('·')}번줄은 빼고</span>` : '');
 }
 
 // ---------- 탭 ----------
@@ -556,9 +685,10 @@ function chordOK(k) { return (stats.chords[k]?.best || 0) >= 80; }
 function renderHome() {
   // 추천: 연습했지만 아직 80% 미만인 코드 → 곡에 필요한 코드 중 안 해본 것 → 나머지
   const order = C.CHORD_ORDER;
-  const rec = order.find((k) => stats.chords[k] && !chordOK(k)) || SONG_CHORDS.find((k) => !stats.chords[k]) || order.find((k) => !chordOK(k)) || 'A';
+  const rec = order.find((k) => stats.chords[k] && !chordOK(k)) || songChords().find((k) => !stats.chords[k]) || order.find((k) => !chordOK(k)) || 'A';
   const best = stats.chords[rec]?.best;
   $('#heroTitle').textContent = best != null ? `${rec}코드 정확도 ${best}%` : `${rec}코드 시작하기`;
+  $('#heroBoard').innerHTML = boardSVG(rec);
   const okToday = day().ok.length, goal = 3;
   $('#heroSegs').innerHTML = Array.from({ length: goal }, (_, i) => `<i class="${i < okToday ? 'on' : ''}"></i>`).join('');
   $('#hero').onclick = () => { setChord(rec); go('code'); };
@@ -567,8 +697,8 @@ function renderHome() {
   for (;;) { const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; if ((stats.days[k]?.sec || 0) >= 30) { streak++; d.setDate(d.getDate() - 1); } else if (streak === 0 && k === today()) d.setDate(d.getDate() - 1); else break; if (streak > 365) break; }
   $('#heroMeta').textContent = `${streak ? `${streak}일 연속 연습 중` : okToday || day().sec > 0 ? '오늘 연습 중' : '오늘 첫 연습을 시작해 볼까요?'} · 오늘 코드 성공 ${Math.min(okToday, goal)}/${goal}`;
   // 배운 코드: 습득한 코드(채움) + 곡에 필요한 코드 중 아직인 것(점선)
-  const show = [...new Set([...order.filter(chordOK), ...SONG_CHORDS])];
-  $('#learned').innerHTML = show.map((k) => `<button class="${chordOK(k) ? 'done' : 'todo'}" data-ch="${k}" title="${stats.chords[k] ? `최고 ${stats.chords[k].best}%` : '아직 연습 전'}">${k}</button>`).join('');
+  const show = [...new Set([...order.filter(chordOK), ...songChords()])];
+  $('#learned').innerHTML = show.map((k) => `<button class="${chordOK(k) ? 'done' : 'todo'}${k.length > 3 ? ' long' : ''}" data-ch="${k}" title="${stats.chords[k] ? `최고 ${Number(stats.chords[k].best) || 0}%` : '아직 연습 전'}">${k}</button>`).join('');
   $$('#learned [data-ch]').forEach((b) => (b.onclick = () => { setChord(b.dataset.ch); go('code'); }));
 }
 
@@ -714,7 +844,7 @@ function smooth(ev, key, offNeck = false) {
 }
 
 // ---------- 그리기 ----------
-const COLOR = { good: '#22c55e', close: '#f59e0b', bad: '#ef4444', idle: '#ffffff' };
+const COLOR = { good: '#8fd19e', close: '#f2b880', bad: '#ee9a90', idle: '#fff7ec' };
 const EDGES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 function draw(cv, hands, idx, ev) {
   const W = video.videoWidth, H = video.videoHeight;
@@ -727,32 +857,47 @@ function draw(cv, hands, idx, ev) {
   ctx.save();
   if (S.mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
   ctx.drawImage(video, 0, 0, W, H);
-  ctx.fillStyle = 'rgba(8,14,32,.25)'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(46,34,25,.22)'; ctx.fillRect(0, 0, W, H);
 
-  // 지판 가이드: 테두리, 프렛, 줄
-  const quad = [P(0, 0), P(1, 0), P(1, 1), P(0, 1)];
-  ctx.beginPath(); quad.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath();
-  ctx.fillStyle = 'rgba(37,99,235,.10)'; ctx.fill();
+  const ch = ev?.chord || C.CHORDS[S.tab === 'play' ? play.current() : S.chord];
+  const played = C.playedStrings(ch), gap = C.stringToY(1) - C.stringToY(2);
+  const poly = (pts) => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); };
+  // 지판 가이드 테두리
+  poly([P(0, 0), P(1, 0), P(1, 1), P(0, 1)]);
+  ctx.fillStyle = 'rgba(226,190,143,.12)'; ctx.fill();
   ctx.setLineDash(S.calib ? [8 * u, 6 * u] : []);
-  ctx.strokeStyle = 'rgba(96,165,250,.9)'; ctx.lineWidth = 2 * u; ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(242,214,170,.95)'; ctx.lineWidth = 2 * u; ctx.stroke(); ctx.setLineDash([]);
+  // 프렛 강조: 눌러야 할 칸(쇠막대 사이 × 줄 폭)을 허니색으로 채운다. 바레는 시작 줄~1번줄
+  if (!S.calib) for (const n of ch.notes) {
+    const ya = C.stringToY(n.string) - gap / 2, yb = (n.barre ? C.stringToY(1) : C.stringToY(n.string)) + gap / 2;
+    const xa = C.fretToX(n.fret - 1), xb = C.fretToX(n.fret);
+    poly([P(xa, ya), P(xb, ya), P(xb, yb), P(xa, yb)]);
+    ctx.fillStyle = 'rgba(247,222,174,.5)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,236,196,.95)'; ctx.lineWidth = 2 * u; ctx.stroke();
+  }
   for (let n = 0; n <= C.GUIDE_FRET; n++) {
     const x = C.fretToX(n), [a, b] = [P(x, 0), P(x, 1)];
-    ctx.strokeStyle = n === 0 ? 'rgba(255,255,255,.95)' : 'rgba(203,213,225,.75)'; ctx.lineWidth = (n === 0 ? 5 : 2) * u;
+    ctx.strokeStyle = n === 0 ? 'rgba(255,246,232,.95)' : 'rgba(239,224,202,.75)'; ctx.lineWidth = (n === 0 ? 5 : 2) * u;
     ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
   }
-  // 줄: 치는 줄은 밝게(몸통 쪽으로 이어서), 치지 않는 줄은 붉게 흐리게
-  const ch = ev?.chord || C.CHORDS[S.tab === 'play' ? play.current() : S.chord];
-  for (let s = 1; s <= 6; s++) {
-    const y = C.stringToY(s), muted = ch.mute.includes(s), [a, b] = [P(0, y), P(muted ? 1 : 1.35, y)];
-    ctx.strokeStyle = muted ? 'rgba(248,113,113,.45)' : 'rgba(226,232,240,.7)'; ctx.lineWidth = (0.6 + (s - 1) * 0.25) * u;
-    ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+  // 줄 강조: 칠 줄은 금색(은은한 빛 + 선)으로 몸통 쪽까지, 치지 않는 줄은 로즈색 점선 (화살표는 쓰지 않음)
+  for (let st = 1; st <= 6; st++) {
+    const y = C.stringToY(st), on = played.includes(st), base = (0.7 + (st - 1) * 0.3) * u;
+    if (on) {
+      const [a, b] = [P(0, y), P(1.38, y)];
+      ctx.strokeStyle = 'rgba(241,203,126,.32)'; ctx.lineWidth = base + 5 * u; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+      ctx.strokeStyle = 'rgba(246,213,143,.95)'; ctx.lineWidth = base + 0.6 * u; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+    } else {
+      const [a, b] = [P(0, y), P(1, y)];
+      ctx.setLineDash([6 * u, 5 * u]); ctx.strokeStyle = 'rgba(238,154,144,.6)'; ctx.lineWidth = base; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); ctx.setLineDash([]);
+    }
   }
   // 박자대로 진행: 마디 마지막 박에는 다음 코드 자리를 점선 동그라미로 미리 보여 준다
-  const preview = S.tab === 'play' && play.running && play.mode === 'tempo' && play.beat === SONGS[play.song].beats - 1 ? C.CHORDS[SONGS[play.song].bars[play.bar + 1]] : null;
+  const preview = S.tab === 'play' && play.running && play.mode === 'tempo' && play.beat === SONGS[play.song].beats - 1 ? C.CHORDS[barsOf(play.song)[nextBar(play.bar)]] : null;
   const previewLabels = [];
   if (preview) for (const n of preview.notes) {
     const [tx, ty] = P(...C.targetPoint(n));
-    ctx.beginPath(); ctx.arc(tx, ty, Math.max(7 * u, 9 * u), 0, 7); ctx.setLineDash([4 * u, 3 * u]); ctx.strokeStyle = 'rgba(253,224,71,.95)'; ctx.lineWidth = 2.5 * u; ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(tx, ty, Math.max(7 * u, 9 * u), 0, 7); ctx.setLineDash([4 * u, 3 * u]); ctx.strokeStyle = 'rgba(255,240,206,.95)'; ctx.lineWidth = 2.5 * u; ctx.stroke(); ctx.setLineDash([]);
     previewLabels.push([tx, ty, String(n.finger)]);
   }
   // 목표 위치 + 손가락 끝 → 목표 연결선
@@ -762,7 +907,7 @@ function draw(cv, hands, idx, ev) {
   ch.notes.forEach((n, i) => {
     const f = ev?.fingers[i], st = f ? f.status : 'idle';
     let pts;
-    if (n.barre) pts = [P(C.fretToX(n.fret - 0.3), C.stringToY(6)), P(C.fretToX(n.fret - 0.3), C.stringToY(1))];
+    if (n.barre) pts = [P(C.fretToX(n.fret - 0.3), C.stringToY(n.string)), P(C.fretToX(n.fret - 0.3), C.stringToY(1))];
     if (n.barre) { ctx.strokeStyle = COLOR[st]; ctx.globalAlpha = .55; ctx.lineWidth = r * 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(...pts[0]); ctx.lineTo(...pts[1]); ctx.stroke(); ctx.globalAlpha = 1; }
     const [tx, ty] = P(...C.targetPoint(n));
     if (f && st !== 'good' && hands[idx]) {
@@ -771,41 +916,43 @@ function draw(cv, hands, idx, ev) {
       ctx.beginPath(); ctx.moveTo(tip.x * W, tip.y * H); ctx.lineTo(tx, ty); ctx.stroke(); ctx.setLineDash([]);
     }
     ctx.beginPath(); ctx.arc(tx, ty, r, 0, 7);
-    ctx.fillStyle = st === 'idle' ? 'rgba(37,99,235,.85)' : COLOR[st]; ctx.fill();
-    ctx.lineWidth = 2 * u; ctx.strokeStyle = '#fff'; ctx.stroke();
-    labels.push([tx, ty, String(n.finger), r]);
+    ctx.fillStyle = st === 'idle' ? 'rgba(93,69,53,.92)' : COLOR[st]; ctx.fill();
+    ctx.lineWidth = 2 * u; ctx.strokeStyle = '#fff7ec'; ctx.stroke();
+    labels.push([tx, ty, String(n.finger), r, st === 'idle' ? '#fff7ec' : '#4a3628']);
   });
-  for (const m of ch.mute) { const [x, y] = P(-0.06, C.stringToY(m)); labels.push([x, y, '×', r * 0.8, '#f87171']); }
-  for (const [x, y, t] of previewLabels) labels.push([x, y - r * 1.6, t, r * 0.8, '#fde047']);
+  for (const m of ch.mute) { const [x, y] = P(-0.06, C.stringToY(m)); labels.push([x, y, '×', r * 0.8, '#ee9a90']); }
+  for (const [x, y, t] of previewLabels) labels.push([x, y - r * 1.6, t, r * 0.8, '#ffeec8']);
 
   // 손 뼈대 (줄 잡는 손은 진하게)
   hands.forEach((lm, hi) => {
     const main = hi === idx;
-    ctx.strokeStyle = main ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.3)'; ctx.lineWidth = (main ? 2 : 1.5) * u;
+    ctx.strokeStyle = main ? 'rgba(255,247,236,.85)' : 'rgba(255,247,236,.3)'; ctx.lineWidth = (main ? 2 : 1.5) * u;
     for (const [a, b] of EDGES) { ctx.beginPath(); ctx.moveTo(lm[a].x * W, lm[a].y * H); ctx.lineTo(lm[b].x * W, lm[b].y * H); ctx.stroke(); }
-    if (main && ev) ev.fingers.forEach((f) => { const p = C.padPoint(lm, f.note.finger); ctx.beginPath(); ctx.arc(p.x * W, p.y * H, 5 * u, 0, 7); ctx.fillStyle = COLOR[f.status]; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5 * u; ctx.stroke(); });
+    if (main && ev) ev.fingers.forEach((f) => { const p = C.padPoint(lm, f.note.finger); ctx.beginPath(); ctx.arc(p.x * W, p.y * H, 5 * u, 0, 7); ctx.fillStyle = COLOR[f.status]; ctx.fill(); ctx.strokeStyle = '#fff7ec'; ctx.lineWidth = 1.5 * u; ctx.stroke(); });
   });
 
   // 모서리 손잡이
   const handles = S.calib ? [['nut6', '너트·6번줄'], ['nut1', '너트·1번줄'], ['fret6', '5프렛·6번줄'], ['fret1', '5프렛·1번줄']] : [];
-  for (const [k] of handles) { const [x, y] = S.corners[k]; ctx.beginPath(); ctx.arc(x * W, y * H, 13 * u, 0, 7); ctx.fillStyle = 'rgba(37,99,235,.9)'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3 * u; ctx.stroke(); }
+  for (const [k] of handles) { const [x, y] = S.corners[k]; ctx.beginPath(); ctx.arc(x * W, y * H, 13 * u, 0, 7); ctx.fillStyle = 'rgba(212,168,115,.95)'; ctx.fill(); ctx.strokeStyle = '#fff7ec'; ctx.lineWidth = 3 * u; ctx.stroke(); }
   ctx.restore();
 
   // 글자 (반전 없이)
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const [x, y, t, rr, col] of labels) { ctx.fillStyle = col || '#fff'; ctx.font = `800 ${Math.round(rr * 1.1)}px ${getComputedStyle(document.body).fontFamily}`; ctx.fillText(t, dx(x), y + 1); }
   ctx.font = `700 ${Math.round(11 * u)}px sans-serif`;
-  if (preview) { const [x, y] = P(0.5, 1.45); ctx.fillStyle = '#fde047'; ctx.font = `800 ${Math.round(13 * u)}px sans-serif`; ctx.fillText(`다음: ${preview.name}`, dx(x), y); }
+  if (preview) { const [x, y] = P(0.5, 1.45); ctx.fillStyle = '#ffeec8'; ctx.font = `800 ${Math.round(13 * u)}px sans-serif`; ctx.fillText(`다음: ${preview.name}`, dx(x), y); }
   if (strum.flash && performance.now() / 1000 < strum.flash.until) {
-    ctx.fillStyle = 'rgba(253,224,71,.95)'; ctx.font = `800 ${Math.round(34 * u)}px sans-serif`;
+    ctx.fillStyle = 'rgba(246,213,143,.95)'; ctx.font = `800 ${Math.round(34 * u)}px sans-serif`;
     ctx.fillText(strum.flash.dir > 0 ? '↓' : '↑', dx(strum.flash.x * W), strum.flash.y * H - 40 * u);
   }
-  for (let n = 1; n <= C.GUIDE_FRET; n++) { const [x, y] = P((C.fretToX(n - 1) + C.fretToX(n)) / 2, -0.16); ctx.fillStyle = 'rgba(191,219,254,.95)'; ctx.fillText(String(n), dx(x), y); }
+  const usedF = new Set(ch.notes.map((q) => q.fret));
+  for (let n = 1; n <= C.GUIDE_FRET; n++) { const [x, y] = P((C.fretToX(n - 1) + C.fretToX(n)) / 2, -0.16); const on = usedF.has(n) && !S.calib; ctx.fillStyle = on ? 'rgba(246,213,143,1)' : 'rgba(239,224,202,.7)'; ctx.font = `${on ? 800 : 600} ${Math.round((on ? 14 : 11) * u)}px sans-serif`; ctx.fillText(String(n), dx(x), y); }
+
   for (const [k, name] of handles) {
     const [x, y] = S.corners[k];
-    ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(12 * u)}px sans-serif`;
+    ctx.fillStyle = '#fff7ec'; ctx.font = `700 ${Math.round(12 * u)}px sans-serif`;
     const off = k.endsWith('6') ? -26 : 26;
-    ctx.strokeStyle = 'rgba(8,14,32,.8)'; ctx.lineWidth = 4 * u; ctx.strokeText(name, dx(x * W), y * H + off * u); ctx.fillText(name, dx(x * W), y * H + off * u);
+    ctx.strokeStyle = 'rgba(46,34,25,.8)'; ctx.lineWidth = 4 * u; ctx.strokeText(name, dx(x * W), y * H + off * u); ctx.fillText(name, dx(x * W), y * H + off * u);
   }
 }
 const sub2 = (a, b) => [a[0] - b[0], a[1] - b[1]];
@@ -849,23 +996,26 @@ function setChord(k) {
   $$('#chordTabs button').forEach((b) => b.classList.toggle('on', b.dataset.ch === k));
   const ch = C.CHORDS[k];
   $('#codeName').textContent = `${k} 코드`;
-  $('#codeFull').textContent = ch.full + (ch.mute.length ? ` · ${ch.mute.join('·')}번줄은 치지 않기` : '');
-  diagramSVG($('#diagram'), k);
+  $('#codeFull').textContent = ch.full;
+  $('#codeStrum').innerHTML = strumCaption(k);
   const next = C.CHORD_ORDER[(C.CHORD_ORDER.indexOf(k) + 1) % C.CHORD_ORDER.length];
   $('#nextChord').textContent = `다음 코드로 넘어가기 (${next}) →`;
   $('#nextChord').onclick = () => setChord(next);
   renderFingers(null, false);
 }
-$('#chordTabs').innerHTML = C.CHORD_ORDER.map((k) => `<button role="tab" data-ch="${k}">${k}</button>`).join('');
+$('#chordTabs').innerHTML = C.CHORD_ORDER.map((k) => `<button role="tab" data-ch="${k}"${k.length > 3 ? ' class="long"' : ''}>${k}</button>`).join('');
 $$('#chordTabs button').forEach((b) => (b.onclick = () => setChord(b.dataset.ch)));
 
+// 손가락 안내 칸이 좁아서 위치는 짧게: '2프렛 · 3번줄'
+const posText = (n) => `${n.fret}프렛 · ${n.barre ? C.barreText(n) : n.string + '번줄'}`;
 function renderFingers(ev, onNeck) {
   const ch = C.CHORDS[S.chord];
+  setBoard($('#codeBoard'), S.chord, { status: ev && onNeck ? ev.fingers.map((f) => f.status) : null });
   const badge = $('#codeBadge'), meter = $('#codeMeter');
   if (!ev) {
     badge.className = 'pill'; badge.textContent = cam.running ? '손을 찾는 중' : '대기 중';
     $('#codePct').textContent = '—'; $('span', meter).style.width = '0';
-    $('#fingers').innerHTML = ch.notes.map((n) => `<div class="finger"><span class="mark">${n.finger}</span><div><b>${C.FINGER_NAME[n.finger]} (${n.fret}번 프렛 ${n.barre ? '전체 바레' : n.string + '번줄'})</b><p>${cam.running ? '줄 잡는 손을 지판 가이드 위에 올려 주세요' : '카메라를 켜면 위치를 확인해요'}</p></div></div>`).join('');
+    $('#fingers').innerHTML = ch.notes.map((n) => `<div class="finger"><span class="mark">${n.finger}</span><div><b>${C.FINGER_NAME[n.finger]}</b><span class="pos">${posText(n)}</span><p>${cam.running ? '줄 잡는 손을 지판 가이드 위에 올려 주세요' : '카메라를 켜면 위치를 확인해요'}</p></div></div>`).join('');
     return;
   }
   badge.className = 'pill ' + (ev.ok ? 'green' : ev.score >= 50 ? 'orange' : 'red');
@@ -873,11 +1023,11 @@ function renderFingers(ev, onNeck) {
   $('#codePct').textContent = `${ev.score}%`;
   meter.className = 'meter ' + (ev.ok ? '' : ev.score >= 50 ? 'close' : 'bad');
   $('span', meter).style.width = ev.score + '%';
-  $('#fingers').innerHTML = ev.fingers.map((f) => `<div class="finger ${f.status}"><span class="mark">${f.status === 'good' ? '✓' : '!'}</span><div><b>${esc(f.label)}</b><p>${esc(f.msg)}</p></div></div>`).join('')
+  $('#fingers').innerHTML = ev.fingers.map((f) => `<div class="finger ${f.status}"><span class="mark">${f.status === 'good' ? '✓' : '!'}</span><div><b>${C.FINGER_NAME[f.note.finger]}</b><span class="pos">${posText(f.note)}</span><p>${esc(f.msg)}</p></div></div>`).join('')
     + (onNeck ? '' : `<p class="tiny" style="margin:0">손가락이 지판 가이드 밖에 있어요. 위치가 다르면 “지판 위치 맞추기”로 가이드를 지판에 맞춰 주세요.</p>`)
     + (shapeWarn ? `<p class="tiny" style="margin:0">손 모양이 ${esc(shapeWarn)} 코드에 더 가까워 보여요. 손가락 위치를 한 번 더 확인해 주세요 (실험 기능, 참고용)</p>` : '')
     + (mineWarn ? `<p class="tiny" style="margin:0">등록한 내 ${esc(S.chord)} 모양과 ${esc(mineWarn.name)} 위치가 달라요. 다시 확인해 주세요</p>` : '')
-    + (enrollMsg ? `<p class="tiny" style="margin:0;color:var(--blue,#2563eb)">${esc(enrollMsg)}</p>` : '');
+    + (enrollMsg ? `<p class="tiny" style="margin:0;color:var(--honey-ink)">${esc(enrollMsg)}</p>` : '');
 }
 let okSince = 0, badSince = 0, uiT = 0;
 function onCodeFrame(ev, dt, hasHand) {
@@ -894,45 +1044,74 @@ function onCodeFrame(ev, dt, hasHand) {
 }
 
 // ---------- 연주해보자 ----------
-// 코드 진행만 담는다(가사·악보 없음). beats: 한 마디 박 수
+// 코드 진행만 담는다(가사·악보 없음). beats: 코드 한 칸(bars의 한 칸)이 이어지는 박 수
+// 통기타 반주곡. 칸마다 코드 하나. 7th·분수 코드·Cm 같은 어려운 코드는 앱에서 배우는 기본 코드로 바꿈
 const SONGS = {
-  tomato: { title: '멋쟁이 토마토', sub: 'D·G·A 연습 · 다운 4번', level: '보통', beats: 4, bpm: 90,
-    credit: '작사·작곡 김영광 · 코드 진행만 사용',
-    bars: 'D A A D D A A D G G D D G D A D'.split(' ') },
-  nabi: { title: '나비야', sub: '1절 · 원곡 F·C7을 G·D로 쉽게 옮김', level: '쉬움', beats: 2, bpm: 84,
-    credit: '독일 민요',
-    bars: 'G D G G G D G G D D G G G D G G'.split(' ') },
-  twinkle: { title: '작은별', sub: '1절', level: '쉬움', beats: 2, bpm: 84,
-    credit: '프랑스 민요',
-    bars: 'G G C G C G D G G C G D G C G D G G C G C G D G'.split(' ') },
+  // 순환 진행 G-D-Em-Bm-C-G-Am-D7 (D7→D). 한 마디에 코드 하나, 전주+1절+2절 분량 3바퀴 뒤 G로 끝
+  neoege: { title: '너에게 난, 나에게 넌', sub: 'G키 · 순환 진행 3바퀴 · 16비트 스트로크 곡', level: '보통', beats: 4, bpm: 84,
+    credit: '자전거 탄 풍경 · 원곡 약 92BPM · 코드 진행만 사용',
+    bars: [...Array(3)].flatMap(() => 'G D Em Bm C G Am D'.split(' ')).concat('G'),
+    sections: [[0, '1바퀴'], [8, '2바퀴'], [16, '3바퀴·마무리']] },
+  // 하행 진행 C-G/B-Am7-C/G-F-C/E-Dm7-G7 → C G Am C F C Dm G. 2박마다 코드가 바뀜, 4바퀴 뒤 C로 끝
+  uimi: { title: '너의 의미', sub: 'C키 · 베이스가 계단처럼 내려가는 진행 · 2박마다 바뀜', level: '보통', beats: 2, bpm: 72,
+    credit: '아이유(feat. 김창완) · 원곡 산울림 · 코드 진행만 사용',
+    bars: [...Array(4)].flatMap(() => 'C G Am C F C Dm G'.split(' ')).concat('C'),
+    sections: [[0, '1바퀴'], [8, '2바퀴'], [16, '3바퀴'], [24, '4바퀴·마무리']] },
+  // 1절+후렴. A키 원곡 진행을 G키로 옮기고 Cm(버금딸림 단화음)은 C로 바꿈. 2박마다 바뀜
+  dontworry: { title: '걱정말아요 그대', sub: 'G키로 옮김 · 1절+후렴 · 2박마다 바뀜', level: '어려움', beats: 2, bpm: 72,
+    credit: '이적 · 원곡 전인권 · 코드 진행만 사용',
+    bars: ['G G D Em', 'C D G G', 'C C Bm Bm', 'Em D Am C',      // 1절
+           'G D Em D', 'C D G G', 'G D Em D', 'C D G G']          // 후렴
+      .join(' ').split(' '),
+    sections: [[0, '1절'], [16, '후렴']] },
 };
-const SONG_CHORDS = [...new Set(Object.values(SONGS).flatMap((s) => s.bars))].sort((a, b) => C.CHORD_ORDER.indexOf(a) - C.CHORD_ORDER.indexOf(b));
+// 쉬운 코드 모드: 바레 코드를 바레 없는 코드로 바꿔서 연주 (판정도 바뀐 코드로)
+const EASY = { Bm: 'D', F: 'Fmaj7' };
+function barsOf(k) { const b = SONGS[k].bars; return play.easy ? b.map((c) => EASY[c] || c) : b; }
+function songChords() { return [...new Set(Object.keys(SONGS).flatMap(barsOf))].sort((a, b) => C.CHORD_ORDER.indexOf(a) - C.CHORD_ORDER.indexOf(b)); }
+const songKey = (k) => k + (play.easy ? ':easy' : '');   // 쉬운 코드 기록은 따로
+// 구간: i번째 칸이 속한 구간 {name, start, end(미포함), no, total}
+function sectionAt(i) {
+  const sec = SONGS[play.song].sections || [[0, '']], n = barsOf(play.song).length;
+  let j = 0; sec.forEach((s, k) => { if (s[0] <= i) j = k; });
+  return { name: sec[j][1], start: sec[j][0], end: j + 1 < sec.length ? sec[j + 1][0] : n, no: j + 1, total: sec.length };
+}
+// 다음 칸: 구간 반복 중이면 구간 끝에서 구간 처음으로
+function nextBar(i) { return play.loop && i + 1 >= play.loop[1] ? play.loop[0] : i + 1; }
 const play = {
   rh: { hit: 0, near: 0, miss: 0 }, pending: [], beats: [],
-  song: 'tomato', bar: 0, running: false, mode: 'wait', bpmAdj: 0, metro: true, countdown: 0,
+  easy: store.get('easy', false), loop: null, looped: false, sfx: store.get('sfx', true), chimed: false,
+  song: 'neoege', bar: 0, running: false, mode: 'wait', bpmAdj: 0, metro: true, countdown: 0,
   results: [], pts: 0, combo: 0, maxCombo: 0, t: 0, hold: 0, holdSum: 0, best: 0, accSum: 0, accN: 0, wrongFor: 0,
   get bpm() { return Math.max(40, Math.min(160, SONGS[this.song].bpm + this.bpmAdj)); },
-  current() { return SONGS[this.song].bars[Math.min(this.bar, SONGS[this.song].bars.length - 1)]; },
+  current() { const b = barsOf(this.song); return b[Math.min(this.bar, b.length - 1)]; },
 };
 
 function renderSongs() {
   $('#songs').innerHTML = Object.entries(SONGS).map(([k, s]) => {
-    const need = [...new Set(s.bars)];
+    const need = [...new Set(barsOf(k))];
     const missing = need.filter((c) => !chordOK(c));
+    const rec = stats.songs[songKey(k)];
     return `<div class="card song">
-      <div class="between"><div><h3>${esc(s.title)}</h3><div class="tiny">${esc(s.sub)} · ${s.level} · ${s.beats}/4박 · BPM ${s.bpm}</div></div>
+      <div class="between"><div><h3>${esc(s.title)}</h3><div class="tiny">${esc(s.sub)} · ${s.level} · ${s.beats}/4박 · BPM ${s.bpm}${play.easy ? ' · 쉬운 코드' : ''}</div></div>
         <button class="btn primary" data-song="${k}" style="padding:9px 14px">연주하기</button></div>
-      <div class="row tiny">필요한 코드 <span class="chips">${need.map((c) => `<span class="chip ${chordOK(c) ? 'ok' : 'no'}">${c}</span>`).join('')}</span></div>
-      <div class="tiny">${missing.length ? `${missing.join('·')} 코드를 코드 수업에서 먼저 연습하면 좋아요` : '필요한 코드를 모두 익혔어요!'} · ${esc(s.credit)}</div>
+      <div class="row tiny">필요한 코드 <span class="chips">${need.map((c) => `<button class="chip ${chordOK(c) ? 'ok' : 'no'}" data-ch="${c}" title="${c} 코드 연습하러 가기">${c}</button>`).join('')}</span></div>
+      <div class="tiny">${missing.length ? `${missing.join('·')} 코드를 누르면 바로 연습할 수 있어요` : '필요한 코드를 모두 익혔어요!'} · ${esc(s.credit)}</div>
+      ${rec ? `<div class="tiny">내 최고 기록 <span class="best">${(Number(rec.best) || 0).toLocaleString()}점</span> · 운지 정확도 ${Number(rec.acc) || 0}% · ${Number(rec.plays) || 0}번 완주</div>` : ''}
     </div>`;
   }).join('');
   $$('#songs [data-song]').forEach((b) => (b.onclick = () => openPlayer(b.dataset.song)));
+  $$('#songs [data-ch]').forEach((b) => (b.onclick = () => { setChord(b.dataset.ch); go('code'); }));
   $('#bpm').textContent = play.bpmAdj ? `${play.bpmAdj > 0 ? '+' : ''}${play.bpmAdj}` : '곡 기본';
 }
+$('#easyChk').checked = play.easy;
+$('#easyChk').onchange = (e) => { play.easy = e.target.checked; store.set('easy', play.easy); renderSongs(); };
 $$('#mode button').forEach((b) => (b.onclick = () => { play.mode = b.dataset.mode; $$('#mode button').forEach((x) => x.classList.toggle('on', x === b)); }));
 $('#bpmDown').onclick = () => { play.bpmAdj = Math.max(-40, play.bpmAdj - 5); renderSongs(); };
 $('#bpmUp').onclick = () => { play.bpmAdj = Math.min(40, play.bpmAdj + 5); renderSongs(); };
 $('#metroChk').onchange = (e) => { play.metro = e.target.checked; };
+$('#sfxChk').checked = play.sfx;
+$('#sfxChk').onchange = (e) => { play.sfx = e.target.checked; store.set('sfx', play.sfx); if (play.sfx) { audio(); chime(); } };
 
 async function openPlayer(key) {
   play.song = key; resetSong();
@@ -953,7 +1132,7 @@ function closePlayer() {
   renderSongs();
 }
 function startPlay() {
-  if (play.bar >= SONGS[play.song].bars.length) resetSong();
+  if (play.bar >= barsOf(play.song).length) resetSong();
   play.running = true; $('#summary').hidden = true;
   if (play.mode === 'tempo' && play.t === 0) play.countdown = 3;   // 박자대로: 3·2·1 뒤 시작
   renderPlay();
@@ -969,10 +1148,16 @@ $('#playBtn').onclick = async () => {
   if (play.running) pausePlay(); else startPlay();
 };
 $('#retryBar').onclick = () => { play.results[play.bar] = undefined; resetBar(); renderPlay(); };
-$('#skipBar').onclick = () => { if (play.bar < SONGS[play.song].bars.length) judgeBar(true); };
+$('#skipBar').onclick = () => { if (play.bar < barsOf(play.song).length) judgeBar(true); };
+$('#loopBtn').onclick = () => {
+  const n = barsOf(play.song).length;
+  if (play.loop) play.loop = null;
+  else { const sec = sectionAt(Math.min(play.bar, n - 1)); play.loop = [sec.start, sec.end]; play.looped = true; if (play.bar >= sec.end) { play.bar = sec.start; resetBar(); } }
+  renderPlay();
+};
 function pausePlay() { if (play.running) { play.running = false; renderPlay(); } }
-function resetBar() { play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; play.beats = Array(SONGS[play.song].beats).fill(null); }
-function resetSong() { play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; play.rh = { hit: 0, near: 0, miss: 0 }; play.pending = []; play.lastBeat = null; play.countdown = 0; resetBar(); $('#summary').hidden = true; renderPlay(); }
+function resetBar() { play.chimed = false; play.t = 0; play.hold = 0; play.holdSum = 0; play.best = 0; play.beat = -1; play.beats = Array(SONGS[play.song].beats).fill(null); }
+function resetSong() { play.loop = null; play.looped = false; play.bar = 0; play.results = []; play.pts = 0; play.combo = 0; play.maxCombo = 0; play.accSum = 0; play.accN = 0; play.running = false; play.rh = { hit: 0, near: 0, miss: 0 }; play.pending = []; play.lastBeat = null; play.countdown = 0; resetBar(); $('#summary').hidden = true; renderPlay(); }
 
 let actx = null;
 function audio() { try { actx ||= new AudioContext(); actx.resume(); } catch {} }
@@ -982,6 +1167,20 @@ function click(accent) {
   o.frequency.value = accent ? 1500 : 1000; g.gain.setValueAtTime(0.25, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.06);
   o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.07);
 }
+// 맞게 잡았을 때 효과음: 메트로놈 딸깍과 구분되게 부드러운 두 음(솔→레) 종소리. 마디마다 한 번
+function chime() {
+  if (!actx || !play.sfx) return;
+  const t0 = actx.currentTime + 0.01, out = actx.createGain();
+  out.gain.value = 0.22; out.connect(actx.destination);
+  for (const [f, d] of [[784, 0], [1175, 0.08]]) {
+    for (const [mul, type, amp] of [[1, 'sine', 1], [2, 'triangle', 0.18]]) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f * mul;
+      g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(amp, t0 + d + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.5);
+      o.connect(g).connect(out); o.start(t0 + d); o.stop(t0 + d + 0.55);
+    }
+  }
+}
 
 // 판정: 맞출 때까지 기다리기 = 맞는 상태를 0.8초 유지(또는 잡고 한 번 치기)하면 통과,
 //       박자대로 = 마디가 끝날 때 0.4초 이상 이어진 가장 좋은 점수로
@@ -989,10 +1188,12 @@ let lastEv = null, playUiT = 0;
 function onPlayFrame(ev, dt, hasHand) {
   lastEv = ev;
   const song = SONGS[play.song];
-  if (play.running && play.bar < song.bars.length) {
+  if (play.running && play.bar < barsOf(play.song).length) {
     const score = ev?.onNeck ? ev.score : 0;
     if (ev?.onNeck && !play.countdown) { play.accSum += score * dt; play.accN += dt; }
     play.wrongFor = ev?.onNeck && !ev.ok ? play.wrongFor + dt : 0;
+    // 이 마디에서 처음 맞게 잡은 순간 효과음 (판정이 안정된 '맞음'일 때만)
+    if (ev?.ok && !play.countdown && !play.chimed) { play.chimed = true; chime(); }
     if (play.countdown > 0) {
       play.countdown -= dt;
       if (play.countdown <= 0) play.countdown = 0;
@@ -1040,8 +1241,8 @@ function judgeBar(skipped, strummed) {
   play.results[play.bar] = grade;
   if (grade === 'm') play.combo = 0; else { play.combo++; play.maxCombo = Math.max(play.maxCombo, play.combo); play.pts += Math.round((grade === 'p' ? 100 : 50) * (1 + Math.min(play.combo, 10) * 0.1)); }
   play.flash = { grade, until: performance.now() + 900, strummed };
-  play.bar++; resetBar();
-  if (play.bar >= SONGS[play.song].bars.length) finishSong();
+  play.bar = nextBar(play.bar); resetBar();
+  if (play.bar >= barsOf(play.song).length) finishSong();
   renderPlay();
 }
 function finishSong() {
@@ -1050,22 +1251,40 @@ function finishSong() {
   const acc = play.accN ? Math.round(play.accSum / play.accN) : 0;
   const rn = play.rh.hit + play.rh.near + play.rh.miss, rAcc = rn ? Math.round((play.rh.hit + play.rh.near * 0.5) / rn * 100) : null;
   stats.lastSong = play.song; dirty = true;
+  // 곡별 최고 기록 (쉬운 코드는 따로). 구간 반복을 쓴 판은 점수가 부풀어서 기록하지 않음
+  let recLine;
+  if (play.looped) recLine = '<div class="muted">구간 반복을 쓴 판은 최고 기록에 넣지 않아요</div>';
+  else {
+    const rec = (stats.songs[songKey(play.song)] ||= { best: 0, acc: 0, plays: 0 });
+    rec.plays++;
+    if (play.pts > rec.best) { rec.best = play.pts; rec.acc = acc; recLine = '<div class="newbest">🎉 새 최고 기록!</div>'; }
+    else recLine = `<div class="muted">내 최고 기록 ${rec.best.toLocaleString()}점</div>`;
+  }
   $('#summary').hidden = false;
-  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">${play.pts.toLocaleString()}점</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div><div class="muted">평균 운지 정확도 ${acc}%${rAcc != null ? ` · 박자 정확도 ${rAcc}%` : ''}</div><div class="row" style="justify-content:center;margin-top:8px"><button class="btn primary" id="againBtn">↺ 다시 하기</button><button class="btn line" id="listBtn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)">곡 목록</button></div>`;
+  $('#summary').innerHTML = `<h3>${esc(SONGS[play.song].title)} 완주!</h3><div class="big">${play.pts.toLocaleString()}점</div><div class="muted">PERFECT ${p} · GOOD ${g} · MISS ${m} · 최대 콤보 ${play.maxCombo}</div>${recLine}<div class="muted">평균 운지 정확도 ${acc}%${rAcc != null ? ` · 박자 정확도 ${rAcc}%` : ''}</div><div class="row" style="justify-content:center;margin-top:8px"><button class="btn primary" id="againBtn">↺ 다시 하기</button><button class="btn line" id="listBtn">곡 목록</button></div>`;
   $('#againBtn').onclick = () => { resetSong(); startPlay(); };
   $('#listBtn').onclick = closePlayer;
 }
 function renderPlay() {
-  const song = SONGS[play.song], n = song.bars.length, key = play.current();
+  const song = SONGS[play.song], bars = barsOf(play.song), n = bars.length, key = play.current();
   $('#songTitle').textContent = song.title;
-  $('#songSub').textContent = `${song.sub} · ${song.level}${play.mode === 'tempo' ? ` · BPM ${play.bpm}` : ''}`;
+  $('#songSub').textContent = `${song.sub} · ${song.level}${play.easy ? ' · 쉬운 코드' : ''}${play.mode === 'tempo' ? ` · BPM ${play.bpm}` : ''}`;
+  const sec = sectionAt(Math.min(play.bar, n - 1)), at = Math.min(play.bar, n - 1);
+  $('#secName').textContent = sec.name ? `${sec.name} (${sec.no}/${sec.total}구간) · ${at - sec.start + 1}/${sec.end - sec.start}칸` : '';
+  $('#loopBtn').classList.toggle('on', !!play.loop); $('#loopBtn').setAttribute('aria-pressed', String(!!play.loop));
+  $('#loopBtn').textContent = play.loop ? '🔁 구간 반복 중 · 끄기' : '🔁 이 구간 반복';
   $('#pts').textContent = `${play.pts.toLocaleString()}점`;
   $('#progBar').style.width = `${(Math.min(play.bar, n) / n) * 100}%`;
-  $('#nowChord').textContent = key;
+  $('#nowChord').textContent = key; $('#nowChord').style.fontSize = key.length > 3 ? '27px' : '';
+  // 지판 그림: 지금 코드 + 판정 색. 박자대로 진행의 마디 마지막 박에는 다음 코드 자리를 점선으로 미리 보여 준다
+  const ghostKey = play.running && play.mode === 'tempo' && play.beat === song.beats - 1 && play.bar < n ? bars[nextBar(play.bar)] : null;
+  setBoard($('#playBoard'), key, { status: lastEv?.onNeck && lastEv.chord === C.CHORDS[key] ? lastEv.fingers.map((f) => f.status) : null, ghost: ghostKey !== key ? ghostKey : null });
+  const cap = strumCaption(key) + (ghostKey && ghostKey !== key ? `<span>점선: 다음 ${ghostKey}</span>` : '');
+  if ($('#playStrum').dataset.sig !== cap) { $('#playStrum').dataset.sig = cap; $('#playStrum').innerHTML = cap; }
   // 링: 기다리기 = 맞게 잡은 채 유지한 정도, 박자대로 = 마디가 지난 정도
   const prog = play.mode === 'wait' ? Math.min(1, play.hold / 0.8) : Math.min(1, play.t / (song.beats * 60 / play.bpm));
   $('#ringArc').style.strokeDashoffset = String(628.3 * (play.running && prog ? 1 - prog : 0));
-  $('#ringArc').style.stroke = lastEv?.ok ? '#34d399' : '#3b6cff';
+  $('#ringArc').style.stroke = lastEv?.ok ? '#8fbf98' : '#d4a873';
   const v = $('#verdict');
   const fl = play.flash && performance.now() < play.flash.until ? play.flash.grade : null;
   const rt = rhythmText();
@@ -1083,15 +1302,38 @@ function renderPlay() {
   const bt = $('#beats');
   bt.hidden = !(cam.running && play.running && play.mode === 'tempo' && !play.countdown);
   if (!bt.hidden) bt.innerHTML = play.beats.map((g, k) => `<i class="${g || (k === play.beat ? 'now' : '')}">↓</i>`).join('');
-  $('#nextList').innerHTML = song.bars.slice(play.bar, play.bar + 5).map((k, i) => `<div class="${i ? '' : 'cur'}">${k}</div>`).join('');
+  const upcoming = []; for (let i = play.bar, k = 0; k < 5 && i < n; k++, i = nextBar(i)) upcoming.push(bars[i]);
+  $('#nextList').innerHTML = upcoming.map((k, i) => `<div class="${i ? '' : 'cur'}${k.length > 3 ? ' long' : ''}">${k}</div>`).join('');
   $('#playBtn').textContent = play.running ? '❚❚ 일시정지' : play.bar >= n ? '↺ 처음부터' : '▶ 계속';
   const hint = stageHint();
   if (hint) $('#camStatus').textContent = hint;
   else if (cam.running) $('#camStatus').textContent = '카메라로 코드 인식 중…';
 }
 
+// ---------- 화면 모드 (밝게 / 어둡게 / 시스템) ----------
+const darkMQ = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(t) {
+  const root = document.documentElement;
+  if (t === 'light' || t === 'dark') root.dataset.theme = t; else delete root.dataset.theme;
+  const dark = t === 'dark' || (t !== 'light' && darkMQ.matches);
+  $('meta[name="theme-color"]').content = dark ? '#211915' : '#f4ebdd';
+  $$('#themeSeg button').forEach((b) => { const on = b.dataset.theme === (t || 'system'); b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); });
+}
+let theme = store.get('theme', 'system');
+applyTheme(theme);
+darkMQ.addEventListener?.('change', () => applyTheme(theme));
+$$('#themeSeg button').forEach((b) => (b.onclick = () => { theme = b.dataset.theme; store.set('theme', theme); applyTheme(theme); }));
+
+// ---------- 기록 지우기 ----------
+$('#wipeBtn').onclick = () => {
+  if (!confirm('이 기기에 저장된 연습 기록, 곡 점수, 지판 위치, 내 손 등록 데이터를 모두 지울까요?\n지운 기록은 되돌릴 수 없어요.')) return;
+  wiped = true; stopCamera();
+  try { Object.keys(localStorage).filter((k) => k.startsWith('gc-') || k.startsWith('chord.')).forEach((k) => localStorage.removeItem(k)); } catch {}
+  location.reload();
+};
+
 // ---------- 도움말 ----------
-$('#helpBtn').onclick = () => alert('사용법\n\n1. 코드 수업에서 카메라를 켜고 “지판 위치 맞추기”로 파란 가이드를 기타 지판(너트~5프렛)에 맞춥니다.\n2. 화면의 번호 동그라미(손가락 번호) 위에 손가락을 올리면 줄·프렛 단위로 판정합니다.\n3. 연주해보자에서 곡의 코드 진행을 따라 잡아 보세요.\n\n카메라 영상과 기록은 이 브라우저 밖으로 보내지 않습니다.');
+$('#helpBtn').onclick = () => alert('사용법\n\n1. 코드 수업에서 카메라를 켜고 “지판 위치 맞추기”로 파란 가이드를 기타 지판(너트~5프렛)에 맞춥니다.\n2. 화면의 번호 동그라미(손가락 번호) 위에 손가락을 올리면 줄·프렛 단위로 판정합니다.\n3. 연주해보자에서 곡의 코드 진행을 따라 잡아 보세요.\n4. 바레 코드(F·Bm)가 어려우면 연주해보자의 “쉬운 코드로 바꾸기”를 켜세요.\n\n카메라 영상은 저장하지 않고, 연습 기록과 손 등록 숫자는 이 기기에만 저장해 외부로 보내지 않습니다. 앱을 열 때 글꼴·손 인식 프로그램을 받기 위해서만 외부 서버에 접속합니다. 기록은 홈 화면 맨 아래에서 지울 수 있습니다.');
 
 window.__app = { S, C, play, follow, strum, framing, setCorners, video, SONGS, openPlayer, closePlayer, get stats() { return stats; }, setChord, go, setCalib, renderPlay };
 setChord('A');

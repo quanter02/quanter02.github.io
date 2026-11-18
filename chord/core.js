@@ -43,12 +43,31 @@ export const CHORDS = {
         { finger: 1, string: 2, fret: 1 }, { finger: 2, string: 4, fret: 2 }, { finger: 3, string: 3, fret: 2 }] },
   E:  { name: 'E',  full: 'E major', mute: [], notes: [
         { finger: 1, string: 3, fret: 1 }, { finger: 2, string: 5, fret: 2 }, { finger: 3, string: 4, fret: 2 }] },
-  // F 바레: 검지가 1프렛 전체를 누른다. 카메라로는 검지 끝이 6번줄 쪽에 있는지만 본다
+  // F 바레: 검지가 1프렛 전체를 누른다. 카메라로는 검지 끝이 바레 시작 줄(note.string) 쪽에 있는지만 본다
   F:  { name: 'F',  full: 'F major (바레)', mute: [], notes: [
         { finger: 1, string: 6, fret: 1, barre: true }, { finger: 2, string: 3, fret: 2 },
         { finger: 3, string: 5, fret: 3 }, { finger: 4, string: 4, fret: 3 }] },
+  // 새 곡(너의 의미)용
+  Dm: { name: 'Dm', full: 'D minor', mute: [6, 5], notes: [
+        { finger: 1, string: 1, fret: 1 }, { finger: 2, string: 3, fret: 2 }, { finger: 3, string: 2, fret: 3 }] },
+  // Bm 바레(5번줄부터): 검지가 2프렛 5~1번줄을 누른다. 새 곡(너에게 난 나에게 넌, 걱정말아요 그대)용
+  // reach: 바레 검지 끝이 바레 시작 줄에서 1번줄 쪽으로 이만큼(줄 단위)까지 와도 만점. F는 1(기존과 같음), Bm은 5번줄을 꼭 덮어야 해서 0.5
+  Bm: { name: 'Bm', full: 'B minor (바레)', mute: [6], notes: [
+        { finger: 1, string: 5, fret: 2, barre: true, reach: 0.5 }, { finger: 2, string: 2, fret: 3 },
+        { finger: 3, string: 4, fret: 4 }, { finger: 4, string: 3, fret: 4 }] },
+  // 쉬운 코드 모드에서 F 대신 쓰는 코드 (바레 없음, 1~3프렛 1~4번줄)
+  Fmaj7: { name: 'Fmaj7', full: 'F major 7 (F 쉬운 대체 · 바레 없음)', mute: [6, 5], notes: [
+        { finger: 1, string: 2, fret: 1 }, { finger: 2, string: 3, fret: 2 }, { finger: 3, string: 4, fret: 3 }] },
 };
-export const CHORD_ORDER = ['A', 'C', 'G', 'D', 'Em', 'Am', 'E', 'F'];
+export const CHORD_ORDER = ['A', 'C', 'G', 'D', 'Em', 'Am', 'E', 'F', 'Dm', 'Bm', 'Fmaj7'];
+// 줄 강조용: 치는 줄(치지 않는 줄 제외), 스트럼 시작 줄(가장 굵은 치는 줄), 개방현(아무 손가락도 누르지 않는 치는 줄)
+export function playedStrings(chord) { return [6, 5, 4, 3, 2, 1].filter((s) => !chord.mute.includes(s)); }
+export function strumFrom(chord) { return Math.max(...playedStrings(chord)); }
+export function openStrings(chord) {
+  return playedStrings(chord).filter((s) => !chord.notes.some((n) => (n.barre ? s <= n.string : n.string === s)));
+}
+// 바레 표기: 6번줄부터면 '전체 바레', 아니면 'n~1번줄 바레'
+export function barreText(note) { return note.string >= 6 ? '전체 바레' : `${note.string}~1번줄 바레`; }
 
 // ---------- 원근 변환 (4점 호모그래피) ----------
 // src 4점 → dst 4점으로 보내는 3x3 행렬
@@ -131,8 +150,8 @@ export function padPoint(lm, finger) {
 export function evaluateNote(neck, lm, note, cal = null) {
   const at0 = locate(neck, padPoint(lm, note.finger));
   const at = cal ? { ...at0, string: at0.string - cal.s, fret: at0.fret - cal.f } : at0;
-  // 줄: STRING_FULL 이내면 만점, STRING_ZERO면 0점. 바레는 6번줄 쪽(5번줄 너머)이면 만점
-  const sErr = note.barre ? Math.max(0, 5 - at.string) : Math.abs(at.string - note.string);
+  // 줄: STRING_FULL 이내면 만점, STRING_ZERO면 0점. 바레는 시작 줄 쪽(F: 5번줄 너머, Bm: 4.5번줄 너머)이면 만점
+  const sErr = note.barre ? Math.max(0, note.string - (note.reach ?? 1) - at.string) : Math.abs(at.string - note.string);
   const sScore = clamp01(1 - Math.max(0, sErr - STRING_FULL) / (STRING_ZERO - STRING_FULL));
   // 프렛: 칸 (n-1, n] 안이면 만점(쇠막대를 살짝 넘는 0.2까지 허용), 칸 밖으로 0.6칸 벗어나면 0점
   const lo = note.fret - 1, hi = note.fret + 0.2;
@@ -143,7 +162,7 @@ export function evaluateNote(neck, lm, note, cal = null) {
   if (farFromWire) fScore *= 0.85;
   const score = Math.round(100 * sScore * fScore);
 
-  const label = `${FINGER_NAME[note.finger]} (${note.fret}번 프렛 ${note.barre ? '전체 바레' : note.string + '번줄'})`;
+  const label = `${FINGER_NAME[note.finger]} (${note.fret}번 프렛 ${note.barre ? barreText(note) : note.string + '번줄'})`;
   let status, msg;
   if (score >= 80) { status = 'good'; msg = farFromWire ? '좋아요. 프렛 쇠막대 쪽으로 조금 더 붙이면 소리가 깨끗해요' : '완벽한 위치예요'; }
   else {
@@ -151,7 +170,7 @@ export function evaluateNote(neck, lm, note, cal = null) {
     const parts = [];
     if (sScore < 1) {
       const now = Math.min(6.5, Math.max(0.5, at.string));
-      parts.push(note.barre ? '검지를 6번줄까지 쭉 펴서 덮어 주세요'
+      parts.push(note.barre ? `검지를 ${note.string}번줄까지 쭉 펴서 덮어 주세요`
         : `지금 ${Math.round(now)}번줄 근처예요 → ${note.string}번줄로 옮기세요`);
     }
     if (fScore < 0.85) {
